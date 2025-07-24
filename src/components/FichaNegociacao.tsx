@@ -6,8 +6,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface ParcelaPagaSala {
   id: string;
@@ -74,6 +77,7 @@ interface DadosCalculados {
 }
 
 const FichaNegociacao = () => {
+  const navigate = useNavigate();
   const [liner, setLiner] = useState('');
   const [closer, setCloser] = useState('');
   const [tipoVenda, setTipoVenda] = useState('');
@@ -565,7 +569,187 @@ const FichaNegociacao = () => {
     ]);
   };
 
-  const salvarFicha = () => {
+  // Função para gerar PDF da Ficha de Cadastro do Cliente
+  const gerarPDFCadastroCliente = (dadosCliente: any) => {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = 210;
+    const pageHeight = 297;
+    
+    // Header GAV
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("GAV", 20, 20);
+    
+    // Título
+    pdf.setFontSize(14);
+    pdf.text("Ficha de Cadastro de Cliente", 70, 20);
+    
+    // Info página
+    pdf.setFontSize(10);
+    pdf.text("Código: FCR 02/01 rev.", 140, 15);
+    pdf.text("Data: 05/10/2024 rev.", 140, 20);
+    pdf.text("Página: 1 de 1", 170, 25);
+    
+    // Seção DADOS DO CLIENTE
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("DADOS DO CLIENTE", 20, 40);
+    
+    // Campos do cliente
+    let yPos = 50;
+    const addField = (label: string, value: string, x: number = 20, width: number = 170) => {
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      pdf.text(label + ":", x, yPos);
+      pdf.rect(x + 25, yPos - 4, width - 25, 8);
+      pdf.text(value || "", x + 27, yPos);
+      yPos += 12;
+    };
+    
+    addField("Nome", dadosCliente.nome || "");
+    addField("CPF", dadosCliente.cpf || "");
+    
+    yPos -= 12;
+    pdf.text("RG:", 20, yPos);
+    pdf.rect(45, yPos - 4, 80, 8);
+    pdf.text(dadosCliente.rg || "", 47, yPos);
+    
+    pdf.text("ÓRGÃO/UF:", 130, yPos);
+    pdf.rect(155, yPos - 4, 35, 8);
+    pdf.text((dadosCliente.orgaoEmissor || "") + "/" + (dadosCliente.estadoEmissor || ""), 157, yPos);
+    yPos += 12;
+    
+    addField("Profissão", dadosCliente.profissao || "");
+    addField("Estado Civil", dadosCliente.estadoCivil || "");
+    addField("Email", dadosCliente.email || "");
+    addField("Telefone", dadosCliente.telefone || "");
+    
+    // Seção DADOS DO CÔNJUGE (se houver)
+    if (dadosCliente.nomeConjuge) {
+      yPos += 10;
+      pdf.setFont("helvetica", "bold");
+      pdf.text("DADOS DO CÔNJUGE", 20, yPos);
+      yPos += 10;
+      
+      addField("Nome", dadosCliente.nomeConjuge || "");
+      addField("CPF", dadosCliente.cpfConjuge || "");
+      
+      yPos -= 12;
+      pdf.setFont("helvetica", "normal");
+      pdf.text("RG:", 20, yPos);
+      pdf.rect(45, yPos - 4, 80, 8);
+      pdf.text(dadosCliente.rgConjuge || "", 47, yPos);
+      
+      pdf.text("ÓRGÃO/UF:", 130, yPos);
+      pdf.rect(155, yPos - 4, 35, 8);
+      pdf.text((dadosCliente.orgaoEmissorConjuge || "") + "/" + (dadosCliente.estadoEmissorConjuge || ""), 157, yPos);
+      yPos += 12;
+      
+      addField("Profissão", dadosCliente.profissaoConjuge || "");
+      addField("Estado Civil", dadosCliente.estadoCivilConjuge || "");
+      addField("Email", dadosCliente.emailConjuge || "");
+      addField("Telefone", dadosCliente.telefoneConjuge || "");
+    }
+    
+    // Seção ENDEREÇO
+    yPos += 10;
+    pdf.setFont("helvetica", "bold");
+    pdf.text("ENDEREÇO", 20, yPos);
+    yPos += 10;
+    
+    // Campos vazios para preenchimento manual
+    addField("Logradouro", "");
+    addField("Nº", "");
+    addField("Bairro", "");
+    addField("Complemento", "");
+    addField("Cidade", "");
+    pdf.setFont("helvetica", "normal");
+    pdf.text("UF:", 140, yPos - 12);
+    pdf.rect(155, yPos - 16, 35, 8);
+    
+    // SALA DE VENDAS
+    yPos += 10;
+    pdf.setFont("helvetica", "bold");
+    pdf.text("SALA DE VENDAS: _____ GRAMADO - HORTÊNSIAS _____", 20, yPos);
+    yPos += 5;
+    pdf.text("IBERICA", 160, yPos);
+    pdf.rect(185, yPos - 4, 10, 8);
+    
+    return pdf.output('datauristring').split(',')[1]; // Retorna base64
+  };
+
+  // Função para gerar PDF da Ficha de Negociação
+  const gerarPDFNegociacao = (dadosCliente: any, dadosNegociacao: any) => {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    
+    // Header GAV
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("GAV", 20, 20);
+    
+    // Título
+    pdf.setFontSize(14);
+    pdf.text("Ficha de Negociação de Cota", 70, 20);
+    
+    // Info página
+    pdf.setFontSize(10);
+    pdf.text("Código: FCR 02/01 rev.", 140, 15);
+    pdf.text("Data: 05/10/2024 rev.", 140, 20);
+    pdf.text("Página: 1 de 2", 170, 25);
+    
+    // Dados básicos
+    let yPos = 40;
+    pdf.setFontSize(10);
+    pdf.text("CLIENTE:", 20, yPos);
+    pdf.rect(45, yPos - 4, 145, 8);
+    pdf.text(dadosCliente.nome || "", 47, yPos);
+    yPos += 12;
+    
+    pdf.text("CPF:", 20, yPos);
+    pdf.rect(35, yPos - 4, 155, 8);
+    pdf.text(dadosCliente.cpf || "", 37, yPos);
+    yPos += 12;
+    
+    // Sala de vendas
+    pdf.text("SALA DE VENDAS: GRAMADO - HORTÊNSIAS", 20, yPos);
+    yPos += 15;
+    
+    // Tipo de venda
+    pdf.text("( ) PADRÃO ( ) SEMESTRAL ( ) ANUAL ( ) À VISTA ( ) ATÉ 36x ( ) LINEAR", 20, yPos);
+    yPos += 15;
+    
+    // Tabela de Parcelas Pagas na Sala
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Tipo de Parcela Paga na Sala", 20, yPos);
+    pdf.text("Valor Total Pago na Sala", 70, yPos);
+    pdf.text("Valor Distribuído sobre Cada Unidade Apartamento", 120, yPos);
+    pdf.text("Quantidade de Cotas", 170, yPos);
+    pdf.text("Forma de Pag.", 190, yPos);
+    yPos += 8;
+    
+    // Linhas da tabela
+    for (let i = 0; i < 6; i++) {
+      pdf.setFont("helvetica", "normal");
+      pdf.rect(20, yPos - 4, 40, 8);
+      pdf.rect(70, yPos - 4, 40, 8);
+      pdf.rect(120, yPos - 4, 40, 8);
+      pdf.rect(170, yPos - 4, 15, 8);
+      pdf.rect(190, yPos - 4, 20, 8);
+      
+      if (i < parcelasPagasSala.length) {
+        pdf.text(parcelasPagasSala[i].tipo || "", 22, yPos);
+        pdf.text(parcelasPagasSala[i].valorTotal || "", 72, yPos);
+        pdf.text(parcelasPagasSala[i].valorDistribuido || "", 122, yPos);
+        pdf.text(parcelasPagasSala[i].quantidadeCotas || "", 172, yPos);
+        pdf.text(parcelasPagasSala[i].formasPagamento.join(", ") || "", 192, yPos);
+      }
+      yPos += 10;
+    }
+    
+    return pdf.output('datauristring').split(',')[1]; // Retorna base64
+  };
+
+  const salvarFicha = async () => {
     // Realizar auditoria apenas no momento de salvar
     const auditoria = realizarAuditoriaValores();
     
@@ -583,22 +767,70 @@ const FichaNegociacao = () => {
       return;
     }
     
-    console.log('Ficha salva', {
-      liner,
-      closer,
-      tipoVenda,
-      parcelasPagasSala,
-      contratos,
-      informacoesPagamento
-    });
-    alert('Ficha salva com sucesso!');
+    try {
+      // Recuperar dados do cliente do localStorage
+      const dadosClienteString = localStorage.getItem('dadosCliente');
+      const dadosCliente = dadosClienteString ? JSON.parse(dadosClienteString) : {};
+      
+      // Preparar dados da negociação
+      const dadosNegociacao = {
+        liner,
+        closer,
+        tipoVenda,
+        parcelasPagasSala,
+        contratos,
+        informacoesPagamento
+      };
+      
+      console.log('Gerando PDFs...');
+      
+      // Gerar PDFs
+      const pdfCadastro = gerarPDFCadastroCliente(dadosCliente);
+      const pdfNegociacao = gerarPDFNegociacao(dadosCliente, dadosNegociacao);
+      
+      console.log('Enviando PDFs por email...');
+      
+      // Enviar PDFs por email
+      const response = await supabase.functions.invoke('send-pdfs', {
+        body: {
+          clientData: dadosCliente,
+          fichaData: dadosNegociacao,
+          pdfData1: pdfCadastro,
+          pdfData2: pdfNegociacao
+        }
+      });
+      
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+      
+      console.log('Ficha salva e PDFs enviados com sucesso');
+      alert('Ficha salva com sucesso! PDFs foram enviados automaticamente para admudrive2025@gavresorts.com.br');
+      
+    } catch (error) {
+      console.error('Erro ao salvar ficha:', error);
+      alert('Erro ao salvar ficha e enviar PDFs. Tente novamente.');
+    }
   };
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Ficha de Negociação de Cota</CardTitle>
+          <div className="flex items-center justify-between">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/cadastro-cliente')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+            <CardTitle className="text-2xl font-bold">
+              Ficha de Negociação de Cota
+            </CardTitle>
+            <div className="w-20" /> {/* Spacer for centering */}
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Seção Inicial */}

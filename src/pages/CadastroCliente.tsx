@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
+import { ArrowLeft } from 'lucide-react';
 
 const formSchema = z.object({
   nome: z.string().min(2, 'Nome é obrigatório'),
@@ -57,6 +58,8 @@ const CadastroCliente = () => {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     console.log('Dados do cliente:', values);
+    // Salvar dados do cliente no localStorage para usar na ficha de negociação
+    localStorage.setItem('dadosCliente', JSON.stringify(values));
     toast.success('Cliente cadastrado com sucesso!');
     navigate('/ficha-negociacao');
   };
@@ -80,9 +83,20 @@ const CadastroCliente = () => {
     <div className="min-h-screen bg-background p-4">
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            Cadastro do Cliente
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+            <CardTitle className="text-2xl font-bold">
+              Cadastro do Cliente
+            </CardTitle>
+            <div className="w-20" /> {/* Spacer for centering */}
+          </div>
         </CardHeader>
         <CardContent>
           <Form {...form}>
