@@ -437,27 +437,45 @@ const FichaNegociacao = () => {
                        <td className="border border-border p-3">
                          <Input
                            value={parcela.valorDistribuido}
-                           onChange={(e) => {
-                             const newParcelas = [...parcelasPagasSala];
-                             newParcelas[index].valorDistribuido = e.target.value;
-                             setParcelasPagasSala(newParcelas);
+                             onChange={(e) => {
+                              const newParcelas = [...parcelasPagasSala];
+                              newParcelas[index].valorDistribuido = e.target.value;
+                              setParcelasPagasSala(newParcelas);
 
-                             // Clonar valor para 1ª Entrada automaticamente
-                             const novasInformacoes = [...informacoesPagamento];
-                             const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
-                             if (primeiraEntradaIndex !== -1) {
-                               novasInformacoes[primeiraEntradaIndex].total = e.target.value;
-                               novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
-                               novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
-                               
-                               // Preencher forma de pagamento automaticamente se estiver vazia
-                               if (!novasInformacoes[primeiraEntradaIndex].formaPagamento && parcela.formaPagamento) {
-                                 novasInformacoes[primeiraEntradaIndex].formaPagamento = parcela.formaPagamento;
-                               }
-                               
-                               setInformacoesPagamento(novasInformacoes);
-                             }
-                           }}
+                              // Clonar valor para 1ª Entrada automaticamente
+                              const novasInformacoes = [...informacoesPagamento];
+                              const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
+                              if (primeiraEntradaIndex !== -1) {
+                                novasInformacoes[primeiraEntradaIndex].total = e.target.value;
+                                novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
+                                novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
+                                
+                                // Preencher forma de pagamento automaticamente se estiver vazia
+                                if (!novasInformacoes[primeiraEntradaIndex].formaPagamento && parcela.formaPagamento) {
+                                  novasInformacoes[primeiraEntradaIndex].formaPagamento = parcela.formaPagamento;
+                                }
+                                
+                                // Calcular Restante da Entrada
+                                const restanteEntradaIndex = novasInformacoes.findIndex(info => info.tipo === 'Restante da Entrada');
+                                if (restanteEntradaIndex !== -1) {
+                                  const contratoAtivo = contratos.find(c => c.empreendimento);
+                                  if (contratoAtivo) {
+                                    const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
+                                    const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
+                                    const valorPrimeiraEntrada = parseFloat(e.target.value) || 0;
+                                    const restante = valorEntrada - valorPrimeiraEntrada;
+                                    
+                                    if (restante > 0) {
+                                      novasInformacoes[restanteEntradaIndex].total = restante.toString();
+                                      novasInformacoes[restanteEntradaIndex].valorParcela = restante.toString();
+                                      novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
+                                    }
+                                  }
+                                }
+                                
+                                setInformacoesPagamento(novasInformacoes);
+                              }
+                            }}
                            placeholder="Valor distribuído"
                            type="number"
                          />
@@ -572,32 +590,17 @@ const FichaNegociacao = () => {
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="border border-border p-3">
-                        <Select
-                          value={contrato.torre}
-                          onValueChange={(value) => {
-                            const newContratos = [...contratos];
-                            newContratos[index].torre = value;
-                            setContratos(newContratos);
-                          }}
-                          disabled={!contrato.empreendimento || loading}
-                        >
-                          <SelectTrigger className="bg-background">
-                            <SelectValue placeholder={
-                              !contrato.empreendimento 
-                                ? "Selecione empreendimento primeiro" 
-                                : "Selecione torre"
-                            } />
-                          </SelectTrigger>
-                          <SelectContent className="bg-background z-50">
-                            {getTorresPorEmpreendimento(contrato.empreendimento).map((torre) => (
-                              <SelectItem key={torre.id} value={torre.nome}>
-                                {torre.nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </td>
+                       <td className="border border-border p-3">
+                         <Input
+                           value={contrato.torre}
+                           onChange={(e) => {
+                             const newContratos = [...contratos];
+                             newContratos[index].torre = e.target.value;
+                             setContratos(newContratos);
+                           }}
+                           placeholder="Torre"
+                         />
+                       </td>
                       <td className="border border-border p-3">
                         <Input
                           value={contrato.apartamento}
@@ -734,19 +737,39 @@ const FichaNegociacao = () => {
                       <td className="border border-border p-3">
                         <Input
                           value={info.total}
-                          onChange={(e) => {
-                            const newInfos = [...informacoesPagamento];
-                            newInfos[index].total = e.target.value;
-                            
-                            // Recalcular valor da parcela automaticamente quando alterar total
-                            if (newInfos[index].qtdParcelas && parseInt(newInfos[index].qtdParcelas) > 0) {
-                              const total = parseFloat(e.target.value) || 0;
-                              const qtdParcelas = parseInt(newInfos[index].qtdParcelas);
-                              newInfos[index].valorParcela = (total / qtdParcelas).toFixed(2);
-                            }
-                            
-                            setInformacoesPagamento(newInfos);
-                          }}
+                           onChange={(e) => {
+                             const newInfos = [...informacoesPagamento];
+                             newInfos[index].total = e.target.value;
+                             
+                             // Recalcular valor da parcela automaticamente quando alterar total
+                             if (newInfos[index].qtdParcelas && parseInt(newInfos[index].qtdParcelas) > 0) {
+                               const total = parseFloat(e.target.value) || 0;
+                               const qtdParcelas = parseInt(newInfos[index].qtdParcelas);
+                               newInfos[index].valorParcela = (total / qtdParcelas).toFixed(2);
+                             }
+                             
+                             // Se for 1ª Entrada, recalcular Restante da Entrada
+                             if (info.tipo === '1ª Entrada') {
+                               const restanteEntradaIndex = newInfos.findIndex(inf => inf.tipo === 'Restante da Entrada');
+                               if (restanteEntradaIndex !== -1) {
+                                 const contratoAtivo = contratos.find(c => c.empreendimento);
+                                 if (contratoAtivo) {
+                                   const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
+                                   const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
+                                   const valorPrimeiraEntrada = parseFloat(e.target.value) || 0;
+                                   const restante = valorEntrada - valorPrimeiraEntrada;
+                                   
+                                   if (restante > 0) {
+                                     newInfos[restanteEntradaIndex].total = restante.toString();
+                                     newInfos[restanteEntradaIndex].valorParcela = restante.toString();
+                                     newInfos[restanteEntradaIndex].qtdParcelas = '1';
+                                   }
+                                 }
+                               }
+                             }
+                             
+                             setInformacoesPagamento(newInfos);
+                           }}
                           placeholder="Total"
                           type="number"
                           className="bg-background"
@@ -763,22 +786,22 @@ const FichaNegociacao = () => {
                             <div className="space-y-1">
                               <Input
                                 value={info.qtdParcelas}
-                                onChange={(e) => {
-                                  const valor = parseInt(e.target.value) || 0;
-                                  if (maxParcelas && valor > maxParcelas) {
-                                    return; // Bloqueia entrada superior ao máximo
-                                  }
-                                  const newInfos = [...informacoesPagamento];
-                                  newInfos[index].qtdParcelas = e.target.value;
-                                  
-                                  // Recalcular valor da parcela automaticamente
-                                  if (newInfos[index].total && valor > 0) {
-                                    const total = parseFloat(newInfos[index].total);
-                                    newInfos[index].valorParcela = (total / valor).toFixed(2);
-                                  }
-                                  
-                                  setInformacoesPagamento(newInfos);
-                                }}
+                                 onChange={(e) => {
+                                   const valor = parseInt(e.target.value) || 0;
+                                   if (maxParcelas && valor > maxParcelas) {
+                                     return; // Bloqueia entrada superior ao máximo
+                                   }
+                                   const newInfos = [...informacoesPagamento];
+                                   newInfos[index].qtdParcelas = e.target.value;
+                                   
+                                   // Recalcular valor da parcela automaticamente
+                                   if (newInfos[index].total && valor > 0) {
+                                     const total = parseFloat(newInfos[index].total);
+                                     newInfos[index].valorParcela = (total / valor).toFixed(2);
+                                   }
+                                   
+                                   setInformacoesPagamento(newInfos);
+                                 }}
                                 placeholder="Qtd"
                                 type="number"
                                 max={maxParcelas || undefined}
