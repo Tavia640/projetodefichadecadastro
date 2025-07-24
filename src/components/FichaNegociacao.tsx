@@ -245,18 +245,13 @@ const FichaNegociacao = () => {
     }
   };
 
-  // Função para calcular data inteligente baseada em parcelas
+  // Função para calcular data inteligente baseada em parcelas - sempre dia 15
   const calcularDataInteligente = (dataBase: Date, mesesParaAdicionar: number): Date => {
     const novaData = new Date(dataBase);
     novaData.setMonth(novaData.getMonth() + mesesParaAdicionar);
     
-    // Ajustar para dia 05 ou 15
-    const dia = novaData.getDate();
-    if (dia <= 10) {
-      novaData.setDate(5);
-    } else {
-      novaData.setDate(15);
-    }
+    // Sempre definir para dia 15
+    novaData.setDate(15);
     
     return novaData;
   };
@@ -289,10 +284,53 @@ const FichaNegociacao = () => {
     setInformacoesPagamento(novasInformacoes);
   };
 
+  // Função para recalcular restante da entrada
+  const recalcularRestanteEntrada = (informacoes: InformacaoPagamento[]) => {
+    const contratoAtivo = contratos.find(c => c.empreendimento);
+    if (!contratoAtivo) return informacoes;
+
+    const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
+    const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
+    
+    // Calcular total das entradas (1ª, 2ª, etc.)
+    const totalEntradas = informacoes
+      .filter(info => info.tipo.includes('ª Entrada'))
+      .reduce((total, info) => total + (parseFloat(info.total) || 0), 0);
+    
+    const restante = valorEntrada - totalEntradas;
+    
+    // Atualizar restante da entrada
+    const novasInformacoes = [...informacoes];
+    const restanteEntradaIndex = novasInformacoes.findIndex(info => info.tipo === 'Restante da Entrada');
+    
+    if (restanteEntradaIndex !== -1) {
+      if (restante > 0) {
+        novasInformacoes[restanteEntradaIndex].total = restante.toString();
+        novasInformacoes[restanteEntradaIndex].valorParcela = (restante / (parseInt(novasInformacoes[restanteEntradaIndex].qtdParcelas) || 1)).toFixed(2);
+      } else {
+        novasInformacoes[restanteEntradaIndex].total = '0';
+        novasInformacoes[restanteEntradaIndex].valorParcela = '0';
+        novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
+      }
+    }
+    
+    return novasInformacoes;
+  };
+
   // Executar validações sempre que informações mudarem
   useEffect(() => {
     atualizarAlertas();
   }, [informacoesPagamento, contratos]);
+
+  // Recalcular restante da entrada quando contratos/empreendimentos mudarem
+  useEffect(() => {
+    if (contratos.length > 0 && empreendimentos.length > 0) {
+      const informacoesAtualizadas = recalcularRestanteEntrada(informacoesPagamento);
+      if (JSON.stringify(informacoesAtualizadas) !== JSON.stringify(informacoesPagamento)) {
+        setInformacoesPagamento(informacoesAtualizadas);
+      }    
+    }
+  }, [contratos, empreendimentos]);
 
   // Carregar dados do Supabase
   useEffect(() => {
@@ -658,43 +696,23 @@ const FichaNegociacao = () => {
                               newParcelas[index].valorDistribuido = e.target.value;
                               setParcelasPagasSala(newParcelas);
 
-                               // Clonar valor para 1ª Entrada automaticamente
-                               const novasInformacoes = [...informacoesPagamento];
-                               const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
-                               if (primeiraEntradaIndex !== -1) {
-                                 novasInformacoes[primeiraEntradaIndex].total = e.target.value;
-                                 novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
-                                 novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
-                                 
-                                 // Preencher forma de pagamento automaticamente se estiver vazia
-                                 if (!novasInformacoes[primeiraEntradaIndex].formaPagamento && parcela.formasPagamento[0]) {
-                                   novasInformacoes[primeiraEntradaIndex].formaPagamento = parcela.formasPagamento[0];
-                                 }
-                               }
-                               
-                               // Sempre recalcular Restante da Entrada após qualquer mudança em entradas
-                               const restanteEntradaIndex = novasInformacoes.findIndex(info => info.tipo === 'Restante da Entrada');
-                               if (restanteEntradaIndex !== -1) {
-                                 const contratoAtivo = contratos.find(c => c.empreendimento);
-                                 if (contratoAtivo) {
-                                   const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
-                                   const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
-                                   const totalEntradas = calcularTotalEntradas(novasInformacoes);
-                                   const restante = valorEntrada - totalEntradas;
-                                   
-                                   if (restante > 0) {
-                                     novasInformacoes[restanteEntradaIndex].total = restante.toString();
-                                     novasInformacoes[restanteEntradaIndex].valorParcela = restante.toString();
-                                     novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
-                                   } else {
-                                     novasInformacoes[restanteEntradaIndex].total = '0';
-                                     novasInformacoes[restanteEntradaIndex].valorParcela = '0';
-                                     novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
-                                   }
-                                 }
-                               }
-                               
-                               setInformacoesPagamento(novasInformacoes);
+                                // Clonar valor para 1ª Entrada automaticamente
+                                const novasInformacoes = [...informacoesPagamento];
+                                const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
+                                if (primeiraEntradaIndex !== -1) {
+                                  novasInformacoes[primeiraEntradaIndex].total = e.target.value;
+                                  novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
+                                  novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
+                                  
+                                  // Preencher forma de pagamento automaticamente se estiver vazia
+                                  if (!novasInformacoes[primeiraEntradaIndex].formaPagamento && parcela.formasPagamento[0]) {
+                                    novasInformacoes[primeiraEntradaIndex].formaPagamento = parcela.formasPagamento[0];
+                                  }
+                                }
+                                
+                                // Recalcular restante da entrada
+                                const informacoesAtualizadas = recalcularRestanteEntrada(novasInformacoes);
+                                setInformacoesPagamento(informacoesAtualizadas);
                             }}
                            placeholder="Valor distribuído"
                            type="number"
@@ -1044,30 +1062,12 @@ const FichaNegociacao = () => {
                               }
                               
                                // Se for uma entrada (1ª, 2ª, 3ª, etc.), recalcular Restante da Entrada
-                               if (info.tipo.includes('ª Entrada')) {
-                                 const restanteEntradaIndex = newInfos.findIndex(inf => inf.tipo === 'Restante da Entrada');
-                                 if (restanteEntradaIndex !== -1) {
-                                   const contratoAtivo = contratos.find(c => c.empreendimento);
-                                   if (contratoAtivo) {
-                                     const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
-                                     const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
-                                     const totalEntradas = calcularTotalEntradas(newInfos);
-                                     const restante = valorEntrada - totalEntradas;
-                                     
-                                     if (restante > 0) {
-                                       newInfos[restanteEntradaIndex].total = restante.toString();
-                                       newInfos[restanteEntradaIndex].valorParcela = restante.toString();
-                                       newInfos[restanteEntradaIndex].qtdParcelas = '1';
-                                     } else {
-                                       newInfos[restanteEntradaIndex].total = '0';
-                                       newInfos[restanteEntradaIndex].valorParcela = '0';
-                                       newInfos[restanteEntradaIndex].qtdParcelas = '1';
-                                     }
-                                   }
-                                 }
-                               }
-                              
-                              setInformacoesPagamento(newInfos);
+                                if (info.tipo.includes('ª Entrada')) {
+                                  const informacoesAtualizadas = recalcularRestanteEntrada(newInfos);
+                                  setInformacoesPagamento(informacoesAtualizadas);
+                                } else {
+                                  setInformacoesPagamento(newInfos);
+                                }
                             }}
                            placeholder="Total"
                            type="number"
@@ -1120,6 +1120,14 @@ const FichaNegociacao = () => {
                                          setTimeout(() => {
                                            atualizarDatasInteligentes(restanteEntrada.primeiroVencimento, qtdParcelasEntrada, qtdParcelasSinal);
                                          }, 0);
+                                       }
+                                     }
+                                     
+                                     // Se alterou quantidade de parcelas do Restante da Entrada, recalcular valor da parcela
+                                     if (info.tipo === 'Restante da Entrada' && newInfos[index].total) {
+                                       const total = parseFloat(newInfos[index].total);
+                                       if (total > 0 && valor > 0) {
+                                         newInfos[index].valorParcela = (total / valor).toFixed(2);
                                        }
                                      }
                                      
