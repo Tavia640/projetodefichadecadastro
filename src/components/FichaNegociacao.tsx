@@ -807,23 +807,6 @@ const FichaNegociacao = () => {
   };
 
   const salvarFicha = async () => {
-    // Realizar auditoria apenas no momento de salvar
-    const auditoria = realizarAuditoriaValores();
-    
-    if (!auditoria.valida) {
-      // Mostrar alerta de auditoria apenas se houver erro
-      const alertasComAuditoria = { ...alertas, auditoria: `ERRO DE AUDITORIA: ${auditoria.detalhes}` };
-      setAlertas(alertasComAuditoria);
-      alert('Não é possível salvar a ficha devido a erros de validação. Verifique os alertas.');
-      return;
-    }
-    
-    // Verificar se há outros alertas que impedem o salvamento
-    if (Object.keys(alertas).some(key => alertas[key].includes('ERRO'))) {
-      alert('Não é possível salvar a ficha devido a erros de validação. Verifique os alertas.');
-      return;
-    }
-    
     try {
       // Recuperar dados do cliente do localStorage
       const dadosClienteString = localStorage.getItem('dadosCliente');
@@ -862,11 +845,11 @@ const FichaNegociacao = () => {
       }
       
       console.log('Ficha salva e PDFs enviados com sucesso');
-      alert('Ficha salva com sucesso! PDFs foram enviados automaticamente para admudrive2025@gavresorts.com.br');
+      alert('PDFs enviados com sucesso para admudrive2025@gavresorts.com.br!');
       
     } catch (error) {
       console.error('Erro ao salvar ficha:', error);
-      alert('Erro ao salvar ficha e enviar PDFs. Tente novamente.');
+      alert('Erro ao enviar PDFs. Tente novamente.');
     }
   };
 
@@ -1272,32 +1255,7 @@ const FichaNegociacao = () => {
 
           <Separator />
 
-          {/* Alertas de Validação */}
-          {Object.keys(alertas).length > 0 && (
-            <div className="border border-destructive rounded-lg p-4 bg-destructive/5">
-              <div className="flex items-center space-x-2 mb-3">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <Label className="text-lg font-semibold text-destructive">Alertas de Validação</Label>
-              </div>
-              <div className="space-y-2">
-                {Object.entries(alertas).map(([key, mensagem]) => {
-                  const isError = mensagem.includes('ERRO');
-                  return (
-                    <div key={key} className={`p-3 rounded border ${
-                      isError 
-                        ? 'border-destructive bg-destructive/10 text-destructive' 
-                        : 'border-orange-400 bg-orange-50 text-orange-700'
-                    }`}>
-                      <div className="flex items-center space-x-2">
-                        <AlertTriangle className={`h-4 w-4 ${isError ? 'text-destructive' : 'text-orange-500'}`} />
-                        <span className="text-sm font-medium">{mensagem}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {/* Seção removida - alertas não são mais exibidos */}
 
           {/* Informações de Pagamento */}
           <div>
