@@ -121,13 +121,24 @@ const FichaNegociacao = () => {
         if (errorEmpreendimentos) throw errorEmpreendimentos;
         setEmpreendimentos(empreendimentosData || []);
 
-        // Carregar categorias de preço das vendas normais com todos os campos
+        // Carregar categorias de preço das vendas normais com todos os campos (apenas registros mais recentes)
         const { data: tiposVendaNormal, error: errorTiposVenda } = await supabase
           .from('tipos_venda_normal')
-          .select('categoria_preco, vir_cota, empreendimento_id, total_entrada, total_sinal, total_saldo, sinal_qtd, saldo_qtd, percentual_entrada, percentual_sinal, percentual_saldo');
+          .select('categoria_preco, vir_cota, empreendimento_id, total_entrada, total_sinal, total_saldo, sinal_qtd, saldo_qtd, percentual_entrada, percentual_sinal, percentual_saldo, created_at')
+          .order('created_at', { ascending: false });
 
         if (errorTiposVenda) throw errorTiposVenda;
-        setCategoriasPreco(tiposVendaNormal || []);
+        
+        // Filtrar apenas o registro mais recente de cada categoria por empreendimento
+        const categoriasUnicas = tiposVendaNormal?.reduce((acc, curr) => {
+          const key = `${curr.empreendimento_id}-${curr.categoria_preco}`;
+          if (!acc[key] || new Date(curr.created_at) > new Date(acc[key].created_at)) {
+            acc[key] = curr;
+          }
+          return acc;
+        }, {} as Record<string, any>);
+        
+        setCategoriasPreco(Object.values(categoriasUnicas || {}));
 
         // Carregar torres
         const { data: torresData, error: errorTorres } = await supabase
