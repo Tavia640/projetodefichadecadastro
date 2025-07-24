@@ -180,7 +180,7 @@ const FichaNegociacao = () => {
     };
   };
 
-  // Função para atualizar alertas
+  // Função para atualizar alertas (excluindo auditoria automática)
   const atualizarAlertas = () => {
     const novosAlertas: {[key: string]: string} = {};
     
@@ -213,11 +213,7 @@ const FichaNegociacao = () => {
       }
     }
     
-    // Auditoria de valores
-    const auditoria = realizarAuditoriaValores();
-    if (!auditoria.valida) {
-      novosAlertas['auditoria'] = `ERRO DE AUDITORIA: ${auditoria.detalhes}`;
-    }
+    // NÃO incluir auditoria automática aqui
     
     setAlertas(novosAlertas);
   };
@@ -450,6 +446,23 @@ const FichaNegociacao = () => {
   };
 
   const salvarFicha = () => {
+    // Realizar auditoria apenas no momento de salvar
+    const auditoria = realizarAuditoriaValores();
+    
+    if (!auditoria.valida) {
+      // Mostrar alerta de auditoria apenas se houver erro
+      const alertasComAuditoria = { ...alertas, auditoria: `ERRO DE AUDITORIA: ${auditoria.detalhes}` };
+      setAlertas(alertasComAuditoria);
+      alert('Não é possível salvar a ficha devido a erros de validação. Verifique os alertas.');
+      return;
+    }
+    
+    // Verificar se há outros alertas que impedem o salvamento
+    if (Object.keys(alertas).some(key => alertas[key].includes('ERRO'))) {
+      alert('Não é possível salvar a ficha devido a erros de validação. Verifique os alertas.');
+      return;
+    }
+    
     console.log('Ficha salva', {
       liner,
       closer,
@@ -574,43 +587,43 @@ const FichaNegociacao = () => {
                               newParcelas[index].valorDistribuido = e.target.value;
                               setParcelasPagasSala(newParcelas);
 
-                              // Clonar valor para 1ª Entrada automaticamente
-                              const novasInformacoes = [...informacoesPagamento];
-                              const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
-                              if (primeiraEntradaIndex !== -1) {
-                                novasInformacoes[primeiraEntradaIndex].total = e.target.value;
-                                novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
-                                novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
-                                
-                                // Preencher forma de pagamento automaticamente se estiver vazia
-                                if (!novasInformacoes[primeiraEntradaIndex].formaPagamento && parcela.formasPagamento[0]) {
-                                  novasInformacoes[primeiraEntradaIndex].formaPagamento = parcela.formasPagamento[0];
-                                }
-                                
-                                // Calcular Restante da Entrada
-                                const restanteEntradaIndex = novasInformacoes.findIndex(info => info.tipo === 'Restante da Entrada');
-                                if (restanteEntradaIndex !== -1) {
-                                  const contratoAtivo = contratos.find(c => c.empreendimento);
-                                   if (contratoAtivo) {
-                                     const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
-                                     const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
-                                     const totalEntradas = calcularTotalEntradas(novasInformacoes);
-                                     const restante = valorEntrada - totalEntradas;
-                                     
-                                     if (restante > 0) {
-                                       novasInformacoes[restanteEntradaIndex].total = restante.toString();
-                                       novasInformacoes[restanteEntradaIndex].valorParcela = restante.toString();
-                                       novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
-                                     } else {
-                                       novasInformacoes[restanteEntradaIndex].total = '0';
-                                       novasInformacoes[restanteEntradaIndex].valorParcela = '0';
-                                       novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
-                                     }
+                               // Clonar valor para 1ª Entrada automaticamente
+                               const novasInformacoes = [...informacoesPagamento];
+                               const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
+                               if (primeiraEntradaIndex !== -1) {
+                                 novasInformacoes[primeiraEntradaIndex].total = e.target.value;
+                                 novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
+                                 novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
+                                 
+                                 // Preencher forma de pagamento automaticamente se estiver vazia
+                                 if (!novasInformacoes[primeiraEntradaIndex].formaPagamento && parcela.formasPagamento[0]) {
+                                   novasInformacoes[primeiraEntradaIndex].formaPagamento = parcela.formasPagamento[0];
+                                 }
+                               }
+                               
+                               // Sempre recalcular Restante da Entrada após qualquer mudança em entradas
+                               const restanteEntradaIndex = novasInformacoes.findIndex(info => info.tipo === 'Restante da Entrada');
+                               if (restanteEntradaIndex !== -1) {
+                                 const contratoAtivo = contratos.find(c => c.empreendimento);
+                                 if (contratoAtivo) {
+                                   const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
+                                   const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
+                                   const totalEntradas = calcularTotalEntradas(novasInformacoes);
+                                   const restante = valorEntrada - totalEntradas;
+                                   
+                                   if (restante > 0) {
+                                     novasInformacoes[restanteEntradaIndex].total = restante.toString();
+                                     novasInformacoes[restanteEntradaIndex].valorParcela = restante.toString();
+                                     novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
+                                   } else {
+                                     novasInformacoes[restanteEntradaIndex].total = '0';
+                                     novasInformacoes[restanteEntradaIndex].valorParcela = '0';
+                                     novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
                                    }
-                                }
-                                
-                                setInformacoesPagamento(novasInformacoes);
-                              }
+                                 }
+                               }
+                               
+                               setInformacoesPagamento(novasInformacoes);
                             }}
                            placeholder="Valor distribuído"
                            type="number"
