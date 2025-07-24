@@ -1,23 +1,36 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
-// Inicializar Resend com validação da API key
-const apiKey = Deno.env.get("RESEND_API_KEY");
-if (!apiKey) {
-  console.error("❌ RESEND_API_KEY não configurada!");
-}
-const resend = apiKey ? new Resend(apiKey) : null;
-
+// CORS headers
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 interface SendPDFRequest {
-  clientData: any;
-  fichaData: any;
+  clientData: {
+    nome?: string;
+    cpf?: string;
+    email?: string;
+    telefone?: string;
+    [key: string]: any;
+  };
+  fichaData: {
+    liner?: string;
+    closer?: string;
+    tipoVenda?: string;
+    [key: string]: any;
+  };
   pdfData1: string; // base64 encoded PDF
   pdfData2: string; // base64 encoded PDF
+}
+
+interface EmailResponse {
+  success: boolean;
+  message: string;
+  messageId?: string;
+  error?: string;
+  timestamp: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -32,19 +45,38 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("📨 Processando requisição de envio de PDFs...");
     
     // Verificar se a API key está configurada
-    if (!resend) {
-      throw new Error("❌ Chave API do Resend não configurada. Configure RESEND_API_KEY nas configurações do projeto.");
+    const apiKey = Deno.env.get("RESEND_API_KEY");
+    if (!apiKey) {
+      console.error("❌ RESEND_API_KEY não configurada!");
+      throw new Error("Chave API do Resend não configurada. Configure RESEND_API_KEY nas configurações do projeto.");
+    }
+
+    // Inicializar Resend
+    const resend = new Resend(apiKey);
+    console.log("✅ Resend inicializado com sucesso");
+    
+    const requestData: SendPDFRequest = await req.json();
+    const { clientData, fichaData, pdfData1, pdfData2 } = requestData;
+
+    // Validação rigorosa dos dados recebidos
+    if (!clientData) {
+      throw new Error("Dados do cliente são obrigatórios");
     }
     
-    const { clientData, fichaData, pdfData1, pdfData2 }: SendPDFRequest = await req.json();
+    if (!fichaData) {
+      throw new Error("Dados da negociação são obrigatórios");
+    }
+    
+    if (!pdfData1 || !pdfData2) {
+      throw new Error("Ambos os PDFs são obrigatórios");
+    }
 
-    // Validação dos dados recebidos
-    if (!clientData || !fichaData || !pdfData1 || !pdfData2) {
-      throw new Error("❌ Dados incompletos recebidos na requisição");
+    if (!clientData.nome) {
+      throw new Error("Nome do cliente é obrigatório");
     }
 
     console.log("✅ Dados validados:", {
-      cliente: clientData.nome || "Nome não informado",
+      cliente: clientData.nome,
       temPdf1: !!pdfData1,
       temPdf2: !!pdfData2,
       sizePdf1: pdfData1.length,
@@ -55,35 +87,34 @@ const handler = async (req: Request): Promise<Response> => {
     const cleanPdf1 = pdfData1.startsWith('data:') ? pdfData1.split(',')[1] : pdfData1;
     const cleanPdf2 = pdfData2.startsWith('data:') ? pdfData2.split(',')[1] : pdfData2;
 
-    console.log("🔄 Convertendo PDFs para anexos...");
-
-    // Preparar anexos com melhor tratamento de erro
-    let attachments: any[] = [];
-    
-    try {
-      attachments = [
-        {
-          filename: `Ficha_Cadastro_${(clientData.nome || 'Cliente').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
-          content: cleanPdf1,
-          contentType: 'application/pdf',
-        },
-        {
-          filename: `Ficha_Negociacao_${(clientData.nome || 'Cliente').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
-          content: cleanPdf2,
-          contentType: 'application/pdf',
-        },
-      ];
-    } catch (attachError) {
-      console.error("❌ Erro ao preparar anexos:", attachError);
-      throw new Error("Erro ao processar arquivos PDF");
+    // Validar se os PDFs não estão vazios
+    if (cleanPdf1.length < 1000 || cleanPdf2.length < 1000) {
+      throw new Error("Os PDFs parecem estar vazios ou corrompidos");
     }
+
+    console.log("🔄 Preparando anexos para envio...");
+
+    // Preparar anexos
+    const attachments = [
+      {
+        filename: `Ficha_Cadastro_${clientData.nome.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+        content: cleanPdf1,
+        contentType: 'application/pdf',
+      },
+      {
+        filename: `Ficha_Negociacao_${clientData.nome.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+        content: cleanPdf2,
+        contentType: 'application/pdf',
+      },
+    ];
 
     console.log("📧 Enviando email para admudrive2025@gavresorts.com.br...");
 
+    // Construir o email
     const emailResponse = await resend.emails.send({
       from: "GAV Resorts <onboarding@resend.dev>",
       to: ["admudrive2025@gavresorts.com.br"],
-      subject: `🏖️ Nova Ficha de Negociação - ${clientData.nome || 'Cliente'}`,
+      subject: `🏖️ Nova Ficha de Negociação - ${clientData.nome}`,
       html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #f8f9fa;">
           <!-- Header -->
@@ -121,10 +152,6 @@ const handler = async (req: Request): Promise<Response> => {
                     <td style="padding: 8px 0; font-weight: bold; color: #495057;">Telefone:</td>
                     <td style="padding: 8px 0; color: #212529;">${clientData.telefone || 'Não informado'}</td>
                   </tr>
-                  <tr>
-                    <td style="padding: 8px 0; font-weight: bold; color: #495057;">Estado Civil:</td>
-                    <td style="padding: 8px 0; color: #212529;">${clientData.estadoCivil || 'Não informado'}</td>
-                  </tr>
                 </table>
               </div>
             </div>
@@ -147,10 +174,6 @@ const handler = async (req: Request): Promise<Response> => {
                   <tr>
                     <td style="padding: 8px 0; font-weight: bold; color: #856404;">Tipo de Venda:</td>
                     <td style="padding: 8px 0; color: #212529;">${fichaData.tipoVenda || 'Não informado'}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; font-weight: bold; color: #856404;">Resort:</td>
-                    <td style="padding: 8px 0; color: #212529;">${fichaData.resort || 'Não informado'}</td>
                   </tr>
                 </table>
               </div>
@@ -197,24 +220,28 @@ const handler = async (req: Request): Promise<Response> => {
       attachments: attachments
     });
 
-    console.log("✅ Email enviado com sucesso!");
-    console.log("📊 Response:", {
-      success: !!emailResponse.data,
-      messageId: emailResponse.data?.id,
-      error: emailResponse.error
-    });
+    console.log("📊 Resposta do Resend:", emailResponse);
 
     if (emailResponse.error) {
       console.error("❌ Erro no Resend:", emailResponse.error);
       throw new Error(`Falha no envio do email: ${emailResponse.error.message}`);
     }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      message: "✅ PDFs enviados com sucesso para admudrive2025@gavresorts.com.br!",
-      messageId: emailResponse.data?.id,
+    if (!emailResponse.data?.id) {
+      console.error("❌ Resposta inválida do Resend:", emailResponse);
+      throw new Error("Resposta inválida do serviço de email");
+    }
+
+    console.log("✅ Email enviado com sucesso! ID:", emailResponse.data.id);
+
+    const successResponse: EmailResponse = {
+      success: true,
+      message: "PDFs enviados com sucesso para admudrive2025@gavresorts.com.br",
+      messageId: emailResponse.data.id,
       timestamp: new Date().toISOString()
-    }), {
+    };
+
+    return new Response(JSON.stringify(successResponse), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -226,21 +253,20 @@ const handler = async (req: Request): Promise<Response> => {
     console.error("❌ ERRO CRÍTICO na função send-pdfs:", error);
     console.error("📋 Stack trace:", error.stack);
     
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: `Erro no servidor: ${error.message}`,
-        timestamp: new Date().toISOString(),
-        details: error.stack
-      }),
-      {
-        status: 500,
-        headers: { 
-          "Content-Type": "application/json", 
-          ...corsHeaders 
-        },
-      }
-    );
+    const errorResponse: EmailResponse = {
+      success: false,
+      message: error.message || "Erro interno do servidor",
+      error: error.message,
+      timestamp: new Date().toISOString()
+    };
+    
+    return new Response(JSON.stringify(errorResponse), {
+      status: 500,
+      headers: { 
+        "Content-Type": "application/json", 
+        ...corsHeaders 
+      },
+    });
   }
 };
 
