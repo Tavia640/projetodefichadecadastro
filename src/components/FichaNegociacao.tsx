@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Plus, Trash2, AlertTriangle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ParcelaPagaSala {
   id: string;
@@ -38,6 +39,24 @@ interface InformacaoPagamento {
   primeiroVencimento: string;
 }
 
+interface Empreendimento {
+  id: string;
+  nome: string;
+  descricao?: string;
+}
+
+interface CategoriaPreco {
+  categoria_preco: string;
+  vir_cota: number;
+  empreendimento_id: string;
+}
+
+interface Torre {
+  id: string;
+  nome: string;
+  empreendimento_id: string;
+}
+
 const FichaNegociacao = () => {
   const [liner, setLiner] = useState('');
   const [closer, setCloser] = useState('');
@@ -66,6 +85,61 @@ const FichaNegociacao = () => {
     { id: '3', tipo: 'Sinal', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
     { id: '4', tipo: 'Saldo', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' }
   ]);
+
+  // Estados para dados do Supabase
+  const [empreendimentos, setEmpreendimentos] = useState<Empreendimento[]>([]);
+  const [categoriasPreco, setCategoriasPreco] = useState<CategoriaPreco[]>([]);
+  const [torres, setTorres] = useState<Torre[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Carregar dados do Supabase
+  useEffect(() => {
+    const carregarDados = async () => {
+      try {
+        // Carregar empreendimentos
+        const { data: empreendimentosData, error: errorEmpreendimentos } = await supabase
+          .from('empreendimentos')
+          .select('*')
+          .eq('status', 'ATIVO');
+
+        if (errorEmpreendimentos) throw errorEmpreendimentos;
+        setEmpreendimentos(empreendimentosData || []);
+
+        // Carregar categorias de preço das vendas normais
+        const { data: tiposVendaNormal, error: errorTiposVenda } = await supabase
+          .from('tipos_venda_normal')
+          .select('categoria_preco, vir_cota, empreendimento_id');
+
+        if (errorTiposVenda) throw errorTiposVenda;
+        setCategoriasPreco(tiposVendaNormal || []);
+
+        // Carregar torres
+        const { data: torresData, error: errorTorres } = await supabase
+          .from('torres')
+          .select('*');
+
+        if (errorTorres) throw errorTorres;
+        setTorres(torresData || []);
+
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarDados();
+  }, []);
+
+  // Filtrar categorias por empreendimento
+  const getCategoriasPorEmpreendimento = (empreendimentoId: string) => {
+    return categoriasPreco.filter(cat => cat.empreendimento_id === empreendimentoId);
+  };
+
+  // Filtrar torres por empreendimento
+  const getTorresPorEmpreendimento = (empreendimentoId: string) => {
+    return torres.filter(torre => torre.empreendimento_id === empreendimentoId);
+  };
 
   const adicionarParcelaPagaSala = () => {
     setParcelasPagasSala([...parcelasPagasSala, {
@@ -365,29 +439,50 @@ const FichaNegociacao = () => {
                           onValueChange={(value) => {
                             const newContratos = [...contratos];
                             newContratos[index].empreendimento = value;
+                            // Limpar categoria e torre quando mudar empreendimento
+                            newContratos[index].categoriaPreco = '';
+                            newContratos[index].torre = '';
                             setContratos(newContratos);
                           }}
+                          disabled={loading}
                         >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione empreendimento" />
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder={loading ? "Carregando..." : "Selecione empreendimento"} />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="empreendimento1">Empreendimento 1</SelectItem>
-                            <SelectItem value="empreendimento2">Empreendimento 2</SelectItem>
-                            <SelectItem value="empreendimento3">Empreendimento 3</SelectItem>
+                          <SelectContent className="bg-background z-50">
+                            {empreendimentos.map((emp) => (
+                              <SelectItem key={emp.id} value={emp.id}>
+                                {emp.nome}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </td>
                       <td className="border border-border p-3">
-                        <Input
+                        <Select
                           value={contrato.torre}
-                          onChange={(e) => {
+                          onValueChange={(value) => {
                             const newContratos = [...contratos];
-                            newContratos[index].torre = e.target.value;
+                            newContratos[index].torre = value;
                             setContratos(newContratos);
                           }}
-                          placeholder="Torre"
-                        />
+                          disabled={!contrato.empreendimento || loading}
+                        >
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder={
+                              !contrato.empreendimento 
+                                ? "Selecione empreendimento primeiro" 
+                                : "Selecione torre"
+                            } />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background z-50">
+                            {getTorresPorEmpreendimento(contrato.empreendimento).map((torre) => (
+                              <SelectItem key={torre.id} value={torre.nome}>
+                                {torre.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </td>
                       <td className="border border-border p-3">
                         <Input
@@ -412,10 +507,37 @@ const FichaNegociacao = () => {
                         />
                       </td>
                       <td className="border border-border p-3">
-                        <div className="flex items-center space-x-2 text-warning">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="text-sm">OBRIGATÓRIO: Selecione a categoria primeiro!</span>
-                        </div>
+                        <Select
+                          value={contrato.categoriaPreco}
+                          onValueChange={(value) => {
+                            const newContratos = [...contratos];
+                            newContratos[index].categoriaPreco = value;
+                            // Auto-preencher valor baseado na categoria selecionada
+                            const categoria = categoriasPreco.find(cat => 
+                              cat.categoria_preco === value && cat.empreendimento_id === contrato.empreendimento
+                            );
+                            if (categoria) {
+                              newContratos[index].valor = categoria.vir_cota.toString();
+                            }
+                            setContratos(newContratos);
+                          }}
+                          disabled={!contrato.empreendimento || loading}
+                        >
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder={
+                              !contrato.empreendimento 
+                                ? "Selecione empreendimento primeiro" 
+                                : "Selecione categoria de preço"
+                            } />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background z-50">
+                            {getCategoriasPorEmpreendimento(contrato.empreendimento).map((categoria) => (
+                              <SelectItem key={categoria.categoria_preco} value={categoria.categoria_preco}>
+                                {categoria.categoria_preco} - R$ {categoria.vir_cota.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </td>
                       <td className="border border-border p-3">
                         <Input
