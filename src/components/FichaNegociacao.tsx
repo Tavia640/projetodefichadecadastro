@@ -247,11 +247,22 @@ const FichaNegociacao = () => {
 
   // Função para calcular data inteligente baseada em parcelas - sempre dia 15
   const calcularDataInteligente = (dataBase: Date, mesesParaAdicionar: number): Date => {
-    const novaData = new Date(dataBase);
-    novaData.setMonth(novaData.getMonth() + mesesParaAdicionar);
+    // Criar uma nova data a partir da string para evitar problemas de timezone
+    const dataBaseStr = dataBase.toISOString().split('T')[0]; // YYYY-MM-DD
+    const [ano, mes, dia] = dataBaseStr.split('-').map(Number);
     
-    // Sempre definir para dia 15
-    novaData.setDate(15);
+    // Criar nova data com o mês ajustado
+    let novoAno = ano;
+    let novoMes = mes + mesesParaAdicionar;
+    
+    // Ajustar ano se necessário
+    while (novoMes > 12) {
+      novoMes -= 12;
+      novoAno += 1;
+    }
+    
+    // Sempre criar com dia 15
+    const novaData = new Date(novoAno, novoMes - 1, 15); // mes - 1 porque Date usa base 0
     
     return novaData;
   };
