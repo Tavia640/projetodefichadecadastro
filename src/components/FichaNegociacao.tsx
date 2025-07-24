@@ -49,12 +49,28 @@ interface CategoriaPreco {
   categoria_preco: string;
   vir_cota: number;
   empreendimento_id: string;
+  total_entrada?: number;
+  total_sinal?: number;
+  total_saldo?: number;
+  sinal_qtd?: number;
+  saldo_qtd?: number;
+  percentual_entrada?: number;
+  percentual_sinal?: number;
+  percentual_saldo?: number;
 }
 
 interface Torre {
   id: string;
   nome: string;
   empreendimento_id: string;
+}
+
+interface DadosCalculados {
+  valorTotal: number;
+  valorSinal: number;
+  valorSaldo: number;
+  maxParcelasSinal: number;
+  maxParcelasSaldo: number;
 }
 
 const FichaNegociacao = () => {
@@ -105,10 +121,10 @@ const FichaNegociacao = () => {
         if (errorEmpreendimentos) throw errorEmpreendimentos;
         setEmpreendimentos(empreendimentosData || []);
 
-        // Carregar categorias de preço das vendas normais
+        // Carregar categorias de preço das vendas normais com todos os campos
         const { data: tiposVendaNormal, error: errorTiposVenda } = await supabase
           .from('tipos_venda_normal')
-          .select('categoria_preco, vir_cota, empreendimento_id');
+          .select('categoria_preco, vir_cota, empreendimento_id, total_entrada, total_sinal, total_saldo, sinal_qtd, saldo_qtd, percentual_entrada, percentual_sinal, percentual_saldo');
 
         if (errorTiposVenda) throw errorTiposVenda;
         setCategoriasPreco(tiposVendaNormal || []);
@@ -139,6 +155,57 @@ const FichaNegociacao = () => {
   // Filtrar torres por empreendimento
   const getTorresPorEmpreendimento = (empreendimentoId: string) => {
     return torres.filter(torre => torre.empreendimento_id === empreendimentoId);
+  };
+
+  // Calcular dados automaticamente baseado na categoria
+  const calcularDadosCategoria = (empreendimentoId: string, categoriaPreco: string): DadosCalculados | null => {
+    const categoria = categoriasPreco.find(cat => 
+      cat.empreendimento_id === empreendimentoId && cat.categoria_preco === categoriaPreco
+    );
+
+    if (!categoria) return null;
+
+    return {
+      valorTotal: categoria.vir_cota || 0,
+      valorSinal: categoria.total_sinal || 0,
+      valorSaldo: categoria.total_saldo || 0,
+      maxParcelasSinal: categoria.sinal_qtd || 1,
+      maxParcelasSaldo: categoria.saldo_qtd || 1
+    };
+  };
+
+  // Preencher automaticamente informações de pagamento
+  const preencherInformacoesPagamento = (dados: DadosCalculados) => {
+    const novasInformacoes = informacoesPagamento.map(info => {
+      if (info.tipo === 'Sinal') {
+        return {
+          ...info,
+          total: dados.valorSinal.toString(),
+          qtdParcelas: dados.maxParcelasSinal.toString(),
+          valorParcela: (dados.valorSinal / dados.maxParcelasSinal).toFixed(2)
+        };
+      }
+      if (info.tipo === 'Saldo') {
+        return {
+          ...info,
+          total: dados.valorSaldo.toString(),
+          qtdParcelas: dados.maxParcelasSaldo.toString(),
+          valorParcela: (dados.valorSaldo / dados.maxParcelasSaldo).toFixed(2)
+        };
+      }
+      return info;
+    });
+    setInformacoesPagamento(novasInformacoes);
+  };
+
+  // Validar quantidade de parcelas
+  const validarQuantidadeParcelas = (tipo: string, quantidade: number, empreendimentoId: string, categoriaPreco: string): boolean => {
+    const dados = calcularDadosCategoria(empreendimentoId, categoriaPreco);
+    if (!dados) return true;
+
+    if (tipo === 'Sinal' && quantidade > dados.maxParcelasSinal) return false;
+    if (tipo === 'Saldo' && quantidade > dados.maxParcelasSaldo) return false;
+    return true;
   };
 
   const adicionarParcelaPagaSala = () => {
@@ -518,6 +585,12 @@ const FichaNegociacao = () => {
                             );
                             if (categoria) {
                               newContratos[index].valor = categoria.vir_cota.toString();
+                              
+                              // Preencher automaticamente as informações de pagamento
+                              const dados = calcularDadosCategoria(contrato.empreendimento, value);
+                              if (dados) {
+                                preencherInformacoesPagamento(dados);
+                              }
                             }
                             setContratos(newContratos);
                           }}
@@ -617,23 +690,70 @@ const FichaNegociacao = () => {
                           onChange={(e) => {
                             const newInfos = [...informacoesPagamento];
                             newInfos[index].total = e.target.value;
+                            
+                            // Recalcular valor da parcela automaticamente quando alterar total
+                            if (newInfos[index].qtdParcelas && parseInt(newInfos[index].qtdParcelas) > 0) {
+                              const total = parseFloat(e.target.value) || 0;
+                              const qtdParcelas = parseInt(newInfos[index].qtdParcelas);
+                              newInfos[index].valorParcela = (total / qtdParcelas).toFixed(2);
+                            }
+                            
                             setInformacoesPagamento(newInfos);
                           }}
                           placeholder="Total"
                           type="number"
+                          className="bg-background"
                         />
                       </td>
                       <td className="border border-border p-3">
-                        <Input
-                          value={info.qtdParcelas}
-                          onChange={(e) => {
-                            const newInfos = [...informacoesPagamento];
-                            newInfos[index].qtdParcelas = e.target.value;
-                            setInformacoesPagamento(newInfos);
-                          }}
-                          placeholder="Qtd"
-                          type="number"
-                        />
+                        {(() => {
+                          // Encontrar o primeiro contrato com empreendimento e categoria preenchidos para validação
+                          const contratoAtivo = contratos.find(c => c.empreendimento && c.categoriaPreco);
+                          const dados = contratoAtivo ? calcularDadosCategoria(contratoAtivo.empreendimento, contratoAtivo.categoriaPreco) : null;
+                          const maxParcelas = dados ? (info.tipo === 'Sinal' ? dados.maxParcelasSinal : dados.maxParcelasSaldo) : null;
+                          
+                          return (
+                            <div className="space-y-1">
+                              <Input
+                                value={info.qtdParcelas}
+                                onChange={(e) => {
+                                  const valor = parseInt(e.target.value) || 0;
+                                  if (maxParcelas && valor > maxParcelas) {
+                                    return; // Bloqueia entrada superior ao máximo
+                                  }
+                                  const newInfos = [...informacoesPagamento];
+                                  newInfos[index].qtdParcelas = e.target.value;
+                                  
+                                  // Recalcular valor da parcela automaticamente
+                                  if (newInfos[index].total && valor > 0) {
+                                    const total = parseFloat(newInfos[index].total);
+                                    newInfos[index].valorParcela = (total / valor).toFixed(2);
+                                  }
+                                  
+                                  setInformacoesPagamento(newInfos);
+                                }}
+                                placeholder="Qtd"
+                                type="number"
+                                max={maxParcelas || undefined}
+                                className={`${
+                                  maxParcelas && parseInt(info.qtdParcelas) > maxParcelas 
+                                    ? 'border-destructive' 
+                                    : ''
+                                }`}
+                              />
+                              {maxParcelas && (info.tipo === 'Sinal' || info.tipo === 'Saldo') && (
+                                <div className="text-xs text-muted-foreground">
+                                  Máx: {maxParcelas} parcelas
+                                </div>
+                              )}
+                              {maxParcelas && parseInt(info.qtdParcelas) > maxParcelas && (
+                                <div className="text-xs text-destructive">
+                                  Limite excedido!
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="border border-border p-3">
                         <Input
