@@ -109,6 +109,124 @@ const FichaNegociacao = () => {
   const [torres, setTorres] = useState<Torre[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Estados para alertas de autorização
+  const [alertas, setAlertas] = useState<{[key: string]: string}>({});
+
+  // Função para validar primeira entrada
+  const validarPrimeiraEntrada = (valor: number): string | null => {
+    if (valor < 1000) {
+      return 'ERRO: Primeira entrada não pode ser menor que R$ 1.000,00';
+    }
+    if (valor === 1000) {
+      return 'Precisa de autorização do líder de sala';
+    }
+    if (valor > 1330) {
+      return null; // Sem mensagem
+    }
+    return 'Precisa de autorização do líder de sala';
+  };
+
+  // Função para validar restante da entrada
+  const validarRestanteEntrada = (qtdParcelas: number): string | null => {
+    if (qtdParcelas <= 2) {
+      return null; // Sem mensagem
+    }
+    return 'Precisa de autorização do líder de sala';
+  };
+
+  // Função para validar data do primeiro vencimento do sinal
+  const validarDataVencimentoSinal = (dataVencimento: string): string | null => {
+    if (!dataVencimento) return null;
+    
+    const hoje = new Date();
+    const vencimento = new Date(dataVencimento);
+    const diferencaDias = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
+    
+    if (diferencaDias <= 150) {
+      return null; // Sem alerta
+    }
+    if (diferencaDias <= 210) {
+      return 'Precisa de autorização do regional';
+    }
+    return 'Precisa de autorização da diretoria';
+  };
+
+  // Função para auditoria de valores
+  const realizarAuditoriaValores = (): { valida: boolean; detalhes: string } => {
+    const contratoAtivo = contratos.find(c => c.empreendimento && c.valor);
+    if (!contratoAtivo) {
+      return { valida: false, detalhes: 'Nenhum contrato válido encontrado' };
+    }
+
+    const valorTotal = parseFloat(contratoAtivo.valor) || 0;
+    
+    // Somar todas as entradas
+    const totalEntradas = informacoesPagamento
+      .filter(info => info.tipo.includes('ª Entrada') || info.tipo === 'Restante da Entrada')
+      .reduce((total, info) => total + (parseFloat(info.total) || 0), 0);
+    
+    const sinalInfo = informacoesPagamento.find(info => info.tipo === 'Sinal');
+    const saldoInfo = informacoesPagamento.find(info => info.tipo === 'Saldo');
+    
+    const valorSinal = parseFloat(sinalInfo?.total || '0');
+    const valorSaldo = parseFloat(saldoInfo?.total || '0');
+    
+    const somaTotal = totalEntradas + valorSinal + valorSaldo;
+    const diferenca = Math.abs(valorTotal - somaTotal);
+    
+    return {
+      valida: diferenca < 0.01, // Tolerância para erros de arredondamento
+      detalhes: `Valor Total: R$ ${valorTotal.toFixed(2)} | Entradas: R$ ${totalEntradas.toFixed(2)} | Sinal: R$ ${valorSinal.toFixed(2)} | Saldo: R$ ${valorSaldo.toFixed(2)} | Diferença: R$ ${diferenca.toFixed(2)}`
+    };
+  };
+
+  // Função para atualizar alertas
+  const atualizarAlertas = () => {
+    const novosAlertas: {[key: string]: string} = {};
+    
+    // Validar primeira entrada
+    const primeiraEntrada = informacoesPagamento.find(info => info.tipo === '1ª Entrada');
+    if (primeiraEntrada?.total) {
+      const valor = parseFloat(primeiraEntrada.total);
+      const alerta = validarPrimeiraEntrada(valor);
+      if (alerta) {
+        novosAlertas['primeira_entrada'] = alerta;
+      }
+    }
+    
+    // Validar restante da entrada
+    const restanteEntrada = informacoesPagamento.find(info => info.tipo === 'Restante da Entrada');
+    if (restanteEntrada?.qtdParcelas) {
+      const qtd = parseInt(restanteEntrada.qtdParcelas);
+      const alerta = validarRestanteEntrada(qtd);
+      if (alerta) {
+        novosAlertas['restante_entrada'] = alerta;
+      }
+    }
+    
+    // Validar data do sinal
+    const sinalInfo = informacoesPagamento.find(info => info.tipo === 'Sinal');
+    if (sinalInfo?.primeiroVencimento) {
+      const alerta = validarDataVencimentoSinal(sinalInfo.primeiroVencimento);
+      if (alerta) {
+        novosAlertas['data_sinal'] = alerta;
+      }
+    }
+    
+    // Auditoria de valores
+    const auditoria = realizarAuditoriaValores();
+    if (!auditoria.valida) {
+      novosAlertas['auditoria'] = `ERRO DE AUDITORIA: ${auditoria.detalhes}`;
+    }
+    
+    setAlertas(novosAlertas);
+  };
+
+  // Executar validações sempre que informações mudarem
+  useEffect(() => {
+    atualizarAlertas();
+  }, [informacoesPagamento, contratos]);
+
   // Carregar dados do Supabase
   useEffect(() => {
     const carregarDados = async () => {
@@ -754,6 +872,33 @@ const FichaNegociacao = () => {
 
           <Separator />
 
+          {/* Alertas de Validação */}
+          {Object.keys(alertas).length > 0 && (
+            <div className="border border-destructive rounded-lg p-4 bg-destructive/5">
+              <div className="flex items-center space-x-2 mb-3">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <Label className="text-lg font-semibold text-destructive">Alertas de Validação</Label>
+              </div>
+              <div className="space-y-2">
+                {Object.entries(alertas).map(([key, mensagem]) => {
+                  const isError = mensagem.includes('ERRO');
+                  return (
+                    <div key={key} className={`p-3 rounded border ${
+                      isError 
+                        ? 'border-destructive bg-destructive/10 text-destructive' 
+                        : 'border-orange-400 bg-orange-50 text-orange-700'
+                    }`}>
+                      <div className="flex items-center space-x-2">
+                        <AlertTriangle className={`h-4 w-4 ${isError ? 'text-destructive' : 'text-orange-500'}`} />
+                        <span className="text-sm font-medium">{mensagem}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Informações de Pagamento */}
           <div>
             <Label className="text-lg font-semibold">Informações de Pagamento</Label>
@@ -795,100 +940,122 @@ const FichaNegociacao = () => {
                               />
                             )}
                           </td>
-                      <td className="border border-border p-3">
-                        <Input
-                          value={info.total}
-                           onChange={(e) => {
-                             const newInfos = [...informacoesPagamento];
-                             newInfos[index].total = e.target.value;
-                             
-                             // Recalcular valor da parcela automaticamente quando alterar total
-                             if (newInfos[index].qtdParcelas && parseInt(newInfos[index].qtdParcelas) > 0) {
-                               const total = parseFloat(e.target.value) || 0;
-                               const qtdParcelas = parseInt(newInfos[index].qtdParcelas);
-                               newInfos[index].valorParcela = (total / qtdParcelas).toFixed(2);
-                             }
-                             
-                              // Se for uma entrada (1ª, 2ª, 3ª, etc.), recalcular Restante da Entrada
-                              if (info.tipo.includes('ª Entrada')) {
-                                const restanteEntradaIndex = newInfos.findIndex(inf => inf.tipo === 'Restante da Entrada');
-                                if (restanteEntradaIndex !== -1) {
-                                  const contratoAtivo = contratos.find(c => c.empreendimento);
-                                  if (contratoAtivo) {
-                                    const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
-                                    const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
-                                    const totalEntradas = calcularTotalEntradas(newInfos);
-                                    const restante = valorEntrada - totalEntradas;
-                                    
-                                    if (restante > 0) {
-                                      newInfos[restanteEntradaIndex].total = restante.toString();
-                                      newInfos[restanteEntradaIndex].valorParcela = restante.toString();
-                                      newInfos[restanteEntradaIndex].qtdParcelas = '1';
-                                    } else {
-                                      newInfos[restanteEntradaIndex].total = '0';
-                                      newInfos[restanteEntradaIndex].valorParcela = '0';
-                                      newInfos[restanteEntradaIndex].qtdParcelas = '1';
-                                    }
-                                  }
-                                }
+                       <td className="border border-border p-3">
+                         <Input
+                           value={info.total}
+                            onChange={(e) => {
+                              const valor = parseFloat(e.target.value) || 0;
+                              
+                              // Validação específica para 1ª Entrada - não pode ser menor que R$ 1.000
+                              if (info.tipo === '1ª Entrada' && valor > 0 && valor < 1000) {
+                                return; // Bloqueia valores menores que R$ 1.000 para primeira entrada
                               }
-                             
-                             setInformacoesPagamento(newInfos);
-                           }}
-                          placeholder="Total"
-                          type="number"
-                          className="bg-background"
-                        />
-                      </td>
-                      <td className="border border-border p-3">
-                        {(() => {
-                          // Encontrar o primeiro contrato com empreendimento e categoria preenchidos para validação
-                          const contratoAtivo = contratos.find(c => c.empreendimento && c.categoriaPreco);
-                          const dados = contratoAtivo ? calcularDadosCategoria(contratoAtivo.empreendimento, contratoAtivo.categoriaPreco) : null;
-                          const maxParcelas = dados ? (info.tipo === 'Sinal' ? dados.maxParcelasSinal : dados.maxParcelasSaldo) : null;
-                          
-                          return (
-                            <div className="space-y-1">
-                              <Input
-                                value={info.qtdParcelas}
-                                 onChange={(e) => {
-                                   const valor = parseInt(e.target.value) || 0;
-                                   if (maxParcelas && valor > maxParcelas) {
-                                     return; // Bloqueia entrada superior ao máximo
+
+                              const newInfos = [...informacoesPagamento];
+                              newInfos[index].total = e.target.value;
+                              
+                              // Recalcular valor da parcela automaticamente quando alterar total
+                              if (newInfos[index].qtdParcelas && parseInt(newInfos[index].qtdParcelas) > 0) {
+                                const total = parseFloat(e.target.value) || 0;
+                                const qtdParcelas = parseInt(newInfos[index].qtdParcelas);
+                                newInfos[index].valorParcela = (total / qtdParcelas).toFixed(2);
+                              }
+                              
+                               // Se for uma entrada (1ª, 2ª, 3ª, etc.), recalcular Restante da Entrada
+                               if (info.tipo.includes('ª Entrada')) {
+                                 const restanteEntradaIndex = newInfos.findIndex(inf => inf.tipo === 'Restante da Entrada');
+                                 if (restanteEntradaIndex !== -1) {
+                                   const contratoAtivo = contratos.find(c => c.empreendimento);
+                                   if (contratoAtivo) {
+                                     const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
+                                     const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
+                                     const totalEntradas = calcularTotalEntradas(newInfos);
+                                     const restante = valorEntrada - totalEntradas;
+                                     
+                                     if (restante > 0) {
+                                       newInfos[restanteEntradaIndex].total = restante.toString();
+                                       newInfos[restanteEntradaIndex].valorParcela = restante.toString();
+                                       newInfos[restanteEntradaIndex].qtdParcelas = '1';
+                                     } else {
+                                       newInfos[restanteEntradaIndex].total = '0';
+                                       newInfos[restanteEntradaIndex].valorParcela = '0';
+                                       newInfos[restanteEntradaIndex].qtdParcelas = '1';
+                                     }
                                    }
-                                   const newInfos = [...informacoesPagamento];
-                                   newInfos[index].qtdParcelas = e.target.value;
-                                   
-                                   // Recalcular valor da parcela automaticamente
-                                   if (newInfos[index].total && valor > 0) {
-                                     const total = parseFloat(newInfos[index].total);
-                                     newInfos[index].valorParcela = (total / valor).toFixed(2);
-                                   }
-                                   
-                                   setInformacoesPagamento(newInfos);
-                                 }}
-                                placeholder="Qtd"
-                                type="number"
-                                max={maxParcelas || undefined}
-                                className={`${
-                                  maxParcelas && parseInt(info.qtdParcelas) > maxParcelas 
-                                    ? 'border-destructive' 
-                                    : ''
-                                }`}
-                              />
-                              {maxParcelas && (info.tipo === 'Sinal' || info.tipo === 'Saldo') && (
-                                <div className="text-xs text-muted-foreground">
-                                  Máx: {maxParcelas} parcelas
-                                </div>
-                              )}
-                              {maxParcelas && parseInt(info.qtdParcelas) > maxParcelas && (
-                                <div className="text-xs text-destructive">
-                                  Limite excedido!
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })()}
+                                 }
+                               }
+                              
+                              setInformacoesPagamento(newInfos);
+                            }}
+                           placeholder="Total"
+                           type="number"
+                           min={info.tipo === '1ª Entrada' ? 1000 : undefined}
+                           className={`bg-background ${
+                             info.tipo === '1ª Entrada' && parseFloat(info.total) > 0 && parseFloat(info.total) < 1000 
+                               ? 'border-destructive' 
+                               : ''
+                           }`}
+                         />
+                       </td>
+                       <td className="border border-border p-3">
+                         {(() => {
+                           // Encontrar o primeiro contrato com empreendimento e categoria preenchidos para validação
+                           const contratoAtivo = contratos.find(c => c.empreendimento && c.categoriaPreco);
+                           const dados = contratoAtivo ? calcularDadosCategoria(contratoAtivo.empreendimento, contratoAtivo.categoriaPreco) : null;
+                           let maxParcelas = dados ? (info.tipo === 'Sinal' ? dados.maxParcelasSinal : dados.maxParcelasSaldo) : null;
+                           
+                           // Limitação específica para Restante da Entrada: máximo 5 parcelas
+                           if (info.tipo === 'Restante da Entrada') {
+                             maxParcelas = 5;
+                           }
+                           
+                           return (
+                             <div className="space-y-1">
+                               <Input
+                                 value={info.qtdParcelas}
+                                  onChange={(e) => {
+                                    const valor = parseInt(e.target.value) || 0;
+                                    if (maxParcelas && valor > maxParcelas) {
+                                      return; // Bloqueia entrada superior ao máximo
+                                    }
+                                    const newInfos = [...informacoesPagamento];
+                                    newInfos[index].qtdParcelas = e.target.value;
+                                    
+                                    // Recalcular valor da parcela automaticamente
+                                    if (newInfos[index].total && valor > 0) {
+                                      const total = parseFloat(newInfos[index].total);
+                                      newInfos[index].valorParcela = (total / valor).toFixed(2);
+                                    }
+                                    
+                                    setInformacoesPagamento(newInfos);
+                                  }}
+                                 placeholder="Qtd"
+                                 type="number"
+                                 max={maxParcelas || undefined}
+                                 className={`${
+                                   maxParcelas && parseInt(info.qtdParcelas) > maxParcelas 
+                                     ? 'border-destructive' 
+                                     : ''
+                                 }`}
+                               />
+                               {maxParcelas && (info.tipo === 'Sinal' || info.tipo === 'Saldo') && (
+                                 <div className="text-xs text-muted-foreground">
+                                   Máx: {maxParcelas} parcelas
+                                 </div>
+                               )}
+                               {info.tipo === 'Restante da Entrada' && (
+                                 <div className="text-xs text-muted-foreground">
+                                   Máx: 5 parcelas
+                                 </div>
+                               )}
+                               {maxParcelas && parseInt(info.qtdParcelas) > maxParcelas && (
+                                 <div className="text-xs text-destructive">
+                                   Limite excedido!
+                                 </div>
+                               )}
+                             </div>
+                           );
+                         })()}
                       </td>
                       <td className="border border-border p-3">
                         <Input
