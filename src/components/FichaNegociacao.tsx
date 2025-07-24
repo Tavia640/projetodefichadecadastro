@@ -199,14 +199,7 @@ const FichaNegociacao = () => {
     const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
 
     const novasInformacoes = informacoesPagamento.map(info => {
-      if (info.tipo === '1ª Entrada' && empreendimento) {
-        return {
-          ...info,
-          total: valorEntrada.toString(),
-          qtdParcelas: '1',
-          valorParcela: valorEntrada.toString()
-        };
-      }
+      // Não preencher automaticamente a 1ª Entrada, deixar que seja sincronizada pelo "Valor Distribuído"
       if (info.tipo === 'Sinal') {
         return {
           ...info,
