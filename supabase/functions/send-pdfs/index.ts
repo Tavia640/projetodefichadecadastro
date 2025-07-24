@@ -52,8 +52,8 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     // Limpar possível prefixo data:application/pdf;base64, dos PDFs
-    const cleanPdf1 = pdfData1.includes(',') ? pdfData1.split(',')[1] : pdfData1;
-    const cleanPdf2 = pdfData2.includes(',') ? pdfData2.split(',')[1] : pdfData2;
+    const cleanPdf1 = pdfData1.startsWith('data:') ? pdfData1.split(',')[1] : pdfData1;
+    const cleanPdf2 = pdfData2.startsWith('data:') ? pdfData2.split(',')[1] : pdfData2;
 
     console.log("🔄 Convertendo PDFs para anexos...");
 
@@ -231,7 +231,7 @@ const handler = async (req: Request): Promise<Response> => {
         success: false, 
         error: `Erro no servidor: ${error.message}`,
         timestamp: new Date().toISOString(),
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        details: error.stack
       }),
       {
         status: 500,

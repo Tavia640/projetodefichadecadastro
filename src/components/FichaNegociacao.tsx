@@ -573,9 +573,6 @@ const FichaNegociacao = () => {
   const gerarPDFCadastroCliente = (dadosCliente: any) => {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
-    // Configurações de fonte
-    pdf.setFont("helvetica", "normal");
-    
     // Header com logo GAV
     pdf.setFontSize(14);
     pdf.setFont("helvetica", "bold");
@@ -589,7 +586,7 @@ const FichaNegociacao = () => {
     pdf.setFont("helvetica", "bold");
     pdf.text("Ficha de Cadastro de Cliente", 75, 20);
     
-    // Info do formulário
+    // Info do formulário (direita)
     pdf.setFontSize(8);
     pdf.setFont("helvetica", "normal");
     pdf.text("Código: FCR 02/01 rev.", 150, 12);
@@ -610,8 +607,10 @@ const FichaNegociacao = () => {
       pdf.setFontSize(8);
       pdf.text(label + ":", x + 2, y - 1);
       pdf.rect(x, y, width, height);
-      pdf.setFontSize(9);
-      pdf.text(value || "", x + 2, y + 5);
+      if (value) {
+        pdf.setFontSize(9);
+        pdf.text(value, x + 2, y + 5);
+      }
     };
     
     // Nome completo
@@ -651,32 +650,32 @@ const FichaNegociacao = () => {
     yPos += 15;
     
     // Nome do cônjuge
-    createField("Nome", dadosCliente.nomeConjuge || "", 10, yPos, 190, 8);
+    createField("Nome", "", 10, yPos, 190, 8);
     yPos += 12;
     
     // CPF do cônjuge
-    createField("CPF", dadosCliente.cpfConjuge || "", 10, yPos, 190, 8);
+    createField("CPF", "", 10, yPos, 190, 8);
     yPos += 12;
     
     // RG e ÓRGÃO/UF do cônjuge na mesma linha
-    createField("RG", dadosCliente.rgConjuge || "", 10, yPos, 120, 8);
-    createField("ÓRGÃO/UF", (dadosCliente.orgaoEmissorConjuge || "") + "/" + (dadosCliente.estadoEmissorConjuge || ""), 135, yPos, 65, 8);
+    createField("RG", "", 10, yPos, 120, 8);
+    createField("ÓRGÃO/UF", "/", 135, yPos, 65, 8);
     yPos += 12;
     
     // Profissão do cônjuge
-    createField("Profissão", dadosCliente.profissaoConjuge || "", 10, yPos, 190, 8);
+    createField("Profissão", "", 10, yPos, 190, 8);
     yPos += 12;
     
     // Estado Civil do cônjuge
-    createField("Estado Civil", dadosCliente.estadoCivilConjuge || "", 10, yPos, 190, 8);
+    createField("Estado Civil", "", 10, yPos, 190, 8);
     yPos += 12;
     
     // E-mail do cônjuge
-    createField("E-mail", dadosCliente.emailConjuge || "", 10, yPos, 190, 8);
+    createField("E-mail", "", 10, yPos, 190, 8);
     yPos += 12;
     
     // Telefone do cônjuge
-    createField("Telefone", dadosCliente.telefoneConjuge || "", 10, yPos, 190, 8);
+    createField("Telefone", "", 10, yPos, 190, 8);
     yPos += 20;
     
     // Seção ENDEREÇO
@@ -703,36 +702,8 @@ const FichaNegociacao = () => {
     // Cidade e UF
     createField("Cidade", "", 10, yPos, 130, 8);
     createField("UF", "", 145, yPos, 55, 8);
-    yPos += 20;
     
-    // Seção SALA DE VENDAS
-    pdf.setFontSize(10);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("SALA DE VENDAS: _____ GRAMADO - HORTÊNSIAS _____", 10, yPos);
-    pdf.text("IBERICA", 170, yPos);
-    pdf.rect(185, yPos - 4, 10, 8);
-    yPos += 15;
-    
-    // Seções adicionais
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(8);
-    pdf.text("LINER: ___________________________________________________", 10, yPos);
-    yPos += 10;
-    pdf.text("EMPRESA (Liner): _____________________________________", 10, yPos);
-    yPos += 10;
-    pdf.text("CLOSER: ______________________________________________", 10, yPos);
-    yPos += 10;
-    pdf.text("EMPRESA (Closer): ____________________________________", 10, yPos);
-    yPos += 10;
-    pdf.text("PV: ___________________________________________________", 10, yPos);
-    yPos += 10;
-    pdf.text("EMPRESA (PV): ________________________________________", 10, yPos);
-    yPos += 10;
-    pdf.text("LÍDER DE SALA: _________ LEONARDO THOMAS _________", 10, yPos);
-    yPos += 10;
-    pdf.text("SUB LÍDER DE SALA: ___________________________________", 10, yPos);
-    
-    return pdf.output('datauristring').split(',')[1]; // Retorna base64
+    return pdf.output('datauristring');
   };
 
   // Função para gerar PDF da Ficha de Negociação
@@ -740,70 +711,149 @@ const FichaNegociacao = () => {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     // Header GAV
-    pdf.setFontSize(16);
+    pdf.setFontSize(14);
     pdf.setFont("helvetica", "bold");
-    pdf.text("GAV", 20, 20);
+    pdf.rect(10, 10, 30, 15);
+    pdf.text("GAV", 18, 20);
+    pdf.setFontSize(8);
+    pdf.text("RESORTS", 16, 23);
     
     // Título
-    pdf.setFontSize(14);
-    pdf.text("Ficha de Negociação de Cota", 70, 20);
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Ficha de Negociação de Cota", 75, 20);
     
     // Info página
-    pdf.setFontSize(10);
-    pdf.text("Código: FCR 02/01 rev.", 140, 15);
-    pdf.text("Data: 05/10/2024 rev.", 140, 20);
-    pdf.text("Página: 1 de 2", 170, 25);
+    pdf.setFontSize(8);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("Código: FCR 02/01 rev.", 150, 12);
+    pdf.text("Data: 05/10/2024 rev.", 150, 16);
+    pdf.text("Página: 1 de 2", 150, 20);
     
     // Dados básicos
-    let yPos = 40;
+    let yPos = 35;
     pdf.setFontSize(10);
-    pdf.text("CLIENTE:", 20, yPos);
-    pdf.rect(45, yPos - 4, 145, 8);
-    pdf.text(dadosCliente.nome || "", 47, yPos);
-    yPos += 12;
+    pdf.setFont("helvetica", "bold");
+    pdf.text("CLIENTE:", 12, yPos);
+    pdf.rect(10, yPos + 2, 190, 8);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(dadosCliente.nome || "", 12, yPos + 7);
+    yPos += 15;
     
-    pdf.text("CPF:", 20, yPos);
-    pdf.rect(35, yPos - 4, 155, 8);
-    pdf.text(dadosCliente.cpf || "", 37, yPos);
-    yPos += 12;
+    pdf.setFont("helvetica", "bold");
+    pdf.text("CPF:", 12, yPos);
+    pdf.rect(10, yPos + 2, 190, 8);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(dadosCliente.cpf || "", 12, yPos + 7);
+    yPos += 15;
     
     // Sala de vendas
-    pdf.text("SALA DE VENDAS: GRAMADO - HORTÊNSIAS", 20, yPos);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("SALA DE VENDAS: GRAMADO - HORTÊNSIAS", 12, yPos);
+    yPos += 10;
+    
+    // Liner e Closer
+    pdf.text("LINER:", 12, yPos);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(dadosNegociacao.liner || "", 30, yPos);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("CLOSER:", 120, yPos);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(dadosNegociacao.closer || "", 145, yPos);
     yPos += 15;
     
     // Tipo de venda
-    pdf.text("( ) PADRÃO ( ) SEMESTRAL ( ) ANUAL ( ) À VISTA ( ) ATÉ 36x ( ) LINEAR", 20, yPos);
+    pdf.setFont("helvetica", "normal");
+    const tipoTexto = dadosNegociacao.tipoVenda ? `(X) ${dadosNegociacao.tipoVenda.toUpperCase()}` : "( ) PADRÃO";
+    pdf.text(`${tipoTexto} ( ) SEMESTRAL ( ) ANUAL ( ) À VISTA ( ) ATÉ 36x ( ) LINEAR`, 12, yPos);
     yPos += 15;
     
     // Tabela de Parcelas Pagas na Sala
     pdf.setFont("helvetica", "bold");
-    pdf.text("Tipo de Parcela Paga na Sala", 20, yPos);
-    pdf.text("Valor Total Pago na Sala", 70, yPos);
-    pdf.text("Valor Distribuído sobre Cada Unidade Apartamento", 120, yPos);
-    pdf.text("Quantidade de Cotas", 170, yPos);
-    pdf.text("Forma de Pag.", 190, yPos);
-    yPos += 8;
+    pdf.setFontSize(8);
+    
+    // Cabeçalho da tabela
+    pdf.rect(10, yPos, 40, 10);
+    pdf.text("Tipo de Parcela", 12, yPos + 6);
+    pdf.rect(50, yPos, 30, 10);
+    pdf.text("Valor Total", 52, yPos + 6);
+    pdf.rect(80, yPos, 30, 10);
+    pdf.text("Valor Distrib.", 82, yPos + 6);
+    pdf.rect(110, yPos, 20, 10);
+    pdf.text("Qtd Cotas", 112, yPos + 6);
+    pdf.rect(130, yPos, 30, 10);
+    pdf.text("Forma Pag.", 132, yPos + 6);
+    pdf.rect(160, yPos, 40, 10);
+    pdf.text("Observações", 162, yPos + 6);
+    yPos += 10;
     
     // Linhas da tabela
+    pdf.setFont("helvetica", "normal");
     for (let i = 0; i < 6; i++) {
-      pdf.setFont("helvetica", "normal");
-      pdf.rect(20, yPos - 4, 40, 8);
-      pdf.rect(70, yPos - 4, 40, 8);
-      pdf.rect(120, yPos - 4, 40, 8);
-      pdf.rect(170, yPos - 4, 15, 8);
-      pdf.rect(190, yPos - 4, 20, 8);
+      pdf.rect(10, yPos, 40, 8);
+      pdf.rect(50, yPos, 30, 8);
+      pdf.rect(80, yPos, 30, 8);
+      pdf.rect(110, yPos, 20, 8);
+      pdf.rect(130, yPos, 30, 8);
+      pdf.rect(160, yPos, 40, 8);
       
-      if (i < parcelasPagasSala.length) {
-        pdf.text(parcelasPagasSala[i].tipo || "", 22, yPos);
-        pdf.text(parcelasPagasSala[i].valorTotal || "", 72, yPos);
-        pdf.text(parcelasPagasSala[i].valorDistribuido || "", 122, yPos);
-        pdf.text(parcelasPagasSala[i].quantidadeCotas || "", 172, yPos);
-        pdf.text(parcelasPagasSala[i].formasPagamento.join(", ") || "", 192, yPos);
+      if (i < dadosNegociacao.parcelasPagasSala.length) {
+        const parcela = dadosNegociacao.parcelasPagasSala[i];
+        pdf.text(parcela.tipo || "", 12, yPos + 5);
+        pdf.text(parcela.valorTotal || "", 52, yPos + 5);
+        pdf.text(parcela.valorDistribuido || "", 82, yPos + 5);
+        pdf.text(parcela.quantidadeCotas || "", 112, yPos + 5);
+        pdf.text(parcela.formasPagamento[0] || "", 132, yPos + 5);
       }
-      yPos += 10;
+      yPos += 8;
     }
     
-    return pdf.output('datauristring').split(',')[1]; // Retorna base64
+    // Informações de pagamento
+    yPos += 10;
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(10);
+    pdf.text("INFORMAÇÕES DE PAGAMENTO:", 12, yPos);
+    yPos += 10;
+    
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(8);
+    
+    // Cabeçalho da tabela de pagamentos
+    pdf.rect(10, yPos, 30, 8);
+    pdf.text("Tipo", 12, yPos + 5);
+    pdf.rect(40, yPos, 25, 8);
+    pdf.text("Total", 42, yPos + 5);
+    pdf.rect(65, yPos, 20, 8);
+    pdf.text("Qtd Parc.", 67, yPos + 5);
+    pdf.rect(85, yPos, 25, 8);
+    pdf.text("Vlr Parcela", 87, yPos + 5);
+    pdf.rect(110, yPos, 30, 8);
+    pdf.text("Forma Pag.", 112, yPos + 5);
+    pdf.rect(140, yPos, 25, 8);
+    pdf.text("1º Venc.", 142, yPos + 5);
+    yPos += 8;
+    
+    // Dados das informações de pagamento
+    dadosNegociacao.informacoesPagamento.forEach((info: any) => {
+      if (info.total && parseFloat(info.total) > 0) {
+        pdf.rect(10, yPos, 30, 6);
+        pdf.rect(40, yPos, 25, 6);
+        pdf.rect(65, yPos, 20, 6);
+        pdf.rect(85, yPos, 25, 6);
+        pdf.rect(110, yPos, 30, 6);
+        pdf.rect(140, yPos, 25, 6);
+        
+        pdf.text(info.tipo, 12, yPos + 4);
+        pdf.text(info.total, 42, yPos + 4);
+        pdf.text(info.qtdParcelas, 67, yPos + 4);
+        pdf.text(info.valorParcela, 87, yPos + 4);
+        pdf.text(info.formaPagamento, 112, yPos + 4);
+        pdf.text(info.primeiroVencimento, 142, yPos + 4);
+        yPos += 6;
+      }
+    });
+    
+    return pdf.output('datauristring');
   };
 
   const salvarFicha = async () => {
@@ -845,9 +895,10 @@ const FichaNegociacao = () => {
       const pdfCadastro = gerarPDFCadastroCliente(dadosCliente);
       const pdfNegociacao = gerarPDFNegociacao(dadosCliente, dadosNegociacao);
       
+      console.log('PDFs gerados, tamanhos:', pdfCadastro.length, pdfNegociacao.length);
       console.log('Enviando PDFs por email...');
       
-      // Enviar PDFs por email via edge function
+      // Enviar PDFs por email via edge function  
       const response = await supabase.functions.invoke('send-pdfs', {
         body: {
           clientData: dadosCliente,
@@ -900,9 +951,9 @@ const FichaNegociacao = () => {
       const pdfCadastro = gerarPDFCadastroCliente(dadosCliente);
       const pdfNegociacao = gerarPDFNegociacao(dadosCliente, dadosNegociacao);
       
-      // Criar URLs para os PDFs
-      const pdfCadastroUrl = `data:application/pdf;base64,${pdfCadastro}`;
-      const pdfNegociacaoUrl = `data:application/pdf;base64,${pdfNegociacao}`;
+      // Criar URLs para os PDFs (já contém data:application/pdf;base64)
+      const pdfCadastroUrl = pdfCadastro;
+      const pdfNegociacaoUrl = pdfNegociacao;
       
       // Abrir PDFs em novas janelas para impressão
       const janelaCadastro = window.open(pdfCadastroUrl, '_blank');
