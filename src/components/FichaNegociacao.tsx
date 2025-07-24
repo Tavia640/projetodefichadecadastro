@@ -79,7 +79,7 @@ const FichaNegociacao = () => {
   const [tipoVenda, setTipoVenda] = useState('');
   const [parcelasPagasSala, setParcelasPagasSala] = useState<ParcelaPagaSala[]>([{
     id: '1',
-    tipo: '1ª Entrada',
+    tipo: 'Entrada',
     valorTotal: '',
     valorDistribuido: '',
     quantidadeCotas: '',
@@ -243,6 +243,50 @@ const FichaNegociacao = () => {
     } else {
       setAlertas({});
     }
+  };
+
+  // Função para calcular data inteligente baseada em parcelas
+  const calcularDataInteligente = (dataBase: Date, mesesParaAdicionar: number): Date => {
+    const novaData = new Date(dataBase);
+    novaData.setMonth(novaData.getMonth() + mesesParaAdicionar);
+    
+    // Ajustar para dia 05 ou 15
+    const dia = novaData.getDate();
+    if (dia <= 10) {
+      novaData.setDate(5);
+    } else {
+      novaData.setDate(15);
+    }
+    
+    return novaData;
+  };
+
+  // Função para atualizar datas automaticamente baseado na entrada restante
+  const atualizarDatasInteligentes = (dataEntradaRestante: string, qtdParcelasEntrada: number, qtdParcelasSinal: number) => {
+    if (!dataEntradaRestante || qtdParcelasEntrada <= 0) return;
+    
+    const dataBase = new Date(dataEntradaRestante);
+    
+    // Calcular data do sinal: data base + quantidade de parcelas da entrada restante
+    const dataSinal = calcularDataInteligente(dataBase, qtdParcelasEntrada);
+    
+    // Calcular data do saldo: data do sinal + quantidade de parcelas do sinal
+    const dataSaldo = calcularDataInteligente(dataSinal, qtdParcelasSinal || 1);
+    
+    // Atualizar as informações de pagamento
+    const novasInformacoes = [...informacoesPagamento];
+    
+    const sinalIndex = novasInformacoes.findIndex(info => info.tipo === 'Sinal');
+    if (sinalIndex !== -1) {
+      novasInformacoes[sinalIndex].primeiroVencimento = dataSinal.toISOString().split('T')[0];
+    }
+    
+    const saldoIndex = novasInformacoes.findIndex(info => info.tipo === 'Saldo');
+    if (saldoIndex !== -1) {
+      novasInformacoes[saldoIndex].primeiroVencimento = dataSaldo.toISOString().split('T')[0];
+    }
+    
+    setInformacoesPagamento(novasInformacoes);
   };
 
   // Executar validações sempre que informações mudarem
@@ -447,7 +491,7 @@ const FichaNegociacao = () => {
     setTipoVenda('');
     setParcelasPagasSala([{
       id: '1',
-      tipo: '1ª Entrada',
+      tipo: 'Entrada',
       valorTotal: '',
       valorDistribuido: '',
       quantidadeCotas: '',
@@ -733,10 +777,6 @@ const FichaNegociacao = () => {
                 </tbody>
               </table>
             </div>
-            <Button onClick={adicionarParcelaPagaSala} className="mt-2" variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Linha
-            </Button>
           </div>
 
           <Separator />
@@ -1055,22 +1095,36 @@ const FichaNegociacao = () => {
                              <div className="space-y-1">
                                <Input
                                  value={info.qtdParcelas}
-                                  onChange={(e) => {
-                                    const valor = parseInt(e.target.value) || 0;
-                                    if (maxParcelas && valor > maxParcelas) {
-                                      return; // Bloqueia entrada superior ao máximo
-                                    }
-                                    const newInfos = [...informacoesPagamento];
-                                    newInfos[index].qtdParcelas = e.target.value;
-                                    
-                                    // Recalcular valor da parcela automaticamente
-                                    if (newInfos[index].total && valor > 0) {
-                                      const total = parseFloat(newInfos[index].total);
-                                      newInfos[index].valorParcela = (total / valor).toFixed(2);
-                                    }
-                                    
-                                    setInformacoesPagamento(newInfos);
-                                  }}
+                                   onChange={(e) => {
+                                     const valor = parseInt(e.target.value) || 0;
+                                     if (maxParcelas && valor > maxParcelas) {
+                                       return; // Bloqueia entrada superior ao máximo
+                                     }
+                                     const newInfos = [...informacoesPagamento];
+                                     newInfos[index].qtdParcelas = e.target.value;
+                                     
+                                     // Recalcular valor da parcela automaticamente
+                                     if (newInfos[index].total && valor > 0) {
+                                       const total = parseFloat(newInfos[index].total);
+                                       newInfos[index].valorParcela = (total / valor).toFixed(2);
+                                     }
+                                     
+                                     // Se for Restante da Entrada ou Sinal, recalcular datas inteligentes
+                                     if (info.tipo === 'Restante da Entrada' || info.tipo === 'Sinal') {
+                                       const restanteEntrada = newInfos.find(inf => inf.tipo === 'Restante da Entrada');
+                                       if (restanteEntrada?.primeiroVencimento) {
+                                         const qtdParcelasEntrada = info.tipo === 'Restante da Entrada' ? valor : parseInt(restanteEntrada.qtdParcelas) || 1;
+                                         const sinalInfo = newInfos.find(inf => inf.tipo === 'Sinal');
+                                         const qtdParcelasSinal = info.tipo === 'Sinal' ? valor : parseInt(sinalInfo?.qtdParcelas || '1');
+                                         
+                                         setTimeout(() => {
+                                           atualizarDatasInteligentes(restanteEntrada.primeiroVencimento, qtdParcelasEntrada, qtdParcelasSinal);
+                                         }, 0);
+                                       }
+                                     }
+                                     
+                                     setInformacoesPagamento(newInfos);
+                                   }}
                                  placeholder="Qtd"
                                  type="number"
                                  max={maxParcelas || undefined}
@@ -1133,31 +1187,49 @@ const FichaNegociacao = () => {
                           </SelectContent>
                         </Select>
                       </td>
-                      <td className="border border-border p-3">
-                        <Input
-                          value={info.primeiroVencimento}
-                          onChange={(e) => {
-                            const newInfos = [...informacoesPagamento];
-                            newInfos[index].primeiroVencimento = e.target.value;
-                            setInformacoesPagamento(newInfos);
-                          }}
-                          type="date"
-                          className={`${
-                            (info.tipo === 'Sinal' || info.tipo === 'Saldo') && info.primeiroVencimento 
-                              ? (() => {
-                                  const data = new Date(info.primeiroVencimento);
-                                  const dia = data.getDate();
-                                  return (dia !== 5 && dia !== 15) ? 'border-destructive' : '';
-                                })()
-                              : ''
-                          }`}
-                        />
-                        {(info.tipo === 'Sinal' || info.tipo === 'Saldo') && (
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Apenas dias 05 ou 15
-                          </div>
-                        )}
-                      </td>
+                       <td className="border border-border p-3">
+                         <Input
+                           value={info.primeiroVencimento}
+                           onChange={(e) => {
+                             const newInfos = [...informacoesPagamento];
+                             newInfos[index].primeiroVencimento = e.target.value;
+                             
+                             // Se for Restante da Entrada, ativar calendário inteligente
+                             if (info.tipo === 'Restante da Entrada' && e.target.value) {
+                               const qtdParcelasEntrada = parseInt(info.qtdParcelas) || 1;
+                               const sinalInfo = informacoesPagamento.find(inf => inf.tipo === 'Sinal');
+                               const qtdParcelasSinal = parseInt(sinalInfo?.qtdParcelas || '1');
+                               
+                               // Usar setTimeout para garantir que o state seja atualizado primeiro
+                               setTimeout(() => {
+                                 atualizarDatasInteligentes(e.target.value, qtdParcelasEntrada, qtdParcelasSinal);
+                               }, 0);
+                             }
+                             
+                             setInformacoesPagamento(newInfos);
+                           }}
+                           type="date"
+                           className={`${
+                             (info.tipo === 'Sinal' || info.tipo === 'Saldo') && info.primeiroVencimento 
+                               ? (() => {
+                                   const data = new Date(info.primeiroVencimento);
+                                   const dia = data.getDate();
+                                   return (dia !== 5 && dia !== 15) ? 'border-destructive' : '';
+                                 })()
+                               : ''
+                           }`}
+                         />
+                         {(info.tipo === 'Sinal' || info.tipo === 'Saldo') && (
+                           <div className="text-xs text-muted-foreground mt-1">
+                             Apenas dias 05 ou 15
+                           </div>
+                         )}
+                         {info.tipo === 'Restante da Entrada' && (
+                           <div className="text-xs text-blue-600 mt-1">
+                             Atualiza automaticamente Sinal e Saldo
+                           </div>
+                         )}
+                       </td>
                        <td className="border border-border p-3">
                          <Button
                            variant="destructive"
