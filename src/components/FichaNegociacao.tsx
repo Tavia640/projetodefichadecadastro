@@ -186,6 +186,13 @@ const FichaNegociacao = () => {
     };
   };
 
+  // Função para calcular o total de todas as entradas (1ª, 2ª, 3ª, etc.)
+  const calcularTotalEntradas = (informacoes: InformacaoPagamento[]): number => {
+    return informacoes
+      .filter(info => info.tipo.includes('ª Entrada'))
+      .reduce((total, info) => total + (parseFloat(info.total) || 0), 0);
+  };
+
   // Função para calcular valor de entrada baseado no empreendimento
   const calcularValorEntrada = (empreendimentoNome: string): number => {
     const empreendimentosEspeciais = ['Gran Garden', 'Gran Valley'];
@@ -273,9 +280,14 @@ const FichaNegociacao = () => {
   };
 
   const adicionarEntrada = () => {
+    // Contar quantas entradas já existem para numerar a nova
+    const entradasExistentes = informacoesPagamento.filter(info => info.tipo.includes('ª Entrada'));
+    const proximoNumero = entradasExistentes.length + 1;
+    const novoTipo = `${proximoNumero}ª Entrada`;
+    
     setInformacoesPagamento([...informacoesPagamento, {
       id: Date.now().toString(),
-      tipo: '',
+      tipo: novoTipo,
       total: '',
       qtdParcelas: '',
       valorParcela: '',
@@ -461,18 +473,22 @@ const FichaNegociacao = () => {
                                 const restanteEntradaIndex = novasInformacoes.findIndex(info => info.tipo === 'Restante da Entrada');
                                 if (restanteEntradaIndex !== -1) {
                                   const contratoAtivo = contratos.find(c => c.empreendimento);
-                                  if (contratoAtivo) {
-                                    const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
-                                    const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
-                                    const valorPrimeiraEntrada = parseFloat(e.target.value) || 0;
-                                    const restante = valorEntrada - valorPrimeiraEntrada;
-                                    
-                                    if (restante > 0) {
-                                      novasInformacoes[restanteEntradaIndex].total = restante.toString();
-                                      novasInformacoes[restanteEntradaIndex].valorParcela = restante.toString();
-                                      novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
-                                    }
-                                  }
+                                   if (contratoAtivo) {
+                                     const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
+                                     const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
+                                     const totalEntradas = calcularTotalEntradas(novasInformacoes);
+                                     const restante = valorEntrada - totalEntradas;
+                                     
+                                     if (restante > 0) {
+                                       novasInformacoes[restanteEntradaIndex].total = restante.toString();
+                                       novasInformacoes[restanteEntradaIndex].valorParcela = restante.toString();
+                                       novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
+                                     } else {
+                                       novasInformacoes[restanteEntradaIndex].total = '0';
+                                       novasInformacoes[restanteEntradaIndex].valorParcela = '0';
+                                       novasInformacoes[restanteEntradaIndex].qtdParcelas = '1';
+                                     }
+                                   }
                                 }
                                 
                                 setInformacoesPagamento(novasInformacoes);
@@ -761,9 +777,24 @@ const FichaNegociacao = () => {
                 <tbody>
                   {informacoesPagamento.map((info, index) => (
                     <tr key={info.id}>
-                      <td className="border border-border p-3 font-medium">
-                        {info.tipo}
-                      </td>
+                          <td className="border border-border p-3">
+                            {info.tipo === 'Restante da Entrada' ? (
+                              <span className="text-muted-foreground bg-muted p-2 rounded block text-center">
+                                {info.tipo}
+                              </span>
+                            ) : (
+                              <Input
+                                value={info.tipo}
+                                onChange={(e) => {
+                                  const newInfos = [...informacoesPagamento];
+                                  newInfos[index].tipo = e.target.value;
+                                  setInformacoesPagamento(newInfos);
+                                }}
+                                placeholder="Tipo"
+                                disabled={['1ª Entrada', '2ª Entrada', 'Sinal', 'Saldo'].includes(info.tipo)}
+                              />
+                            )}
+                          </td>
                       <td className="border border-border p-3">
                         <Input
                           value={info.total}
@@ -778,25 +809,29 @@ const FichaNegociacao = () => {
                                newInfos[index].valorParcela = (total / qtdParcelas).toFixed(2);
                              }
                              
-                             // Se for 1ª Entrada, recalcular Restante da Entrada
-                             if (info.tipo === '1ª Entrada') {
-                               const restanteEntradaIndex = newInfos.findIndex(inf => inf.tipo === 'Restante da Entrada');
-                               if (restanteEntradaIndex !== -1) {
-                                 const contratoAtivo = contratos.find(c => c.empreendimento);
-                                 if (contratoAtivo) {
-                                   const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
-                                   const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
-                                   const valorPrimeiraEntrada = parseFloat(e.target.value) || 0;
-                                   const restante = valorEntrada - valorPrimeiraEntrada;
-                                   
-                                   if (restante > 0) {
-                                     newInfos[restanteEntradaIndex].total = restante.toString();
-                                     newInfos[restanteEntradaIndex].valorParcela = restante.toString();
-                                     newInfos[restanteEntradaIndex].qtdParcelas = '1';
-                                   }
-                                 }
-                               }
-                             }
+                              // Se for uma entrada (1ª, 2ª, 3ª, etc.), recalcular Restante da Entrada
+                              if (info.tipo.includes('ª Entrada')) {
+                                const restanteEntradaIndex = newInfos.findIndex(inf => inf.tipo === 'Restante da Entrada');
+                                if (restanteEntradaIndex !== -1) {
+                                  const contratoAtivo = contratos.find(c => c.empreendimento);
+                                  if (contratoAtivo) {
+                                    const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
+                                    const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
+                                    const totalEntradas = calcularTotalEntradas(newInfos);
+                                    const restante = valorEntrada - totalEntradas;
+                                    
+                                    if (restante > 0) {
+                                      newInfos[restanteEntradaIndex].total = restante.toString();
+                                      newInfos[restanteEntradaIndex].valorParcela = restante.toString();
+                                      newInfos[restanteEntradaIndex].qtdParcelas = '1';
+                                    } else {
+                                      newInfos[restanteEntradaIndex].total = '0';
+                                      newInfos[restanteEntradaIndex].valorParcela = '0';
+                                      newInfos[restanteEntradaIndex].qtdParcelas = '1';
+                                    }
+                                  }
+                                }
+                              }
                              
                              setInformacoesPagamento(newInfos);
                            }}
@@ -898,16 +933,16 @@ const FichaNegociacao = () => {
                           type="date"
                         />
                       </td>
-                      <td className="border border-border p-3">
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => removerInformacaoPagamento(info.id)}
-                          disabled={informacoesPagamento.length <= 5}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </td>
+                       <td className="border border-border p-3">
+                         <Button
+                           variant="destructive"
+                           size="sm"
+                           onClick={() => removerInformacaoPagamento(info.id)}
+                           disabled={informacoesPagamento.length <= 5 || ['1ª Entrada', 'Restante da Entrada', '2ª Entrada', 'Sinal', 'Saldo'].includes(info.tipo)}
+                         >
+                           <Trash2 className="h-4 w-4" />
+                         </Button>
+                       </td>
                     </tr>
                   ))}
                 </tbody>
