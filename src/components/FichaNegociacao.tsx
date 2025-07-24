@@ -97,9 +97,10 @@ const FichaNegociacao = () => {
   }]);
   const [informacoesPagamento, setInformacoesPagamento] = useState<InformacaoPagamento[]>([
     { id: '1', tipo: '1ª Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-    { id: '2', tipo: '2ª Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-    { id: '3', tipo: 'Sinal', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-    { id: '4', tipo: 'Saldo', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' }
+    { id: '2', tipo: 'Restante da Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
+    { id: '3', tipo: '2ª Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
+    { id: '4', tipo: 'Sinal', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
+    { id: '5', tipo: 'Saldo', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' }
   ]);
 
   // Estados para dados do Supabase
@@ -185,9 +186,27 @@ const FichaNegociacao = () => {
     };
   };
 
+  // Função para calcular valor de entrada baseado no empreendimento
+  const calcularValorEntrada = (empreendimentoNome: string): number => {
+    const empreendimentosEspeciais = ['Gran Garden', 'Gran Valley'];
+    return empreendimentosEspeciais.includes(empreendimentoNome) ? 4490 : 3990;
+  };
+
   // Preencher automaticamente informações de pagamento
-  const preencherInformacoesPagamento = (dados: DadosCalculados) => {
+  const preencherInformacoesPagamento = (dados: DadosCalculados, empreendimentoId?: string) => {
+    // Buscar nome do empreendimento se fornecido
+    const empreendimento = empreendimentoId ? empreendimentos.find(emp => emp.id === empreendimentoId) : null;
+    const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
+
     const novasInformacoes = informacoesPagamento.map(info => {
+      if (info.tipo === '1ª Entrada' && empreendimento) {
+        return {
+          ...info,
+          total: valorEntrada.toString(),
+          qtdParcelas: '1',
+          valorParcela: valorEntrada.toString()
+        };
+      }
       if (info.tipo === 'Sinal') {
         return {
           ...info,
@@ -291,9 +310,10 @@ const FichaNegociacao = () => {
     }]);
     setInformacoesPagamento([
       { id: '1', tipo: '1ª Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-      { id: '2', tipo: '2ª Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-      { id: '3', tipo: 'Sinal', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-      { id: '4', tipo: 'Saldo', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' }
+      { id: '2', tipo: 'Restante da Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
+      { id: '3', tipo: '2ª Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
+      { id: '4', tipo: 'Sinal', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
+      { id: '5', tipo: 'Saldo', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' }
     ]);
   };
 
@@ -414,18 +434,34 @@ const FichaNegociacao = () => {
                           type="number"
                         />
                       </td>
-                      <td className="border border-border p-3">
-                        <Input
-                          value={parcela.valorDistribuido}
-                          onChange={(e) => {
-                            const newParcelas = [...parcelasPagasSala];
-                            newParcelas[index].valorDistribuido = e.target.value;
-                            setParcelasPagasSala(newParcelas);
-                          }}
-                          placeholder="Valor distribuído"
-                          type="number"
-                        />
-                      </td>
+                       <td className="border border-border p-3">
+                         <Input
+                           value={parcela.valorDistribuido}
+                           onChange={(e) => {
+                             const newParcelas = [...parcelasPagasSala];
+                             newParcelas[index].valorDistribuido = e.target.value;
+                             setParcelasPagasSala(newParcelas);
+
+                             // Clonar valor para 1ª Entrada automaticamente
+                             const novasInformacoes = [...informacoesPagamento];
+                             const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
+                             if (primeiraEntradaIndex !== -1) {
+                               novasInformacoes[primeiraEntradaIndex].total = e.target.value;
+                               novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
+                               novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
+                               
+                               // Preencher forma de pagamento automaticamente se estiver vazia
+                               if (!novasInformacoes[primeiraEntradaIndex].formaPagamento && parcela.formaPagamento) {
+                                 novasInformacoes[primeiraEntradaIndex].formaPagamento = parcela.formaPagamento;
+                               }
+                               
+                               setInformacoesPagamento(novasInformacoes);
+                             }
+                           }}
+                           placeholder="Valor distribuído"
+                           type="number"
+                         />
+                       </td>
                       <td className="border border-border p-3">
                         <Input
                           value={parcela.quantidadeCotas}
@@ -597,11 +633,11 @@ const FichaNegociacao = () => {
                             if (categoria) {
                               newContratos[index].valor = categoria.vir_cota.toString();
                               
-                              // Preencher automaticamente as informações de pagamento
-                              const dados = calcularDadosCategoria(contrato.empreendimento, value);
-                              if (dados) {
-                                preencherInformacoesPagamento(dados);
-                              }
+                               // Preencher automaticamente as informações de pagamento
+                               const dados = calcularDadosCategoria(contrato.empreendimento, value);
+                               if (dados) {
+                                 preencherInformacoesPagamento(dados, contrato.empreendimento);
+                               }
                             }
                             setContratos(newContratos);
                           }}
@@ -814,7 +850,7 @@ const FichaNegociacao = () => {
                           variant="destructive"
                           size="sm"
                           onClick={() => removerInformacaoPagamento(info.id)}
-                          disabled={informacoesPagamento.length <= 4}
+                          disabled={informacoesPagamento.length <= 5}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
