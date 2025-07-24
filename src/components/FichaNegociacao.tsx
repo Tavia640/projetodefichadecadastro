@@ -15,7 +15,7 @@ interface ParcelaPagaSala {
   valorTotal: string;
   valorDistribuido: string;
   quantidadeCotas: string;
-  formaPagamento: string;
+  formasPagamento: string[];
 }
 
 interface Contrato {
@@ -83,7 +83,7 @@ const FichaNegociacao = () => {
     valorTotal: '',
     valorDistribuido: '',
     quantidadeCotas: '',
-    formaPagamento: ''
+    formasPagamento: ['']
   }]);
   const [contratos, setContratos] = useState<Contrato[]>([{
     id: '1',
@@ -238,6 +238,15 @@ const FichaNegociacao = () => {
     return true;
   };
 
+  const adicionarFormaPagamento = (parcelaId: string) => {
+    const newParcelas = [...parcelasPagasSala];
+    const parcelaIndex = newParcelas.findIndex(p => p.id === parcelaId);
+    if (parcelaIndex !== -1) {
+      newParcelas[parcelaIndex].formasPagamento.push('');
+      setParcelasPagasSala(newParcelas);
+    }
+  };
+
   const adicionarParcelaPagaSala = () => {
     setParcelasPagasSala([...parcelasPagasSala, {
       id: Date.now().toString(),
@@ -245,7 +254,7 @@ const FichaNegociacao = () => {
       valorTotal: '',
       valorDistribuido: '',
       quantidadeCotas: '',
-      formaPagamento: ''
+      formasPagamento: ['']
     }]);
   };
 
@@ -296,7 +305,7 @@ const FichaNegociacao = () => {
       valorTotal: '',
       valorDistribuido: '',
       quantidadeCotas: '',
-      formaPagamento: ''
+      formasPagamento: ['']
     }]);
     setContratos([{
       id: '1',
@@ -451,8 +460,8 @@ const FichaNegociacao = () => {
                                 novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
                                 
                                 // Preencher forma de pagamento automaticamente se estiver vazia
-                                if (!novasInformacoes[primeiraEntradaIndex].formaPagamento && parcela.formaPagamento) {
-                                  novasInformacoes[primeiraEntradaIndex].formaPagamento = parcela.formaPagamento;
+                                if (!novasInformacoes[primeiraEntradaIndex].formaPagamento && parcela.formasPagamento[0]) {
+                                  novasInformacoes[primeiraEntradaIndex].formaPagamento = parcela.formasPagamento[0];
                                 }
                                 
                                 // Calcular Restante da Entrada
@@ -493,24 +502,52 @@ const FichaNegociacao = () => {
                         />
                       </td>
                       <td className="border border-border p-3">
-                        <Select
-                          value={parcela.formaPagamento}
-                          onValueChange={(value) => {
-                            const newParcelas = [...parcelasPagasSala];
-                            newParcelas[index].formaPagamento = value;
-                            setParcelasPagasSala(newParcelas);
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione forma" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                            <SelectItem value="cartao">Cartão</SelectItem>
-                            <SelectItem value="pix">PIX</SelectItem>
-                            <SelectItem value="transferencia">Transferência</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div className="space-y-2">
+                          {parcela.formasPagamento.map((forma, formaIndex) => (
+                            <div key={formaIndex} className="flex items-center space-x-2">
+                              <Select
+                                value={forma}
+                                onValueChange={(value) => {
+                                  const newParcelas = [...parcelasPagasSala];
+                                  newParcelas[index].formasPagamento[formaIndex] = value;
+                                  setParcelasPagasSala(newParcelas);
+                                }}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione forma" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                                  <SelectItem value="cartao">Cartão</SelectItem>
+                                  <SelectItem value="pix">PIX</SelectItem>
+                                  <SelectItem value="transferencia">Transferência</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              {parcela.formasPagamento.length > 1 && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newParcelas = [...parcelasPagasSala];
+                                    newParcelas[index].formasPagamento = newParcelas[index].formasPagamento.filter((_, i) => i !== formaIndex);
+                                    setParcelasPagasSala(newParcelas);
+                                  }}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => adicionarFormaPagamento(parcela.id)}
+                            className="w-full"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Adicionar Forma de Pagamento
+                          </Button>
+                        </div>
                       </td>
                       <td className="border border-border p-3">
                         <Button
@@ -529,7 +566,7 @@ const FichaNegociacao = () => {
             </div>
             <Button onClick={adicionarParcelaPagaSala} className="mt-2" variant="outline">
               <Plus className="h-4 w-4 mr-2" />
-              Adicionar Forma de Pagamento
+              Adicionar Linha
             </Button>
           </div>
 
