@@ -652,6 +652,7 @@ const FichaNegociacao = () => {
       }
       
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
+      console.log('📋 Dados do cliente recuperados:', dadosCliente);
       
       // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
@@ -663,17 +664,22 @@ const FichaNegociacao = () => {
         informacoesPagamento
       };
       
+      console.log('💼 Dados da negociação preparados:', dadosNegociacao);
       console.log('📄 Gerando PDFs para impressão...');
       
-      // Gerar PDFs
-      const pdfCadastro = PDFGenerator.gerarPDFCadastroCliente(dadosCliente);
-      const pdfNegociacao = PDFGenerator.gerarPDFNegociacao(dadosCliente, dadosNegociacao);
+      // Gerar PDFs como blob URLs para impressão
+      const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
+      const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
       
       console.log('🖨️ Abrindo PDFs para impressão...');
       
+      // Criar URLs para os blobs
+      const urlCadastro = URL.createObjectURL(pdfCadastroBlob);
+      const urlNegociacao = URL.createObjectURL(pdfNegociacaoBlob);
+      
       // Abrir PDFs em novas janelas para impressão
-      const janelaCadastro = window.open(pdfCadastro, '_blank');
-      const janelaNegociacao = window.open(pdfNegociacao, '_blank');
+      const janelaCadastro = window.open(urlCadastro, '_blank');
+      const janelaNegociacao = window.open(urlNegociacao, '_blank');
       
       // Aguardar carregamento e imprimir
       setTimeout(() => {
@@ -683,7 +689,13 @@ const FichaNegociacao = () => {
         if (janelaNegociacao) {
           janelaNegociacao.print();
         }
-      }, 1000);
+        
+        // Limpar URLs após uso
+        setTimeout(() => {
+          URL.revokeObjectURL(urlCadastro);
+          URL.revokeObjectURL(urlNegociacao);
+        }, 5000);
+      }, 1500);
       
       console.log('✅ PDFs abertos para impressão!');
       
@@ -1397,7 +1409,7 @@ const FichaNegociacao = () => {
             </Button>
             <Button 
               onClick={salvarFicha}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+              className="flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>

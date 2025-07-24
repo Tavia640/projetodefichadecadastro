@@ -111,6 +111,16 @@ export class PDFGenerator {
   }
 
   static gerarPDFCadastroCliente(dadosCliente: DadosCliente): string {
+    const pdf = this.createPDFCadastroCliente(dadosCliente);
+    return pdf.output('datauristring');
+  }
+
+  static gerarPDFCadastroClienteBlob(dadosCliente: DadosCliente): Blob {
+    const pdf = this.createPDFCadastroCliente(dadosCliente);
+    return pdf.output('blob');
+  }
+
+  private static createPDFCadastroCliente(dadosCliente: DadosCliente): jsPDF {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     try {
@@ -220,7 +230,7 @@ export class PDFGenerator {
       this.createField(pdf, "Cidade", "", 10, yPos, 130, 8);
       this.createField(pdf, "UF", "", 145, yPos, 55, 8);
       
-      return pdf.output('datauristring');
+      return pdf;
       
     } catch (error) {
       console.error('Erro ao gerar PDF de cadastro:', error);
@@ -229,6 +239,16 @@ export class PDFGenerator {
   }
 
   static gerarPDFNegociacao(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): string {
+    const pdf = this.createPDFNegociacao(dadosCliente, dadosNegociacao);
+    return pdf.output('datauristring');
+  }
+
+  static gerarPDFNegociacaoBlob(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): Blob {
+    const pdf = this.createPDFNegociacao(dadosCliente, dadosNegociacao);
+    return pdf.output('blob');
+  }
+
+  private static createPDFNegociacao(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): jsPDF {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     try {
@@ -356,7 +376,7 @@ export class PDFGenerator {
           yPos = this.createTableRow(pdf, values, 10, yPos, widthsPag, 6);
         });
       
-      return pdf.output('datauristring');
+      return pdf;
       
     } catch (error) {
       console.error('Erro ao gerar PDF de negociação:', error);
