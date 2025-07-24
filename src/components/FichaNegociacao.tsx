@@ -807,6 +807,23 @@ const FichaNegociacao = () => {
   };
 
   const salvarFicha = async () => {
+    // Realizar auditoria apenas no momento de salvar
+    const auditoria = realizarAuditoriaValores();
+    
+    if (!auditoria.valida) {
+      // Mostrar alerta de auditoria apenas se houver erro
+      const alertasComAuditoria = { ...alertas, auditoria: `ERRO DE AUDITORIA: ${auditoria.detalhes}` };
+      setAlertas(alertasComAuditoria);
+      alert('Não é possível salvar a ficha devido a erros de validação. Verifique os alertas.');
+      return;
+    }
+    
+    // Verificar se há outros alertas que impedem o salvamento
+    if (Object.keys(alertas).some(key => alertas[key].includes('ERRO'))) {
+      alert('Não é possível salvar a ficha devido a erros de validação. Verifique os alertas.');
+      return;
+    }
+    
     try {
       // Recuperar dados do cliente do localStorage
       const dadosClienteString = localStorage.getItem('dadosCliente');
@@ -830,7 +847,7 @@ const FichaNegociacao = () => {
       
       console.log('Enviando PDFs por email...');
       
-      // Enviar PDFs por email
+      // Enviar PDFs por email via edge function
       const response = await supabase.functions.invoke('send-pdfs', {
         body: {
           clientData: dadosCliente,
@@ -840,16 +857,70 @@ const FichaNegociacao = () => {
         }
       });
       
+      console.log('Response da edge function:', response);
+      
       if (response.error) {
-        throw new Error(response.error.message);
+        console.error('Erro na edge function:', response.error);
+        throw new Error(`Erro no envio: ${response.error.message}`);
+      }
+      
+      if (response.data && !response.data.success) {
+        console.error('Erro retornado pela edge function:', response.data);
+        throw new Error(`Erro no servidor: ${response.data.error}`);
       }
       
       console.log('Ficha salva e PDFs enviados com sucesso');
-      alert('PDFs enviados com sucesso para admudrive2025@gavresorts.com.br!');
+      alert('Ficha salva com sucesso! PDFs foram enviados automaticamente para admudrive2025@gavresorts.com.br');
       
     } catch (error) {
       console.error('Erro ao salvar ficha:', error);
-      alert('Erro ao enviar PDFs. Tente novamente.');
+      alert(`Erro ao salvar ficha e enviar PDFs: ${error.message}`);
+    }
+  };
+
+  const imprimirFichas = () => {
+    try {
+      // Recuperar dados do cliente do localStorage
+      const dadosClienteString = localStorage.getItem('dadosCliente');
+      const dadosCliente = dadosClienteString ? JSON.parse(dadosClienteString) : {};
+      
+      // Preparar dados da negociação
+      const dadosNegociacao = {
+        liner,
+        closer,
+        tipoVenda,
+        parcelasPagasSala,
+        contratos,
+        informacoesPagamento
+      };
+      
+      console.log('Gerando PDFs para impressão...');
+      
+      // Gerar PDFs
+      const pdfCadastro = gerarPDFCadastroCliente(dadosCliente);
+      const pdfNegociacao = gerarPDFNegociacao(dadosCliente, dadosNegociacao);
+      
+      // Criar URLs para os PDFs
+      const pdfCadastroUrl = `data:application/pdf;base64,${pdfCadastro}`;
+      const pdfNegociacaoUrl = `data:application/pdf;base64,${pdfNegociacao}`;
+      
+      // Abrir PDFs em novas janelas para impressão
+      const janelaCadastro = window.open(pdfCadastroUrl, '_blank');
+      const janelaNegociacao = window.open(pdfNegociacaoUrl, '_blank');
+      
+      // Aguardar carregamento e imprimir
+      setTimeout(() => {
+        if (janelaCadastro) {
+          janelaCadastro.print();
+        }
+        if (janelaNegociacao) {
+          janelaNegociacao.print();
+        }
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Erro ao imprimir fichas:', error);
+      alert('Erro ao gerar PDFs para impressão. Tente novamente.');
     }
   };
 
@@ -1255,7 +1326,32 @@ const FichaNegociacao = () => {
 
           <Separator />
 
-          {/* Seção removida - alertas não são mais exibidos */}
+          {/* Alertas de Validação */}
+          {Object.keys(alertas).length > 0 && (
+            <div className="border border-destructive rounded-lg p-4 bg-destructive/5 print:hidden">
+              <div className="flex items-center space-x-2 mb-3">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <Label className="text-lg font-semibold text-destructive">Alertas de Validação</Label>
+              </div>
+              <div className="space-y-2">
+                {Object.entries(alertas).map(([key, mensagem]) => {
+                  const isError = mensagem.includes('ERRO');
+                  return (
+                    <div key={key} className={`p-3 rounded border ${
+                      isError 
+                        ? 'border-destructive bg-destructive/10 text-destructive' 
+                        : 'border-orange-400 bg-orange-50 text-orange-700'
+                    }`}>
+                      <div className="flex items-center space-x-2">
+                        <AlertTriangle className={`h-4 w-4 ${isError ? 'text-destructive' : 'text-orange-500'}`} />
+                        <span className="text-sm font-medium">{mensagem}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Informações de Pagamento */}
           <div>
@@ -1520,7 +1616,7 @@ const FichaNegociacao = () => {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => window.print()}
+              onClick={imprimirFichas}
               className="flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1528,7 +1624,7 @@ const FichaNegociacao = () => {
                 <path d="M6,18L4,16v-5a2,2 0 0,1 2-2h12a2,2 0 0,1 2,2v5l-2,2"/>
                 <rect x="6" y="14" width="12" height="8"/>
               </svg>
-              Imprimir
+              Imprimir PDFs
             </Button>
             <Button 
               onClick={salvarFicha}

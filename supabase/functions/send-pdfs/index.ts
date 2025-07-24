@@ -1,7 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Inicializar Resend com validação da API key
+const apiKey = Deno.env.get("RESEND_API_KEY");
+if (!apiKey) {
+  console.error("❌ RESEND_API_KEY não configurada!");
+}
+const resend = apiKey ? new Resend(apiKey) : null;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,6 +30,11 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     console.log("📨 Processando requisição de envio de PDFs...");
+    
+    // Verificar se a API key está configurada
+    if (!resend) {
+      throw new Error("❌ Chave API do Resend não configurada. Configure RESEND_API_KEY nas configurações do projeto.");
+    }
     
     const { clientData, fichaData, pdfData1, pdfData2 }: SendPDFRequest = await req.json();
 
