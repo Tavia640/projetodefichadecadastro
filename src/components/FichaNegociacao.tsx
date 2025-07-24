@@ -572,108 +572,165 @@ const FichaNegociacao = () => {
   // Função para gerar PDF da Ficha de Cadastro do Cliente
   const gerarPDFCadastroCliente = (dadosCliente: any) => {
     const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = 210;
-    const pageHeight = 297;
     
-    // Header GAV
-    pdf.setFontSize(16);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("GAV", 20, 20);
+    // Configurações de fonte
+    pdf.setFont("helvetica", "normal");
     
-    // Título
+    // Header com logo GAV
     pdf.setFontSize(14);
-    pdf.text("Ficha de Cadastro de Cliente", 70, 20);
+    pdf.setFont("helvetica", "bold");
+    pdf.rect(10, 10, 30, 15);
+    pdf.text("GAV", 18, 20);
+    pdf.setFontSize(8);
+    pdf.text("RESORTS", 16, 23);
     
-    // Info página
-    pdf.setFontSize(10);
-    pdf.text("Código: FCR 02/01 rev.", 140, 15);
-    pdf.text("Data: 05/10/2024 rev.", 140, 20);
-    pdf.text("Página: 1 de 1", 170, 25);
-    
-    // Seção DADOS DO CLIENTE
+    // Título centralizado
     pdf.setFontSize(12);
     pdf.setFont("helvetica", "bold");
-    pdf.text("DADOS DO CLIENTE", 20, 40);
+    pdf.text("Ficha de Cadastro de Cliente", 75, 20);
     
-    // Campos do cliente
-    let yPos = 50;
-    const addField = (label: string, value: string, x: number = 20, width: number = 170) => {
+    // Info do formulário
+    pdf.setFontSize(8);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("Código: FCR 02/01 rev.", 150, 12);
+    pdf.text("Data: 05/10/2024 rev.", 150, 16);
+    pdf.text("Página: 1 de 1", 150, 20);
+    
+    // Seção DADOS DO CLIENTE
+    let yPos = 35;
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "bold");
+    pdf.rect(10, yPos - 5, 190, 8);
+    pdf.text("DADOS DO CLIENTE:", 12, yPos);
+    yPos += 15;
+    
+    // Função para criar campos
+    const createField = (label: string, value: string, x: number, y: number, width: number, height: number = 8) => {
       pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.text(label + ":", x + 2, y - 1);
+      pdf.rect(x, y, width, height);
       pdf.setFontSize(9);
-      pdf.text(label + ":", x, yPos);
-      pdf.rect(x + 25, yPos - 4, width - 25, 8);
-      pdf.text(value || "", x + 27, yPos);
-      yPos += 12;
+      pdf.text(value || "", x + 2, y + 5);
     };
     
-    addField("Nome", dadosCliente.nome || "");
-    addField("CPF", dadosCliente.cpf || "");
-    
-    yPos -= 12;
-    pdf.text("RG:", 20, yPos);
-    pdf.rect(45, yPos - 4, 80, 8);
-    pdf.text(dadosCliente.rg || "", 47, yPos);
-    
-    pdf.text("ÓRGÃO/UF:", 130, yPos);
-    pdf.rect(155, yPos - 4, 35, 8);
-    pdf.text((dadosCliente.orgaoEmissor || "") + "/" + (dadosCliente.estadoEmissor || ""), 157, yPos);
+    // Nome completo
+    createField("Nome", dadosCliente.nome || "", 10, yPos, 190, 8);
     yPos += 12;
     
-    addField("Profissão", dadosCliente.profissao || "");
-    addField("Estado Civil", dadosCliente.estadoCivil || "");
-    addField("Email", dadosCliente.email || "");
-    addField("Telefone", dadosCliente.telefone || "");
+    // CPF
+    createField("CPF", dadosCliente.cpf || "", 10, yPos, 190, 8);
+    yPos += 12;
     
-    // Seção DADOS DO CÔNJUGE (se houver)
-    if (dadosCliente.nomeConjuge) {
-      yPos += 10;
-      pdf.setFont("helvetica", "bold");
-      pdf.text("DADOS DO CÔNJUGE", 20, yPos);
-      yPos += 10;
-      
-      addField("Nome", dadosCliente.nomeConjuge || "");
-      addField("CPF", dadosCliente.cpfConjuge || "");
-      
-      yPos -= 12;
-      pdf.setFont("helvetica", "normal");
-      pdf.text("RG:", 20, yPos);
-      pdf.rect(45, yPos - 4, 80, 8);
-      pdf.text(dadosCliente.rgConjuge || "", 47, yPos);
-      
-      pdf.text("ÓRGÃO/UF:", 130, yPos);
-      pdf.rect(155, yPos - 4, 35, 8);
-      pdf.text((dadosCliente.orgaoEmissorConjuge || "") + "/" + (dadosCliente.estadoEmissorConjuge || ""), 157, yPos);
-      yPos += 12;
-      
-      addField("Profissão", dadosCliente.profissaoConjuge || "");
-      addField("Estado Civil", dadosCliente.estadoCivilConjuge || "");
-      addField("Email", dadosCliente.emailConjuge || "");
-      addField("Telefone", dadosCliente.telefoneConjuge || "");
-    }
+    // RG e ÓRGÃO/UF na mesma linha
+    createField("RG", dadosCliente.rg || "", 10, yPos, 120, 8);
+    createField("ÓRGÃO/UF", (dadosCliente.orgaoEmissor || "") + "/" + (dadosCliente.estadoEmissor || ""), 135, yPos, 65, 8);
+    yPos += 12;
+    
+    // Profissão
+    createField("Profissão", dadosCliente.profissao || "", 10, yPos, 190, 8);
+    yPos += 12;
+    
+    // Estado Civil
+    createField("Estado Civil", dadosCliente.estadoCivil || "", 10, yPos, 190, 8);
+    yPos += 12;
+    
+    // E-mail
+    createField("E-mail", dadosCliente.email || "", 10, yPos, 190, 8);
+    yPos += 12;
+    
+    // Telefone
+    createField("Telefone", dadosCliente.telefone || "", 10, yPos, 190, 8);
+    yPos += 20;
+    
+    // Seção DADOS DO CÔNJUGE
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "bold");
+    pdf.rect(10, yPos - 5, 190, 8);
+    pdf.text("DADOS DO CÔNJUGE:", 12, yPos);
+    yPos += 15;
+    
+    // Nome do cônjuge
+    createField("Nome", dadosCliente.nomeConjuge || "", 10, yPos, 190, 8);
+    yPos += 12;
+    
+    // CPF do cônjuge
+    createField("CPF", dadosCliente.cpfConjuge || "", 10, yPos, 190, 8);
+    yPos += 12;
+    
+    // RG e ÓRGÃO/UF do cônjuge na mesma linha
+    createField("RG", dadosCliente.rgConjuge || "", 10, yPos, 120, 8);
+    createField("ÓRGÃO/UF", (dadosCliente.orgaoEmissorConjuge || "") + "/" + (dadosCliente.estadoEmissorConjuge || ""), 135, yPos, 65, 8);
+    yPos += 12;
+    
+    // Profissão do cônjuge
+    createField("Profissão", dadosCliente.profissaoConjuge || "", 10, yPos, 190, 8);
+    yPos += 12;
+    
+    // Estado Civil do cônjuge
+    createField("Estado Civil", dadosCliente.estadoCivilConjuge || "", 10, yPos, 190, 8);
+    yPos += 12;
+    
+    // E-mail do cônjuge
+    createField("E-mail", dadosCliente.emailConjuge || "", 10, yPos, 190, 8);
+    yPos += 12;
+    
+    // Telefone do cônjuge
+    createField("Telefone", dadosCliente.telefoneConjuge || "", 10, yPos, 190, 8);
+    yPos += 20;
     
     // Seção ENDEREÇO
-    yPos += 10;
+    pdf.setFontSize(10);
     pdf.setFont("helvetica", "bold");
-    pdf.text("ENDEREÇO", 20, yPos);
-    yPos += 10;
+    pdf.rect(10, yPos - 5, 190, 8);
+    pdf.text("ENDEREÇO:", 12, yPos);
+    yPos += 15;
     
-    // Campos vazios para preenchimento manual
-    addField("Logradouro", "");
-    addField("Nº", "");
-    addField("Bairro", "");
-    addField("Complemento", "");
-    addField("Cidade", "");
-    pdf.setFont("helvetica", "normal");
-    pdf.text("UF:", 140, yPos - 12);
-    pdf.rect(155, yPos - 16, 35, 8);
+    // Logradouro e Nº
+    createField("Logradouro", "", 10, yPos, 130, 8);
+    createField("Nº", "", 145, yPos, 55, 8);
+    yPos += 12;
     
-    // SALA DE VENDAS
-    yPos += 10;
+    // Bairro
+    createField("Bairro", "", 10, yPos, 190, 8);
+    yPos += 12;
+    
+    // Complemento e CEP
+    createField("Complemento", "", 10, yPos, 130, 8);
+    createField("CEP", "", 145, yPos, 55, 8);
+    yPos += 12;
+    
+    // Cidade e UF
+    createField("Cidade", "", 10, yPos, 130, 8);
+    createField("UF", "", 145, yPos, 55, 8);
+    yPos += 20;
+    
+    // Seção SALA DE VENDAS
+    pdf.setFontSize(10);
     pdf.setFont("helvetica", "bold");
-    pdf.text("SALA DE VENDAS: _____ GRAMADO - HORTÊNSIAS _____", 20, yPos);
-    yPos += 5;
-    pdf.text("IBERICA", 160, yPos);
+    pdf.text("SALA DE VENDAS: _____ GRAMADO - HORTÊNSIAS _____", 10, yPos);
+    pdf.text("IBERICA", 170, yPos);
     pdf.rect(185, yPos - 4, 10, 8);
+    yPos += 15;
+    
+    // Seções adicionais
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(8);
+    pdf.text("LINER: ___________________________________________________", 10, yPos);
+    yPos += 10;
+    pdf.text("EMPRESA (Liner): _____________________________________", 10, yPos);
+    yPos += 10;
+    pdf.text("CLOSER: ______________________________________________", 10, yPos);
+    yPos += 10;
+    pdf.text("EMPRESA (Closer): ____________________________________", 10, yPos);
+    yPos += 10;
+    pdf.text("PV: ___________________________________________________", 10, yPos);
+    yPos += 10;
+    pdf.text("EMPRESA (PV): ________________________________________", 10, yPos);
+    yPos += 10;
+    pdf.text("LÍDER DE SALA: _________ LEONARDO THOMAS _________", 10, yPos);
+    yPos += 10;
+    pdf.text("SUB LÍDER DE SALA: ___________________________________", 10, yPos);
     
     return pdf.output('datauristring').split(',')[1]; // Retorna base64
   };
