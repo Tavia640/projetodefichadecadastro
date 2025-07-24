@@ -180,42 +180,69 @@ const FichaNegociacao = () => {
     };
   };
 
-  // Função para atualizar alertas (excluindo auditoria automática)
+  // Função para atualizar alertas (com hierarquia - mostrar apenas o de maior prioridade)
   const atualizarAlertas = () => {
-    const novosAlertas: {[key: string]: string} = {};
+    const alertasTemp: Array<{key: string, nivel: number, mensagem: string}> = [];
     
-    // Validar primeira entrada
+    // Validar primeira entrada (nível 1 - líder de sala)
     const primeiraEntrada = informacoesPagamento.find(info => info.tipo === '1ª Entrada');
     if (primeiraEntrada?.total) {
       const valor = parseFloat(primeiraEntrada.total);
       const alerta = validarPrimeiraEntrada(valor);
       if (alerta) {
-        novosAlertas['primeira_entrada'] = alerta;
+        const nivel = alerta.includes('ERRO') ? 0 : 1; // Erro tem prioridade máxima
+        alertasTemp.push({key: 'primeira_entrada', nivel, mensagem: alerta});
       }
     }
     
-    // Validar restante da entrada
+    // Validar restante da entrada (nível 1 - líder de sala)
     const restanteEntrada = informacoesPagamento.find(info => info.tipo === 'Restante da Entrada');
     if (restanteEntrada?.qtdParcelas) {
       const qtd = parseInt(restanteEntrada.qtdParcelas);
       const alerta = validarRestanteEntrada(qtd);
       if (alerta) {
-        novosAlertas['restante_entrada'] = alerta;
+        alertasTemp.push({key: 'restante_entrada', nivel: 1, mensagem: alerta});
       }
     }
     
-    // Validar data do sinal
+    // Validar data do sinal (nível 2 - regional, nível 3 - diretoria)
     const sinalInfo = informacoesPagamento.find(info => info.tipo === 'Sinal');
     if (sinalInfo?.primeiroVencimento) {
       const alerta = validarDataVencimentoSinal(sinalInfo.primeiroVencimento);
       if (alerta) {
-        novosAlertas['data_sinal'] = alerta;
+        const nivel = alerta.includes('diretoria') ? 3 : 2;
+        alertasTemp.push({key: 'data_sinal', nivel, mensagem: alerta});
       }
     }
     
-    // NÃO incluir auditoria automática aqui
+    // Validar datas para sinal e saldo (apenas dias 05 ou 15)
+    const validarDiaVencimento = (info: InformacaoPagamento) => {
+      if (info.primeiroVencimento && (info.tipo === 'Sinal' || info.tipo === 'Saldo')) {
+        const data = new Date(info.primeiroVencimento);
+        const dia = data.getDate();
+        if (dia !== 5 && dia !== 15) {
+          return `${info.tipo}: Data deve ser dia 05 ou 15 do mês`;
+        }
+      }
+      return null;
+    };
     
-    setAlertas(novosAlertas);
+    informacoesPagamento.forEach(info => {
+      const alertaData = validarDiaVencimento(info);
+      if (alertaData) {
+        alertasTemp.push({key: `data_${info.tipo}`, nivel: 0, mensagem: `ERRO: ${alertaData}`});
+      }
+    });
+    
+    // Mostrar apenas o alerta de maior prioridade (maior nível)
+    if (alertasTemp.length > 0) {
+      const alertaMaximo = alertasTemp.reduce((max, current) => 
+        current.nivel > max.nivel ? current : max
+      );
+      setAlertas({[alertaMaximo.key]: alertaMaximo.mensagem});
+    } else {
+      setAlertas({});
+    }
   };
 
   // Executar validações sempre que informações mudarem
@@ -658,9 +685,11 @@ const FichaNegociacao = () => {
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                                  <SelectItem value="cartao">Cartão</SelectItem>
+                                  <SelectItem value="cartao-credito">Cartão de Crédito</SelectItem>
+                                  <SelectItem value="cartao-debito">Cartão de Débito</SelectItem>
                                   <SelectItem value="pix">PIX</SelectItem>
                                   <SelectItem value="transferencia">Transferência</SelectItem>
+                                  <SelectItem value="boleto">Boleto</SelectItem>
                                 </SelectContent>
                               </Select>
                               {parcela.formasPagamento.length > 1 && (
@@ -1096,9 +1125,11 @@ const FichaNegociacao = () => {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                            <SelectItem value="cartao">Cartão</SelectItem>
+                            <SelectItem value="cartao-credito">Cartão de Crédito</SelectItem>
+                            <SelectItem value="cartao-debito">Cartão de Débito</SelectItem>
                             <SelectItem value="pix">PIX</SelectItem>
                             <SelectItem value="transferencia">Transferência</SelectItem>
+                            <SelectItem value="boleto">Boleto</SelectItem>
                           </SelectContent>
                         </Select>
                       </td>
@@ -1111,7 +1142,21 @@ const FichaNegociacao = () => {
                             setInformacoesPagamento(newInfos);
                           }}
                           type="date"
+                          className={`${
+                            (info.tipo === 'Sinal' || info.tipo === 'Saldo') && info.primeiroVencimento 
+                              ? (() => {
+                                  const data = new Date(info.primeiroVencimento);
+                                  const dia = data.getDate();
+                                  return (dia !== 5 && dia !== 15) ? 'border-destructive' : '';
+                                })()
+                              : ''
+                          }`}
                         />
+                        {(info.tipo === 'Sinal' || info.tipo === 'Saldo') && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Apenas dias 05 ou 15
+                          </div>
+                        )}
                       </td>
                        <td className="border border-border p-3">
                          <Button
