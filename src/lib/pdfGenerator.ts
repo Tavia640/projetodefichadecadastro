@@ -11,6 +11,21 @@ export interface DadosCliente {
   estadoCivil?: string;
   email?: string;
   telefone?: string;
+  logradouro?: string;
+  numeroEndereco?: string;
+  bairro?: string;
+  complemento?: string;
+  cep?: string;
+  cidade?: string;
+  ufEndereco?: string;
+  nomeConjuge?: string;
+  cpfConjuge?: string;
+  rgConjuge?: string;
+  orgaoEmissorConjuge?: string;
+  estadoEmissorConjuge?: string;
+  profissaoConjuge?: string;
+  emailConjuge?: string;
+  telefoneConjuge?: string;
   [key: string]: any;
 }
 
@@ -45,63 +60,99 @@ export interface DadosNegociacao {
 }
 
 export class PDFGenerator {
-  private static drawBorderedRect(pdf: jsPDF, x: number, y: number, w: number, h: number, fill: boolean = false) {
-    if (fill) {
-      pdf.setFillColor(245, 245, 245);
-      pdf.rect(x, y, w, h, 'F');
-    }
+  private static createFormHeader(pdf: jsPDF, title: string, pageInfo: string) {
+    // Box principal do header (tabela com 3 colunas)
     pdf.setDrawColor(0, 0, 0);
-    pdf.rect(x, y, w, h);
-  }
-
-  private static drawHeader(pdf: jsPDF, title: string, pageInfo: string) {
-    // Header com bordas
-    this.drawBorderedRect(pdf, 10, 10, 30, 15);
-    this.drawBorderedRect(pdf, 40, 10, 110, 15);
-    this.drawBorderedRect(pdf, 150, 10, 50, 15);
-
-    // Logo GAV
+    pdf.setLineWidth(0.5);
+    
+    // Primeira coluna - Logo GAV
+    pdf.rect(10, 10, 40, 20);
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(16);
-    pdf.text("GAV", 20, 20);
+    pdf.setFontSize(14);
+    pdf.text("GAV", 25, 19);
     pdf.setFontSize(8);
-    pdf.text("RESORTS", 17, 23);
+    pdf.text("RESORTS", 22, 25);
 
-    // Título
+    // Segunda coluna - Título
+    pdf.rect(50, 10, 110, 20);
     pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(10);
+    pdf.text("FORMULÁRIO", 95, 16);
     pdf.setFontSize(12);
-    pdf.text("FORMULÁRIO", 85, 15);
-    pdf.text(title, 70, 21);
+    pdf.text(title, 70, 24);
 
-    // Info do documento
+    // Terceira coluna - Código e info
+    pdf.rect(160, 10, 40, 20);
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(8);
-    pdf.text("Código:FOR.02.01.002", 152, 14);
-    pdf.text("Rev.: 24/07/2025-Ver.02", 152, 17);
-    pdf.text(pageInfo, 152, 20);
+    pdf.setFontSize(7);
+    pdf.text("Código:FOR.02.01.002", 162, 15);
+    pdf.text("Rev.: 24/07/2025-Ver.02", 162, 19);
+    pdf.text(pageInfo, 162, 23);
   }
 
-  private static createInputField(pdf: jsPDF, label: string, value: string, x: number, y: number, w: number, h: number = 6) {
-    this.drawBorderedRect(pdf, x, y, w, h);
+  private static createTableWithBorder(
+    pdf: jsPDF, 
+    x: number, 
+    y: number, 
+    width: number, 
+    height: number
+  ) {
+    pdf.setDrawColor(0, 0, 0);
+    pdf.setLineWidth(0.5);
+    pdf.rect(x, y, width, height);
+  }
+
+  private static createFieldInTable(
+    pdf: jsPDF,
+    label: string,
+    value: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number = 8
+  ) {
+    // Borda do campo
+    pdf.setDrawColor(0, 0, 0);
+    pdf.rect(x, y, width, height);
+    
+    // Label
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8);
     pdf.text(label + ":", x + 1, y + 4);
+    
+    // Valor (se existir)
     if (value) {
-      pdf.text(value, x + 1, y + h - 1);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      pdf.text(value, x + 1, y + height - 1);
     }
   }
 
-  private static createTableCell(pdf: jsPDF, text: string, x: number, y: number, w: number, h: number, bold: boolean = false) {
-    this.drawBorderedRect(pdf, x, y, w, h);
+  private static createTableCell(
+    pdf: jsPDF,
+    text: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    fontSize: number = 7,
+    bold: boolean = false
+  ) {
+    // Borda
+    pdf.setDrawColor(0, 0, 0);
+    pdf.rect(x, y, width, height);
+    
+    // Texto
     pdf.setFont("helvetica", bold ? "bold" : "normal");
-    pdf.setFontSize(7);
+    pdf.setFontSize(fontSize);
     
     // Quebrar texto se muito longo
-    const lines = pdf.splitTextToSize(text, w - 2);
-    const startY = y + 3;
+    const lines = pdf.splitTextToSize(text, width - 2);
+    let textY = y + 4;
     
-    for (let i = 0; i < lines.length && i < 2; i++) {
-      pdf.text(lines[i], x + 1, startY + (i * 3));
+    for (let i = 0; i < lines.length && i < Math.floor(height / 3); i++) {
+      pdf.text(lines[i], x + 1, textY);
+      textY += 3;
     }
   }
 
@@ -119,10 +170,10 @@ export class PDFGenerator {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     try {
-      // Header
-      this.drawHeader(pdf, "Ficha de Cadastro de Cliente", "Página: 1 de 2");
+      // Header oficial
+      this.createFormHeader(pdf, "Ficha de Cadastro de Cliente", "Página: 1 de 2");
 
-      let yPos = 35;
+      let yPos = 40;
 
       // DADOS DO CLIENTE
       pdf.setFont("helvetica", "bold");
@@ -130,37 +181,32 @@ export class PDFGenerator {
       pdf.text("DADOS DO CLIENTE:", 10, yPos);
       yPos += 5;
 
-      // Tabela de dados do cliente
-      this.drawBorderedRect(pdf, 10, yPos, 190, 80);
+      // Tabela completa para dados do cliente
+      this.createTableWithBorder(pdf, 10, yPos, 190, 82);
       
-      // Nome
-      this.createInputField(pdf, "Nome", dadosCliente.nome || "", 10, yPos, 190, 10);
-      yPos += 10;
+      // Campos do cliente
+      this.createFieldInTable(pdf, "Nome", dadosCliente.nome || "", 10, yPos, 190, 12);
+      yPos += 12;
 
-      // CPF
-      this.createInputField(pdf, "CPF", dadosCliente.cpf || "", 10, yPos, 190, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "CPF", dadosCliente.cpf || "", 10, yPos, 190, 12);
+      yPos += 12;
 
-      // RG, Órgão, UF
-      this.createInputField(pdf, "RG", dadosCliente.rg || "", 10, yPos, 100, 10);
-      this.createInputField(pdf, "ÓRGÃO", dadosCliente.orgaoEmissor || "", 110, yPos, 40, 10);
-      this.createInputField(pdf, "UF", dadosCliente.estadoEmissor || "", 150, yPos, 50, 10);
-      yPos += 10;
+      // RG, ÓRGÃO, UF na mesma linha
+      this.createFieldInTable(pdf, "RG", dadosCliente.rg || "", 10, yPos, 110, 12);
+      this.createFieldInTable(pdf, "ÓRGÃO", dadosCliente.orgaoEmissor || "", 120, yPos, 35, 12);
+      this.createFieldInTable(pdf, "UF", dadosCliente.estadoEmissor || "", 155, yPos, 45, 12);
+      yPos += 12;
 
-      // Profissão
-      this.createInputField(pdf, "Profissão", dadosCliente.profissao || "", 10, yPos, 190, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "Profissão", dadosCliente.profissao || "", 10, yPos, 190, 12);
+      yPos += 12;
 
-      // Estado Civil
-      this.createInputField(pdf, "Estado Civil", dadosCliente.estadoCivil || "", 10, yPos, 190, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "Estado Civil", dadosCliente.estadoCivil || "", 10, yPos, 190, 12);
+      yPos += 12;
 
-      // E-mail
-      this.createInputField(pdf, "E-mail", dadosCliente.email || "", 10, yPos, 190, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "E-mail", dadosCliente.email || "", 10, yPos, 190, 12);
+      yPos += 12;
 
-      // Telefone
-      this.createInputField(pdf, "Telefone", dadosCliente.telefone || "", 10, yPos, 190, 10);
+      this.createFieldInTable(pdf, "Telefone", dadosCliente.telefone || "", 10, yPos, 190, 10);
       yPos += 20;
 
       // DADOS DO CÔNJUGE
@@ -169,37 +215,30 @@ export class PDFGenerator {
       pdf.text("DADOS DO CÔNJUGE:", 10, yPos);
       yPos += 5;
 
-      // Tabela de dados do cônjuge
-      this.drawBorderedRect(pdf, 10, yPos, 190, 80);
+      // Tabela para dados do cônjuge
+      this.createTableWithBorder(pdf, 10, yPos, 190, 82);
       
-      // Nome
-      this.createInputField(pdf, "Nome", "", 10, yPos, 190, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "Nome", dadosCliente.nomeConjuge || "", 10, yPos, 190, 12);
+      yPos += 12;
 
-      // CPF
-      this.createInputField(pdf, "CPF", "", 10, yPos, 190, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "CPF", dadosCliente.cpfConjuge || "", 10, yPos, 190, 12);
+      yPos += 12;
 
-      // RG, Órgão, UF
-      this.createInputField(pdf, "RG", "", 10, yPos, 100, 10);
-      this.createInputField(pdf, "ÓRGÃO", "", 110, yPos, 40, 10);
-      this.createInputField(pdf, "UF", "", 150, yPos, 50, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "RG", dadosCliente.rgConjuge || "", 10, yPos, 110, 12);
+      this.createFieldInTable(pdf, "ÓRGÃO", dadosCliente.orgaoEmissorConjuge || "", 120, yPos, 35, 12);
+      this.createFieldInTable(pdf, "UF", dadosCliente.estadoEmissorConjuge || "", 155, yPos, 45, 12);
+      yPos += 12;
 
-      // Profissão
-      this.createInputField(pdf, "Profissão", "", 10, yPos, 190, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "Profissão", dadosCliente.profissaoConjuge || "", 10, yPos, 190, 12);
+      yPos += 12;
 
-      // Estado Civil
-      this.createInputField(pdf, "Estado Civil", "", 10, yPos, 190, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "Estado Civil", "", 10, yPos, 190, 12);
+      yPos += 12;
 
-      // E-mail
-      this.createInputField(pdf, "E-mail", "", 10, yPos, 190, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "E-mail", dadosCliente.emailConjuge || "", 10, yPos, 190, 12);
+      yPos += 12;
 
-      // Telefone
-      this.createInputField(pdf, "Telefone", "", 10, yPos, 190, 10);
+      this.createFieldInTable(pdf, "Telefone", dadosCliente.telefoneConjuge || "", 10, yPos, 190, 10);
       yPos += 20;
 
       // ENDEREÇO
@@ -208,71 +247,68 @@ export class PDFGenerator {
       pdf.text("ENDEREÇO:", 10, yPos);
       yPos += 5;
 
+      // Tabela para endereço
+      this.createTableWithBorder(pdf, 10, yPos, 190, 50);
+      
       // Logradouro e Nº
-      this.createInputField(pdf, "Logradouro", "", 10, yPos, 140, 10);
-      this.createInputField(pdf, "Nº", "", 150, yPos, 50, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "Logradouro", dadosCliente.logradouro || "", 10, yPos, 140, 12);
+      this.createFieldInTable(pdf, "Nº", dadosCliente.numeroEndereco || "", 150, yPos, 50, 12);
+      yPos += 12;
 
       // Bairro
-      this.createInputField(pdf, "Bairro", "", 10, yPos, 190, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "Bairro", dadosCliente.bairro || "", 10, yPos, 190, 12);
+      yPos += 12;
 
       // Complemento e CEP
-      this.createInputField(pdf, "Complemento", "", 10, yPos, 140, 10);
-      this.createInputField(pdf, "CEP", "", 150, yPos, 50, 10);
-      yPos += 10;
+      this.createFieldInTable(pdf, "Complemento", dadosCliente.complemento || "", 10, yPos, 140, 12);
+      this.createFieldInTable(pdf, "CEP", dadosCliente.cep || "", 150, yPos, 50, 12);
+      yPos += 12;
 
       // Cidade e UF
-      this.createInputField(pdf, "Cidade", "", 10, yPos, 140, 10);
-      this.createInputField(pdf, "UF", "", 150, yPos, 50, 10);
-      yPos += 20;
+      this.createFieldInTable(pdf, "Cidade", dadosCliente.cidade || "", 10, yPos, 140, 12);
+      this.createFieldInTable(pdf, "UF", dadosCliente.ufEndereco || "", 150, yPos, 50, 14);
+      yPos += 25;
 
       // SALA DE VENDAS
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(10);
       pdf.text("SALA DE VENDAS:", 10, yPos);
-      this.drawBorderedRect(pdf, 180, yPos - 5, 20, 7);
-      pdf.text("BEEBACK", 182, yPos);
-      yPos += 15;
+      // Checkbox BEEBACK
+      pdf.rect(165, yPos - 5, 4, 4);
+      pdf.text("BEEBACK", 172, yPos);
+      yPos += 8;
 
-      // LINER
+      // Campos com linhas
       pdf.text("LINER:", 10, yPos);
-      pdf.line(35, yPos, 200, yPos);
+      pdf.line(30, yPos, 200, yPos);
       yPos += 8;
 
-      // EMPRESA (Liner)
       pdf.text("EMPRESA (Liner):", 10, yPos);
-      pdf.line(55, yPos, 200, yPos);
+      pdf.line(50, yPos, 200, yPos);
       yPos += 8;
 
-      // CLOSER
       pdf.text("CLOSER:", 10, yPos);
-      pdf.line(35, yPos, 200, yPos);
+      pdf.line(30, yPos, 200, yPos);
       yPos += 8;
 
-      // EMPRESA (Closer)
       pdf.text("EMPRESA (Closer):", 10, yPos);
       pdf.line(55, yPos, 200, yPos);
       yPos += 8;
 
-      // PEP
       pdf.text("PEP:", 10, yPos);
       pdf.line(25, yPos, 200, yPos);
       yPos += 8;
 
-      // EMPRESA (PEP)
       pdf.text("EMPRESA (PEP):", 10, yPos);
       pdf.line(50, yPos, 200, yPos);
       yPos += 8;
 
-      // LIDER DE SALA
       pdf.text("LIDER DE SALA:", 10, yPos);
-      pdf.line(45, yPos, 200, yPos);
+      pdf.line(50, yPos, 200, yPos);
       yPos += 8;
 
-      // SUB LIDER DE SALA
       pdf.text("SUB LIDER DE SALA:", 10, yPos);
-      pdf.line(60, yPos, 200, yPos);
+      pdf.line(65, yPos, 200, yPos);
 
       return pdf;
       
@@ -296,12 +332,12 @@ export class PDFGenerator {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     try {
-      // Header
-      this.drawHeader(pdf, "Ficha de Negociação de Cota", "Página: 2 de 2");
+      // Header oficial
+      this.createFormHeader(pdf, "Ficha de Negociação de Cota", "Página: 2 de 2");
 
-      let yPos = 35;
+      let yPos = 40;
 
-      // CLIENTE
+      // CLIENTE e CPF
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(10);
       pdf.text("CLIENTE:", 10, yPos);
@@ -312,7 +348,6 @@ export class PDFGenerator {
       }
       yPos += 8;
 
-      // CPF
       pdf.setFont("helvetica", "bold");
       pdf.text("CPF:", 10, yPos);
       pdf.line(25, yPos, 200, yPos);
@@ -322,13 +357,12 @@ export class PDFGenerator {
       }
       yPos += 8;
 
-      // SALA DE VENDAS
       pdf.setFont("helvetica", "bold");
       pdf.text("SALA DE VENDAS:", 10, yPos);
       pdf.line(50, yPos, 200, yPos);
-      yPos += 12;
+      yPos += 10;
 
-      // Tipos de venda
+      // Checkboxes de tipos de venda
       const tipos = [
         { label: "PADRÃO", value: "padrao" },
         { label: "SEMESTRAL", value: "semestral" },
@@ -343,61 +377,61 @@ export class PDFGenerator {
         const isSelected = dadosNegociacao.tipoVenda === tipo.value;
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(9);
-        pdf.text(`(${isSelected ? 'X' : ' '}) ${tipo.label}`, xPos, yPos);
-        xPos += 30;
+        pdf.text(`( ${isSelected ? 'X' : ' '} ) ${tipo.label}`, xPos, yPos);
+        xPos += 32;
       });
       yPos += 15;
 
-      // Tabela de Parcelas Pagas em Sala
-      const tableHeaders = [
+      // Tabela: Tipo de Parcela Paga em Sala
+      const headers1 = [
         "Tipo de Parcela Paga em Sala",
         "Valor Total Pago em Sala", 
         "Quantidade de cotas",
         "Valor distribuido para cada Unidade",
         "Forma de Pagamento"
       ];
-      const colWidths = [38, 38, 38, 38, 38];
+      const widths1 = [38, 38, 38, 38, 38];
 
-      // Cabeçalho da tabela
+      // Cabeçalho
       let currentX = 10;
-      tableHeaders.forEach((header, i) => {
-        this.createTableCell(pdf, header, currentX, yPos, colWidths[i], 15, true);
-        currentX += colWidths[i];
+      headers1.forEach((header, i) => {
+        this.createTableCell(pdf, header, currentX, yPos, widths1[i], 12, 7, true);
+        currentX += widths1[i];
       });
-      yPos += 15;
+      yPos += 12;
 
-      // Linhas da tabela (3 linhas fixas)
+      // 3 linhas de dados
       const tiposFixos = ["( ) Entrada", "( ) Sinal", "( ) Saldo"];
       for (let i = 0; i < 3; i++) {
         currentX = 10;
         const parcela = dadosNegociacao.parcelasPagasSala[i];
         
-        this.createTableCell(pdf, tiposFixos[i], currentX, yPos, colWidths[0], 10);
-        currentX += colWidths[0];
+        this.createTableCell(pdf, tiposFixos[i], currentX, yPos, widths1[0], 8);
+        currentX += widths1[0];
         
-        this.createTableCell(pdf, parcela?.valorTotal || "", currentX, yPos, colWidths[1], 10);
-        currentX += colWidths[1];
+        this.createTableCell(pdf, parcela?.valorTotal || "", currentX, yPos, widths1[1], 8);
+        currentX += widths1[1];
         
-        this.createTableCell(pdf, parcela?.quantidadeCotas || "", currentX, yPos, colWidths[2], 10);
-        currentX += colWidths[2];
+        this.createTableCell(pdf, parcela?.quantidadeCotas || "", currentX, yPos, widths1[2], 8);
+        currentX += widths1[2];
         
-        this.createTableCell(pdf, parcela?.valorDistribuido || "", currentX, yPos, colWidths[3], 10);
-        currentX += colWidths[3];
+        this.createTableCell(pdf, parcela?.valorDistribuido || "", currentX, yPos, widths1[3], 8);
+        currentX += widths1[3];
         
-        this.createTableCell(pdf, parcela?.formasPagamento?.[0] || "", currentX, yPos, colWidths[4], 10);
+        this.createTableCell(pdf, parcela?.formasPagamento?.[0] || "", currentX, yPos, widths1[4], 8);
         
-        yPos += 10;
+        yPos += 8;
       }
       yPos += 10;
 
-      // Tabela de Contratos
+      // Primeira tabela de contratos
       const contratoHeaders = ["Contrato", "Empreendimento", "Torre/Bloco", "Apt.", "Cota", "Vista da UH.", "PCD", "Valor"];
-      const contratoWidths = [20, 35, 25, 20, 20, 25, 20, 25];
+      const contratoWidths = [20, 30, 25, 20, 20, 25, 20, 30];
 
-      // Cabeçalho
+      // Cabeçalho da tabela de contratos
       currentX = 10;
       contratoHeaders.forEach((header, i) => {
-        this.createTableCell(pdf, header, currentX, yPos, contratoWidths[i], 10, true);
+        this.createTableCell(pdf, header, currentX, yPos, contratoWidths[i], 10, 7, true);
         currentX += contratoWidths[i];
       });
       yPos += 10;
@@ -407,30 +441,30 @@ export class PDFGenerator {
         currentX = 10;
         const contrato = dadosNegociacao.contratos[i];
         
-        this.createTableCell(pdf, "( ) Físico\n( ) Digital", currentX, yPos, contratoWidths[0], 15);
+        this.createTableCell(pdf, "( ) Físico\n( ) Digital", currentX, yPos, contratoWidths[0], 12, 6);
         currentX += contratoWidths[0];
         
-        this.createTableCell(pdf, contrato?.empreendimento || "", currentX, yPos, contratoWidths[1], 15);
+        this.createTableCell(pdf, contrato?.empreendimento || "", currentX, yPos, contratoWidths[1], 12, 6);
         currentX += contratoWidths[1];
         
-        this.createTableCell(pdf, contrato?.torre || "", currentX, yPos, contratoWidths[2], 15);
+        this.createTableCell(pdf, contrato?.torre || "", currentX, yPos, contratoWidths[2], 12, 6);
         currentX += contratoWidths[2];
         
-        this.createTableCell(pdf, contrato?.apartamento || "", currentX, yPos, contratoWidths[3], 15);
+        this.createTableCell(pdf, contrato?.apartamento || "", currentX, yPos, contratoWidths[3], 12, 6);
         currentX += contratoWidths[3];
         
-        this.createTableCell(pdf, contrato?.cota || "", currentX, yPos, contratoWidths[4], 15);
+        this.createTableCell(pdf, contrato?.cota || "", currentX, yPos, contratoWidths[4], 12, 6);
         currentX += contratoWidths[4];
         
-        this.createTableCell(pdf, "( ) Sim\n( ) Não", currentX, yPos, contratoWidths[5], 15);
+        this.createTableCell(pdf, "( ) Sim\n( ) Não", currentX, yPos, contratoWidths[5], 12, 6);
         currentX += contratoWidths[5];
         
-        this.createTableCell(pdf, "( ) Sim\n( ) Não", currentX, yPos, contratoWidths[6], 15);
+        this.createTableCell(pdf, "( ) Sim\n( ) Não", currentX, yPos, contratoWidths[6], 12, 6);
         currentX += contratoWidths[6];
         
-        this.createTableCell(pdf, contrato?.valor || "", currentX, yPos, contratoWidths[7], 15);
+        this.createTableCell(pdf, contrato?.valor || "", currentX, yPos, contratoWidths[7], 12, 6);
         
-        yPos += 15;
+        yPos += 12;
       }
       yPos += 5;
 
@@ -438,45 +472,134 @@ export class PDFGenerator {
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(8);
       pdf.text("O financeiro descrito abaixo é referente a cada unidade separadamente.", 10, yPos);
-      yPos += 10;
+      yPos += 8;
 
-      // Tabela de Informações de Pagamento
+      // Tabela de informações de pagamento
       const pagHeaders = ["Tipo", "Total", "Qtd. Parcelas", "Valor Parcela", "Forma de Pag.", "1º Vencimento"];
       const pagWidths = [30, 25, 25, 25, 25, 30];
 
       // Cabeçalho
       currentX = 10;
       pagHeaders.forEach((header, i) => {
-        this.createTableCell(pdf, header, currentX, yPos, pagWidths[i], 8, true);
+        this.createTableCell(pdf, header, currentX, yPos, pagWidths[i], 8, 7, true);
         currentX += pagWidths[i];
       });
       yPos += 8;
 
-      // Linhas fixas
+      // 5 linhas fixas de informações de pagamento
       const tiposPagamento = ["Entrada", "Entrada", "Entrada Restante", "Sinal", "Saldo"];
       for (let i = 0; i < 5; i++) {
         currentX = 10;
-        const info = dadosNegociacao.informacoesPagamento.find(inf => 
-          inf.tipo === tiposPagamento[i] || 
-          (tiposPagamento[i] === "Entrada" && inf.tipo.includes("ª Entrada"))
-        );
         
-        this.createTableCell(pdf, tiposPagamento[i], currentX, yPos, pagWidths[0], 8);
+        // Buscar a informação correspondente
+        let info;
+        if (tiposPagamento[i] === "Entrada" && i === 0) {
+          info = dadosNegociacao.informacoesPagamento.find(inf => inf.tipo === "1ª Entrada");
+        } else if (tiposPagamento[i] === "Entrada" && i === 1) {
+          info = dadosNegociacao.informacoesPagamento.find(inf => inf.tipo === "2ª Entrada");
+        } else {
+          info = dadosNegociacao.informacoesPagamento.find(inf => inf.tipo === tiposPagamento[i]);
+        }
+        
+        this.createTableCell(pdf, tiposPagamento[i], currentX, yPos, pagWidths[0], 8, 6);
         currentX += pagWidths[0];
         
-        this.createTableCell(pdf, info?.total || "", currentX, yPos, pagWidths[1], 8);
+        this.createTableCell(pdf, info?.total || "", currentX, yPos, pagWidths[1], 8, 6);
         currentX += pagWidths[1];
         
-        this.createTableCell(pdf, info?.qtdParcelas || "", currentX, yPos, pagWidths[2], 8);
+        this.createTableCell(pdf, info?.qtdParcelas || "", currentX, yPos, pagWidths[2], 8, 6);
         currentX += pagWidths[2];
         
-        this.createTableCell(pdf, info?.valorParcela || "", currentX, yPos, pagWidths[3], 8);
+        this.createTableCell(pdf, info?.valorParcela || "", currentX, yPos, pagWidths[3], 8, 6);
         currentX += pagWidths[3];
         
-        this.createTableCell(pdf, info?.formaPagamento || "", currentX, yPos, pagWidths[4], 8);
+        this.createTableCell(pdf, info?.formaPagamento || "", currentX, yPos, pagWidths[4], 8, 6);
         currentX += pagWidths[4];
         
-        this.createTableCell(pdf, info?.primeiroVencimento || "", currentX, yPos, pagWidths[5], 8);
+        this.createTableCell(pdf, info?.primeiroVencimento || "", currentX, yPos, pagWidths[5], 8, 6);
+        
+        yPos += 8;
+      }
+
+      // Adicionando a segunda página (continuação)
+      pdf.addPage();
+      
+      // Header da segunda página
+      this.createFormHeader(pdf, "Ficha de Negociação de Cota", "Página: 2 de 2");
+      
+      yPos = 50;
+
+      // Segunda tabela de contratos (idêntica à primeira)
+      currentX = 10;
+      contratoHeaders.forEach((header, i) => {
+        this.createTableCell(pdf, header, currentX, yPos, contratoWidths[i], 10, 7, true);
+        currentX += contratoWidths[i];
+      });
+      yPos += 10;
+
+      for (let i = 0; i < 4; i++) {
+        currentX = 10;
+        
+        this.createTableCell(pdf, "( ) Físico\n( ) Digital", currentX, yPos, contratoWidths[0], 12, 6);
+        currentX += contratoWidths[0];
+        
+        this.createTableCell(pdf, "", currentX, yPos, contratoWidths[1], 12, 6);
+        currentX += contratoWidths[1];
+        
+        this.createTableCell(pdf, "", currentX, yPos, contratoWidths[2], 12, 6);
+        currentX += contratoWidths[2];
+        
+        this.createTableCell(pdf, "", currentX, yPos, contratoWidths[3], 12, 6);
+        currentX += contratoWidths[3];
+        
+        this.createTableCell(pdf, "", currentX, yPos, contratoWidths[4], 12, 6);
+        currentX += contratoWidths[4];
+        
+        this.createTableCell(pdf, "( ) Sim\n( ) Não", currentX, yPos, contratoWidths[5], 12, 6);
+        currentX += contratoWidths[5];
+        
+        this.createTableCell(pdf, "( ) Sim\n( ) Não", currentX, yPos, contratoWidths[6], 12, 6);
+        currentX += contratoWidths[6];
+        
+        this.createTableCell(pdf, "", currentX, yPos, contratoWidths[7], 12, 6);
+        
+        yPos += 12;
+      }
+      yPos += 5;
+
+      // Texto explicativo (segunda vez)
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.text("O financeiro descrito abaixo é referente a cada unidade separadamente.", 10, yPos);
+      yPos += 8;
+
+      // Segunda tabela de informações de pagamento (vazia)
+      currentX = 10;
+      pagHeaders.forEach((header, i) => {
+        this.createTableCell(pdf, header, currentX, yPos, pagWidths[i], 8, 7, true);
+        currentX += pagWidths[i];
+      });
+      yPos += 8;
+
+      for (let i = 0; i < 5; i++) {
+        currentX = 10;
+        
+        this.createTableCell(pdf, tiposPagamento[i], currentX, yPos, pagWidths[0], 8, 6);
+        currentX += pagWidths[0];
+        
+        this.createTableCell(pdf, "", currentX, yPos, pagWidths[1], 8, 6);
+        currentX += pagWidths[1];
+        
+        this.createTableCell(pdf, "", currentX, yPos, pagWidths[2], 8, 6);
+        currentX += pagWidths[2];
+        
+        this.createTableCell(pdf, "", currentX, yPos, pagWidths[3], 8, 6);
+        currentX += pagWidths[3];
+        
+        this.createTableCell(pdf, "", currentX, yPos, pagWidths[4], 8, 6);
+        currentX += pagWidths[4];
+        
+        this.createTableCell(pdf, "", currentX, yPos, pagWidths[5], 8, 6);
         
         yPos += 8;
       }
