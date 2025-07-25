@@ -1034,7 +1034,11 @@ const FichaNegociacao = () => {
                             <SelectValue placeholder={loading ? "Carregando..." : "Selecione empreendimento"} />
                           </SelectTrigger>
                           <SelectContent className="bg-background z-50">
-                            {empreendimentos.map((emp) => (
+                            {(empreendimentos.length > 0 ? empreendimentos : [
+                              { id: '1', nome: 'Gran Garden' },
+                              { id: '2', nome: 'Gran Valley' },
+                              { id: '3', nome: 'Empreendimento Demo' }
+                            ]).map((emp) => (
                               <SelectItem key={emp.id} value={emp.id}>
                                 {emp.nome}
                               </SelectItem>
