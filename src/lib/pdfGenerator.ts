@@ -61,11 +61,11 @@ export interface DadosNegociacao {
 
 export class PDFGenerator {
   private static createFormHeader(pdf: jsPDF, title: string, pageInfo: string) {
-    // Box principal do header (tabela com 3 colunas)
+    // Header principal com 3 colunas
     pdf.setDrawColor(0, 0, 0);
     pdf.setLineWidth(0.5);
     
-    // Primeira coluna - Logo GAV
+    // Coluna 1 - Logo GAV
     pdf.rect(10, 10, 40, 20);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(14);
@@ -73,7 +73,7 @@ export class PDFGenerator {
     pdf.setFontSize(8);
     pdf.text("RESORTS", 22, 25);
 
-    // Segunda coluna - Título
+    // Coluna 2 - Título
     pdf.rect(50, 10, 110, 20);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(10);
@@ -81,7 +81,7 @@ export class PDFGenerator {
     pdf.setFontSize(12);
     pdf.text(title, 70, 24);
 
-    // Terceira coluna - Código e info
+    // Coluna 3 - Código e info
     pdf.rect(160, 10, 40, 20);
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(7);
@@ -90,19 +90,7 @@ export class PDFGenerator {
     pdf.text(pageInfo, 162, 23);
   }
 
-  private static createTableWithBorder(
-    pdf: jsPDF, 
-    x: number, 
-    y: number, 
-    width: number, 
-    height: number
-  ) {
-    pdf.setDrawColor(0, 0, 0);
-    pdf.setLineWidth(0.5);
-    pdf.rect(x, y, width, height);
-  }
-
-  private static createFieldInTable(
+  private static createTableField(
     pdf: jsPDF,
     label: string,
     value: string,
@@ -156,6 +144,7 @@ export class PDFGenerator {
     }
   }
 
+  // PDF 1: Cadastro de Cliente
   static gerarPDFCadastroCliente(dadosCliente: DadosCliente): string {
     const pdf = this.createPDFCadastroCliente(dadosCliente);
     return pdf.output('datauristring');
@@ -181,32 +170,29 @@ export class PDFGenerator {
       pdf.text("DADOS DO CLIENTE:", 10, yPos);
       yPos += 5;
 
-      // Tabela completa para dados do cliente
-      this.createTableWithBorder(pdf, 10, yPos, 190, 82);
-      
-      // Campos do cliente
-      this.createFieldInTable(pdf, "Nome", dadosCliente.nome || "", 10, yPos, 190, 12);
-      yPos += 12;
+      // Campos do cliente com dados reais
+      this.createTableField(pdf, "Nome", dadosCliente.nome || "", 10, yPos, 190, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "CPF", dadosCliente.cpf || "", 10, yPos, 190, 12);
-      yPos += 12;
+      this.createTableField(pdf, "CPF", dadosCliente.cpf || "", 10, yPos, 190, 10);
+      yPos += 10;
 
       // RG, ÓRGÃO, UF na mesma linha
-      this.createFieldInTable(pdf, "RG", dadosCliente.rg || "", 10, yPos, 110, 12);
-      this.createFieldInTable(pdf, "ÓRGÃO", dadosCliente.orgaoEmissor || "", 120, yPos, 35, 12);
-      this.createFieldInTable(pdf, "UF", dadosCliente.estadoEmissor || "", 155, yPos, 45, 12);
-      yPos += 12;
+      this.createTableField(pdf, "RG", dadosCliente.rg || "", 10, yPos, 100, 10);
+      this.createTableField(pdf, "ÓRGÃO", dadosCliente.orgaoEmissor || "", 110, yPos, 40, 10);
+      this.createTableField(pdf, "UF", dadosCliente.estadoEmissor || "", 150, yPos, 50, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "Profissão", dadosCliente.profissao || "", 10, yPos, 190, 12);
-      yPos += 12;
+      this.createTableField(pdf, "Profissão", dadosCliente.profissao || "", 10, yPos, 190, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "Estado Civil", dadosCliente.estadoCivil || "", 10, yPos, 190, 12);
-      yPos += 12;
+      this.createTableField(pdf, "Estado Civil", dadosCliente.estadoCivil || "", 10, yPos, 190, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "E-mail", dadosCliente.email || "", 10, yPos, 190, 12);
-      yPos += 12;
+      this.createTableField(pdf, "E-mail", dadosCliente.email || "", 10, yPos, 190, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "Telefone", dadosCliente.telefone || "", 10, yPos, 190, 10);
+      this.createTableField(pdf, "Telefone", dadosCliente.telefone || "", 10, yPos, 190, 10);
       yPos += 20;
 
       // DADOS DO CÔNJUGE
@@ -215,30 +201,27 @@ export class PDFGenerator {
       pdf.text("DADOS DO CÔNJUGE:", 10, yPos);
       yPos += 5;
 
-      // Tabela para dados do cônjuge
-      this.createTableWithBorder(pdf, 10, yPos, 190, 82);
-      
-      this.createFieldInTable(pdf, "Nome", dadosCliente.nomeConjuge || "", 10, yPos, 190, 12);
-      yPos += 12;
+      this.createTableField(pdf, "Nome", dadosCliente.nomeConjuge || "", 10, yPos, 190, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "CPF", dadosCliente.cpfConjuge || "", 10, yPos, 190, 12);
-      yPos += 12;
+      this.createTableField(pdf, "CPF", dadosCliente.cpfConjuge || "", 10, yPos, 190, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "RG", dadosCliente.rgConjuge || "", 10, yPos, 110, 12);
-      this.createFieldInTable(pdf, "ÓRGÃO", dadosCliente.orgaoEmissorConjuge || "", 120, yPos, 35, 12);
-      this.createFieldInTable(pdf, "UF", dadosCliente.estadoEmissorConjuge || "", 155, yPos, 45, 12);
-      yPos += 12;
+      this.createTableField(pdf, "RG", dadosCliente.rgConjuge || "", 10, yPos, 100, 10);
+      this.createTableField(pdf, "ÓRGÃO", dadosCliente.orgaoEmissorConjuge || "", 110, yPos, 40, 10);
+      this.createTableField(pdf, "UF", dadosCliente.estadoEmissorConjuge || "", 150, yPos, 50, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "Profissão", dadosCliente.profissaoConjuge || "", 10, yPos, 190, 12);
-      yPos += 12;
+      this.createTableField(pdf, "Profissão", dadosCliente.profissaoConjuge || "", 10, yPos, 190, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "Estado Civil", "", 10, yPos, 190, 12);
-      yPos += 12;
+      this.createTableField(pdf, "Estado Civil", "", 10, yPos, 190, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "E-mail", dadosCliente.emailConjuge || "", 10, yPos, 190, 12);
-      yPos += 12;
+      this.createTableField(pdf, "E-mail", dadosCliente.emailConjuge || "", 10, yPos, 190, 10);
+      yPos += 10;
 
-      this.createFieldInTable(pdf, "Telefone", dadosCliente.telefoneConjuge || "", 10, yPos, 190, 10);
+      this.createTableField(pdf, "Telefone", dadosCliente.telefoneConjuge || "", 10, yPos, 190, 10);
       yPos += 20;
 
       // ENDEREÇO
@@ -247,26 +230,23 @@ export class PDFGenerator {
       pdf.text("ENDEREÇO:", 10, yPos);
       yPos += 5;
 
-      // Tabela para endereço
-      this.createTableWithBorder(pdf, 10, yPos, 190, 50);
-      
       // Logradouro e Nº
-      this.createFieldInTable(pdf, "Logradouro", dadosCliente.logradouro || "", 10, yPos, 140, 12);
-      this.createFieldInTable(pdf, "Nº", dadosCliente.numeroEndereco || "", 150, yPos, 50, 12);
-      yPos += 12;
+      this.createTableField(pdf, "Logradouro", dadosCliente.logradouro || "", 10, yPos, 140, 10);
+      this.createTableField(pdf, "Nº", dadosCliente.numeroEndereco || "", 150, yPos, 50, 10);
+      yPos += 10;
 
       // Bairro
-      this.createFieldInTable(pdf, "Bairro", dadosCliente.bairro || "", 10, yPos, 190, 12);
-      yPos += 12;
+      this.createTableField(pdf, "Bairro", dadosCliente.bairro || "", 10, yPos, 190, 10);
+      yPos += 10;
 
       // Complemento e CEP
-      this.createFieldInTable(pdf, "Complemento", dadosCliente.complemento || "", 10, yPos, 140, 12);
-      this.createFieldInTable(pdf, "CEP", dadosCliente.cep || "", 150, yPos, 50, 12);
-      yPos += 12;
+      this.createTableField(pdf, "Complemento", dadosCliente.complemento || "", 10, yPos, 140, 10);
+      this.createTableField(pdf, "CEP", dadosCliente.cep || "", 150, yPos, 50, 10);
+      yPos += 10;
 
       // Cidade e UF
-      this.createFieldInTable(pdf, "Cidade", dadosCliente.cidade || "", 10, yPos, 140, 12);
-      this.createFieldInTable(pdf, "UF", dadosCliente.ufEndereco || "", 150, yPos, 50, 14);
+      this.createTableField(pdf, "Cidade", dadosCliente.cidade || "", 10, yPos, 140, 10);
+      this.createTableField(pdf, "UF", dadosCliente.ufEndereco || "", 150, yPos, 50, 10);
       yPos += 25;
 
       // SALA DE VENDAS
@@ -276,7 +256,7 @@ export class PDFGenerator {
       // Checkbox BEEBACK
       pdf.rect(165, yPos - 5, 4, 4);
       pdf.text("BEEBACK", 172, yPos);
-      yPos += 8;
+      yPos += 10;
 
       // Campos com linhas
       pdf.text("LINER:", 10, yPos);
@@ -318,6 +298,7 @@ export class PDFGenerator {
     }
   }
 
+  // PDF 2: Negociação (páginas 2 e 3 do formulário original)
   static gerarPDFNegociacao(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): string {
     const pdf = this.createPDFNegociacao(dadosCliente, dadosNegociacao);
     return pdf.output('datauristring');
@@ -332,12 +313,12 @@ export class PDFGenerator {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     try {
-      // Header oficial
+      // PÁGINA 1 do PDF de Negociação (página 2 do formulário original)
       this.createFormHeader(pdf, "Ficha de Negociação de Cota", "Página: 2 de 2");
 
       let yPos = 40;
 
-      // CLIENTE e CPF
+      // CLIENTE e CPF com dados reais
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(10);
       pdf.text("CLIENTE:", 10, yPos);
@@ -362,7 +343,7 @@ export class PDFGenerator {
       pdf.line(50, yPos, 200, yPos);
       yPos += 10;
 
-      // Checkboxes de tipos de venda
+      // Checkboxes de tipos de venda com dados reais
       const tipos = [
         { label: "PADRÃO", value: "padrao" },
         { label: "SEMESTRAL", value: "semestral" },
@@ -382,7 +363,7 @@ export class PDFGenerator {
       });
       yPos += 15;
 
-      // Tabela: Tipo de Parcela Paga em Sala
+      // Tabela: Tipo de Parcela Paga em Sala com dados reais
       const headers1 = [
         "Tipo de Parcela Paga em Sala",
         "Valor Total Pago em Sala", 
@@ -400,7 +381,7 @@ export class PDFGenerator {
       });
       yPos += 12;
 
-      // 3 linhas de dados
+      // 3 linhas de dados com informações reais
       const tiposFixos = ["( ) Entrada", "( ) Sinal", "( ) Saldo"];
       for (let i = 0; i < 3; i++) {
         currentX = 10;
@@ -424,7 +405,7 @@ export class PDFGenerator {
       }
       yPos += 10;
 
-      // Primeira tabela de contratos
+      // Primeira tabela de contratos com dados reais
       const contratoHeaders = ["Contrato", "Empreendimento", "Torre/Bloco", "Apt.", "Cota", "Vista da UH.", "PCD", "Valor"];
       const contratoWidths = [20, 30, 25, 20, 20, 25, 20, 30];
 
@@ -436,7 +417,7 @@ export class PDFGenerator {
       });
       yPos += 10;
 
-      // 4 linhas de contratos
+      // 4 linhas de contratos com dados reais
       for (let i = 0; i < 4; i++) {
         currentX = 10;
         const contrato = dadosNegociacao.contratos[i];
@@ -474,7 +455,7 @@ export class PDFGenerator {
       pdf.text("O financeiro descrito abaixo é referente a cada unidade separadamente.", 10, yPos);
       yPos += 8;
 
-      // Tabela de informações de pagamento
+      // Tabela de informações de pagamento com dados reais
       const pagHeaders = ["Tipo", "Total", "Qtd. Parcelas", "Valor Parcela", "Forma de Pag.", "1º Vencimento"];
       const pagWidths = [30, 25, 25, 25, 25, 30];
 
@@ -486,7 +467,7 @@ export class PDFGenerator {
       });
       yPos += 8;
 
-      // 5 linhas fixas de informações de pagamento
+      // 5 linhas fixas de informações de pagamento com dados reais
       const tiposPagamento = ["Entrada", "Entrada", "Entrada Restante", "Sinal", "Saldo"];
       for (let i = 0; i < 5; i++) {
         currentX = 10;
@@ -521,15 +502,56 @@ export class PDFGenerator {
         yPos += 8;
       }
 
-      // Adicionando a segunda página (continuação)
+      // PÁGINA 2 do PDF de Negociação (página 3 do formulário original)
       pdf.addPage();
       
-      // Header da segunda página
+      // Header da segunda página (página 3 do formulário original)
       this.createFormHeader(pdf, "Ficha de Negociação de Cota", "Página: 2 de 2");
       
       yPos = 50;
 
-      // Segunda tabela de contratos (idêntica à primeira)
+      // Primeira seção: Tipo de Parcela Paga em Sala (repetida na página 3)
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(10);
+      pdf.text("Tipo de Parcela Paga", 10, yPos - 5);
+      pdf.text("em Sala", 10, yPos + 5);
+      
+      pdf.text("Valor Total Pago em", 50, yPos - 5);
+      pdf.text("Sala", 50, yPos + 5);
+      
+      pdf.text("Quantidade", 90, yPos - 5);
+      pdf.text("de cotas", 90, yPos + 5);
+      
+      pdf.text("Valor distribuido para", 130, yPos - 5);
+      pdf.text("cada Unidade", 130, yPos + 5);
+      
+      pdf.text("Forma de Pagamento", 170, yPos - 5);
+      yPos += 15;
+
+      // 3 linhas para parcelas (vazias na página 3 conforme o modelo)
+      const tiposFixos2 = ["( ) Entrada", "( ) Sinal", "( ) Saldo"];
+      for (let i = 0; i < 3; i++) {
+        currentX = 10;
+        
+        this.createTableCell(pdf, tiposFixos2[i], currentX, yPos, 38, 8);
+        currentX += 38;
+        
+        this.createTableCell(pdf, "", currentX, yPos, 38, 8);
+        currentX += 38;
+        
+        this.createTableCell(pdf, "", currentX, yPos, 38, 8);
+        currentX += 38;
+        
+        this.createTableCell(pdf, "", currentX, yPos, 38, 8);
+        currentX += 38;
+        
+        this.createTableCell(pdf, "", currentX, yPos, 38, 8);
+        
+        yPos += 8;
+      }
+      yPos += 10;
+
+      // Segunda tabela de contratos (vazia conforme modelo página 3)
       currentX = 10;
       contratoHeaders.forEach((header, i) => {
         this.createTableCell(pdf, header, currentX, yPos, contratoWidths[i], 10, 7, true);
@@ -573,7 +595,7 @@ export class PDFGenerator {
       pdf.text("O financeiro descrito abaixo é referente a cada unidade separadamente.", 10, yPos);
       yPos += 8;
 
-      // Segunda tabela de informações de pagamento (vazia)
+      // Segunda tabela de informações de pagamento (vazia conforme modelo página 3)
       currentX = 10;
       pagHeaders.forEach((header, i) => {
         this.createTableCell(pdf, header, currentX, yPos, pagWidths[i], 8, 7, true);
@@ -603,6 +625,14 @@ export class PDFGenerator {
         
         yPos += 8;
       }
+
+      // Linha de assinatura no final
+      yPos += 20;
+      pdf.line(10, yPos, 200, yPos);
+      yPos += 5;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.text("Assinatura do Cliente", 90, yPos);
 
       return pdf;
       
