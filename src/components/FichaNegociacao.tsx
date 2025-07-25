@@ -355,16 +355,45 @@ const FichaNegociacao = () => {
 
         // Testar conectividade básica primeiro
         console.log('🔌 Testando conectividade com Supabase...');
-        const { data: testData, error: testError } = await supabase
-          .from('empreendimentos')
-          .select('count', { count: 'exact', head: true });
+        console.log('🌐 URL:', 'https://msxhwlwxpvrtmyngwwcp.supabase.co');
 
-        if (testError) {
-          console.error('❌ Erro de conectividade:', testError);
-          throw new Error(`Conectividade: ${testError.message}`);
+        try {
+          // Teste mais simples - verificar se consegue fazer uma requisição básica
+          const { data: testData, error: testError } = await supabase
+            .from('empreendimentos')
+            .select('id, nome')
+            .limit(1);
+
+          if (testError) {
+            console.error('❌ Erro na query de teste:', testError);
+            console.error('🔍 Código do erro:', testError.code);
+            console.error('🔍 Mensagem:', testError.message);
+            console.error('🔍 Detalhes:', testError.details);
+            console.error('🔍 Hint:', testError.hint);
+
+            // Se a tabela não existe, isso é esperado - vamos criar dados de exemplo
+            if (testError.code === 'PGRST116' || testError.message?.includes('does not exist')) {
+              console.log('⚠️ Tabela empreendimentos não existe - vamos criar alguns dados...');
+              throw new Error('TABELA_NAO_EXISTE');
+            }
+
+            throw testError;
+          }
+
+          console.log('✅ Conectividade OK! Dados de teste:', testData);
+        } catch (networkError: any) {
+          console.error('🚫 Erro de rede ou conectividade:', networkError);
+
+          if (networkError.message === 'TABELA_NAO_EXISTE') {
+            throw networkError;
+          }
+
+          // Se é erro de rede, vamos ver mais detalhes
+          console.error('🔍 Tipo do erro:', networkError.name);
+          console.error('🔍 Mensagem:', networkError.message);
+
+          throw new Error(`Conectividade: ${networkError.message}`);
         }
-
-        console.log('✅ Conectividade OK. Total de empreendimentos:', testData?.count || 0);
 
         // Carregar empreendimentos primeiro
         console.log('📍 Carregando empreendimentos...');
