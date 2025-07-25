@@ -461,13 +461,20 @@ const FichaNegociacao = () => {
           details: error?.details || 'Sem detalhes',
           hint: error?.hint || 'Sem dicas',
           code: error?.code || 'Sem código',
+          name: error?.name || 'Sem nome',
           full: error
         });
 
-        // Inicializar com arrays vazios para evitar crashes
-        setEmpreendimentos([]);
-        setCategoriasPreco([]);
-        setTorres([]);
+        // Se a tabela não existe, vamos tentar criar alguns dados
+        if (error?.message === 'TABELA_NAO_EXISTE') {
+          console.log('📝 Tentando criar dados iniciais no Supabase...');
+          await criarDadosIniciais();
+        } else {
+          // Para outros erros, inicializar com arrays vazios para evitar crashes
+          setEmpreendimentos([]);
+          setCategoriasPreco([]);
+          setTorres([]);
+        }
       } finally {
         console.log('🏁 Finalizando carregamento...');
         setLoading(false);
