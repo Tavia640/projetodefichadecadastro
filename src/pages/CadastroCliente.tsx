@@ -23,6 +23,14 @@ const formSchema = z.object({
   profissao: z.string().min(2, 'Profissão é obrigatória'),
   dataNascimento: z.string().min(10, 'Data de nascimento é obrigatória'),
   estadoCivil: z.string().min(1, 'Estado civil é obrigatório'),
+  // Campos de endereço
+  logradouro: z.string().optional(),
+  numeroEndereco: z.string().optional(),
+  bairro: z.string().optional(),
+  complemento: z.string().optional(),
+  cep: z.string().optional(),
+  cidade: z.string().optional(),
+  ufEndereco: z.string().optional(),
   // Campos do cônjuge (opcionais)
   nomeConjuge: z.string().optional(),
   cpfConjuge: z.string().optional(),
