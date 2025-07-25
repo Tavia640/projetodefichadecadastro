@@ -803,24 +803,31 @@ const FichaNegociacao = () => {
       console.log('💼 Dados da negociação preparados:', dadosNegociacao);
       console.log('📄 Gerando PDFs para impressão...');
 
-      // Gerar PDF 1: Cadastro de Cliente
+      // Gerar PDF 1: Cadastro de Cliente (Página 1)
       console.log('📄 Gerando PDF 1: Cadastro de Cliente...');
       const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
       console.log('✅ PDF 1 gerado:', pdfCadastroBlob.size, 'bytes');
 
-      // Gerar PDF 2: Negociação
+      // Gerar PDF 2: Negociação (Página 2)
       console.log('📄 Gerando PDF 2: Negociação...');
       const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
       console.log('✅ PDF 2 gerado:', pdfNegociacaoBlob.size, 'bytes');
+
+      // Gerar PDF 3: Página 3 (Campos vazios)
+      console.log('📄 Gerando PDF 3: Página 3 (vazia)...');
+      const pdfPagina3Blob = PDFGenerator.gerarPDFPagina3Blob(dadosCliente, dadosNegociacao);
+      console.log('✅ PDF 3 gerado:', pdfPagina3Blob.size, 'bytes');
 
       console.log('🖨️ Abrindo PDFs para impressão...');
 
       // Criar URLs para os blobs
       const urlCadastro = URL.createObjectURL(pdfCadastroBlob);
       const urlNegociacao = URL.createObjectURL(pdfNegociacaoBlob);
+      const urlPagina3 = URL.createObjectURL(pdfPagina3Blob);
 
       console.log('🔗 URL PDF 1:', urlCadastro);
       console.log('🔗 URL PDF 2:', urlNegociacao);
+      console.log('🔗 URL PDF 3:', urlPagina3);
 
       // Abrir PDFs em novas janelas para impressão com delay entre eles
       const janelaCadastro = window.open(urlCadastro, '_blank', 'width=800,height=600');
@@ -830,17 +837,27 @@ const FichaNegociacao = () => {
         const janelaNegociacao = window.open(urlNegociacao, '_blank', 'width=800,height=600');
         console.log('🪟 Janela PDF 2 aberta:', !!janelaNegociacao);
 
-        // Aguardar carregamento e imprimir
         setTimeout(() => {
-          if (janelaCadastro) {
-            console.log('🖨️ Imprimindo PDF 1...');
-            janelaCadastro.print();
-          }
-          if (janelaNegociacao) {
-            console.log('🖨️ Imprimindo PDF 2...');
-            janelaNegociacao.print();
-          }
-        }, 2000);
+          const janelaPagina3 = window.open(urlPagina3, '_blank', 'width=800,height=600');
+          console.log('🪟 Janela PDF 3 aberta:', !!janelaPagina3);
+
+          // Aguardar carregamento e imprimir todos
+          setTimeout(() => {
+            if (janelaCadastro) {
+              console.log('🖨️ Imprimindo PDF 1...');
+              janelaCadastro.print();
+            }
+            if (janelaNegociacao) {
+              console.log('🖨️ Imprimindo PDF 2...');
+              janelaNegociacao.print();
+            }
+            if (janelaPagina3) {
+              console.log('🖨️ Imprimindo PDF 3...');
+              janelaPagina3.print();
+            }
+          }, 2000);
+
+        }, 1000);
 
       }, 1000);
 
@@ -848,10 +865,11 @@ const FichaNegociacao = () => {
       setTimeout(() => {
         URL.revokeObjectURL(urlCadastro);
         URL.revokeObjectURL(urlNegociacao);
+        URL.revokeObjectURL(urlPagina3);
         console.log('🧹 URLs dos PDFs liberadas');
-      }, 10000);
+      }, 15000);
 
-      console.log('✅ Processo de impressão iniciado! Dois PDFs devem abrir em janelas separadas.');
+      console.log('✅ Processo de impressão iniciado! Três PDFs devem abrir em janelas separadas.');
 
     } catch (error: any) {
       console.error('❌ Erro na impressão:', error);
