@@ -353,6 +353,19 @@ const FichaNegociacao = () => {
       try {
         console.log('🔄 Iniciando carregamento dos dados...');
 
+        // Testar conectividade básica primeiro
+        console.log('🔌 Testando conectividade com Supabase...');
+        const { data: testData, error: testError } = await supabase
+          .from('empreendimentos')
+          .select('count', { count: 'exact', head: true });
+
+        if (testError) {
+          console.error('❌ Erro de conectividade:', testError);
+          throw new Error(`Conectividade: ${testError.message}`);
+        }
+
+        console.log('✅ Conectividade OK. Total de empreendimentos:', testData?.count || 0);
+
         // Carregar empreendimentos primeiro
         console.log('📍 Carregando empreendimentos...');
         const { data: empreendimentosData, error: errorEmpreendimentos } = await supabase
