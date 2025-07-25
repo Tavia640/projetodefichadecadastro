@@ -347,6 +347,40 @@ const FichaNegociacao = () => {
     }
   }, [contratos, empreendimentos]);
 
+  // Função para criar dados iniciais no Supabase
+  const criarDadosIniciais = async () => {
+    try {
+      console.log('🏗️ Criando empreendimentos iniciais...');
+
+      // Criar empreendimentos
+      const { data: empData, error: empError } = await supabase
+        .from('empreendimentos')
+        .insert([
+          { nome: 'Gran Garden', descricao: 'Resort Gran Garden', status: 'ATIVO' },
+          { nome: 'Gran Valley', descricao: 'Resort Gran Valley', status: 'ATIVO' },
+          { nome: 'Paradise Resort', descricao: 'Paradise Resort Premium', status: 'ATIVO' }
+        ])
+        .select();
+
+      if (empError) {
+        console.error('❌ Erro ao criar empreendimentos:', empError);
+      } else {
+        console.log('✅ Empreendimentos criados:', empData);
+        setEmpreendimentos(empData || []);
+      }
+
+      // Recarregar a página após criar os dados
+      window.location.reload();
+
+    } catch (error) {
+      console.error('💥 Erro ao criar dados iniciais:', error);
+      // Fallback para dados vazios
+      setEmpreendimentos([]);
+      setCategoriasPreco([]);
+      setTorres([]);
+    }
+  };
+
   // Carregar dados do Supabase
   useEffect(() => {
     const carregarDados = async () => {
