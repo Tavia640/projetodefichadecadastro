@@ -273,6 +273,117 @@ const CadastroCliente = () => {
                 </div>
               </div>
 
+              {/* Dados de Endereço */}
+              <div className="space-y-4 border-t pt-6">
+                <h3 className="text-lg font-semibold">Endereço</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="logradouro"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-3">
+                        <FormLabel>Logradouro</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="numeroEndereco"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Número</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="bairro"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bairro</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="complemento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Complemento</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="cep"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CEP</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="cidade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ufEndereco"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>UF</FormLabel>
+                        <FormControl>
+                          <Input {...field} maxLength={2} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
               {/* Dados do Cônjuge */}
               {showConjugeFields && (
                 <div className="space-y-4 border-t pt-6">
