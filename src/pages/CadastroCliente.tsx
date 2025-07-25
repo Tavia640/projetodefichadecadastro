@@ -140,7 +140,7 @@ const CadastroCliente = () => {
                       <FormItem>
                         <FormLabel>Nome</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} value={field.value || ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
