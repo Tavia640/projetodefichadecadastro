@@ -351,58 +351,83 @@ const FichaNegociacao = () => {
   useEffect(() => {
     const carregarDados = async () => {
       try {
-        // Carregar empreendimentos
+        console.log('🔄 Iniciando carregamento dos dados...');
+
+        // Carregar empreendimentos primeiro
+        console.log('📍 Carregando empreendimentos...');
         const { data: empreendimentosData, error: errorEmpreendimentos } = await supabase
           .from('empreendimentos')
-          .select('*')
-          .eq('status', 'ATIVO');
+          .select('*');
 
-        if (errorEmpreendimentos) throw errorEmpreendimentos;
+        if (errorEmpreendimentos) {
+          console.error('❌ Erro ao carregar empreendimentos:', errorEmpreendimentos);
+          throw errorEmpreendimentos;
+        }
+
+        console.log('✅ Empreendimentos carregados:', empreendimentosData?.length || 0);
         setEmpreendimentos(empreendimentosData || []);
 
-        // Carregar categorias de preço das vendas normais com todos os campos (apenas registros mais recentes)
+        // Carregar tipos de venda normal com tratamento mais defensivo
+        console.log('💰 Carregando tipos de venda normal...');
         const { data: tiposVendaNormal, error: errorTiposVenda } = await supabase
           .from('tipos_venda_normal')
-          .select('categoria_preco, vir_cota, empreendimento_id, total_entrada, total_sinal, total_saldo, sinal_qtd, saldo_qtd, percentual_entrada, percentual_sinal, percentual_saldo, created_at')
+          .select('*')
           .order('created_at', { ascending: false });
 
-        if (errorTiposVenda) throw errorTiposVenda;
-        
-        // Filtrar apenas o registro mais recente de cada categoria por empreendimento
-        const categoriasUnicas = tiposVendaNormal?.reduce((acc, curr) => {
-          const key = `${curr.empreendimento_id}-${curr.categoria_preco}`;
-          if (!acc[key] || new Date(curr.created_at) > new Date(acc[key].created_at)) {
-            acc[key] = curr;
-          }
-          return acc;
-        }, {} as Record<string, any>);
-        
-        setCategoriasPreco(Object.values(categoriasUnicas || {}));
+        if (errorTiposVenda) {
+          console.error('❌ Erro ao carregar tipos de venda:', errorTiposVenda);
+          // Não quebrar aqui, continuar sem os tipos de venda
+          console.warn('⚠️ Continuando sem tipos de venda...');
+          setCategoriasPreco([]);
+        } else {
+          console.log('✅ Tipos de venda carregados:', tiposVendaNormal?.length || 0);
+
+          // Filtrar apenas o registro mais recente de cada categoria por empreendimento
+          const categoriasUnicas = tiposVendaNormal?.reduce((acc, curr) => {
+            const key = `${curr.empreendimento_id}-${curr.categoria_preco}`;
+            if (!acc[key] || new Date(curr.created_at) > new Date(acc[key].created_at)) {
+              acc[key] = curr;
+            }
+            return acc;
+          }, {} as Record<string, any>);
+
+          setCategoriasPreco(Object.values(categoriasUnicas || {}));
+        }
 
         // Carregar torres
+        console.log('🏢 Carregando torres...');
         const { data: torresData, error: errorTorres } = await supabase
           .from('torres')
           .select('*');
 
-        if (errorTorres) throw errorTorres;
-        setTorres(torresData || []);
+        if (errorTorres) {
+          console.error('❌ Erro ao carregar torres:', errorTorres);
+          // Não quebrar aqui, continuar sem as torres
+          console.warn('⚠️ Continuando sem torres...');
+          setTorres([]);
+        } else {
+          console.log('✅ Torres carregadas:', torresData?.length || 0);
+          setTorres(torresData || []);
+        }
+
+        console.log('🎉 Carregamento de dados concluído com sucesso!');
 
       } catch (error: any) {
-        console.error('Erro ao carregar dados:', error);
-        console.error('Detalhes do erro:', {
+        console.error('💥 Erro crítico ao carregar dados:', error);
+        console.error('🔍 Detalhes do erro:', {
           message: error?.message || 'Erro desconhecido',
           details: error?.details || 'Sem detalhes',
           hint: error?.hint || 'Sem dicas',
-          code: error?.code || 'Sem código'
+          code: error?.code || 'Sem código',
+          full: error
         });
 
-        // Mostrar alerta com erro mais detalhado para debug
-        if (error?.message) {
-          alert(`Erro ao carregar dados: ${error.message}\nDetalhes: ${error.details || 'N/A'}\nDica: ${error.hint || 'N/A'}`);
-        } else {
-          alert(`Erro ao carregar dados: ${JSON.stringify(error)}`);
-        }
+        // Inicializar com arrays vazios para evitar crashes
+        setEmpreendimentos([]);
+        setCategoriasPreco([]);
+        setTorres([]);
       } finally {
+        console.log('🏁 Finalizando carregamento...');
         setLoading(false);
       }
     };
@@ -1336,7 +1361,7 @@ const FichaNegociacao = () => {
                           <SelectContent>
                             <SelectItem value="dinheiro">Dinheiro</SelectItem>
                             <SelectItem value="cartao-credito">Cartão de Crédito</SelectItem>
-                            <SelectItem value="cartao-debito">Cart��o de Débito</SelectItem>
+                            <SelectItem value="cartao-debito">Cartão de Débito</SelectItem>
                             <SelectItem value="pix">PIX</SelectItem>
                             <SelectItem value="transferencia">Transferência</SelectItem>
                             <SelectItem value="boleto">Boleto</SelectItem>
