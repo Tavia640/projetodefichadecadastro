@@ -367,7 +367,7 @@ const FichaNegociacao = () => {
         console.log('✅ Conectividade OK. Total de empreendimentos:', testData?.count || 0);
 
         // Carregar empreendimentos primeiro
-        console.log('📍 Carregando empreendimentos...');
+        console.log('�� Carregando empreendimentos...');
         const { data: empreendimentosData, error: errorEmpreendimentos } = await supabase
           .from('empreendimentos')
           .select('*');
@@ -432,7 +432,8 @@ const FichaNegociacao = () => {
           details: error?.details || 'Sem detalhes',
           hint: error?.hint || 'Sem dicas',
           code: error?.code || 'Sem código',
-          full: error
+          name: error?.name || 'Sem nome',
+          stack: error?.stack || 'Sem stack trace'
         });
 
         // Inicializar com arrays vazios para evitar crashes
