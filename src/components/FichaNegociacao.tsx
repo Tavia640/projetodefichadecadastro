@@ -1569,21 +1569,28 @@ const FichaNegociacao = () => {
                     liner, closer, tipoVenda, parcelasPagasSala, contratos, informacoesPagamento
                   };
 
-                  // Baixar PDF 1: Cadastro
+                  // Baixar PDF 1: Cadastro (Página 1)
                   const pdfCadastro = PDFGenerator.gerarPDFCadastroCliente(dadosCliente);
                   const linkCadastro = document.createElement('a');
                   linkCadastro.href = pdfCadastro;
-                  linkCadastro.download = 'Cadastro-Cliente.pdf';
+                  linkCadastro.download = 'Pagina-1-Cadastro-Cliente.pdf';
                   linkCadastro.click();
 
-                  // Baixar PDF 2: Negociação
+                  // Baixar PDF 2: Negociação (Página 2)
                   const pdfNegociacao = PDFGenerator.gerarPDFNegociacao(dadosCliente, dadosNegociacao);
                   const linkNegociacao = document.createElement('a');
                   linkNegociacao.href = pdfNegociacao;
-                  linkNegociacao.download = 'Negociacao-Cota.pdf';
+                  linkNegociacao.download = 'Pagina-2-Negociacao-Cota.pdf';
                   linkNegociacao.click();
 
-                  console.log('✅ Dois PDFs baixados com sucesso!');
+                  // Baixar PDF 3: Página 3 (Campos vazios)
+                  const pdfPagina3 = PDFGenerator.gerarPDFPagina3(dadosCliente, dadosNegociacao);
+                  const linkPagina3 = document.createElement('a');
+                  linkPagina3.href = pdfPagina3;
+                  linkPagina3.download = 'Pagina-3-Negociacao-Vazia.pdf';
+                  linkPagina3.click();
+
+                  console.log('✅ Três PDFs baixados com sucesso!');
                 } catch (error: any) {
                   console.error('❌ Erro ao baixar PDFs:', error);
                   alert(`Erro: ${error.message}`);
