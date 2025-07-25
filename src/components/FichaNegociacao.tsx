@@ -988,7 +988,7 @@ const FichaNegociacao = () => {
 
                                 // Clonar valor para 1ª Entrada automaticamente
                                 const novasInformacoes = [...informacoesPagamento];
-                                const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1�� Entrada');
+                                const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
                                 if (primeiraEntradaIndex !== -1) {
                                   novasInformacoes[primeiraEntradaIndex].total = e.target.value;
                                   novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
@@ -1554,8 +1554,52 @@ const FichaNegociacao = () => {
             <Button variant="outline" onClick={limparFicha}>
               Limpar
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
+              onClick={() => {
+                try {
+                  const dadosClienteString = localStorage.getItem('dadosCliente');
+                  if (!dadosClienteString) {
+                    alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
+                    return;
+                  }
+
+                  const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
+                  const dadosNegociacao: DadosNegociacao = {
+                    liner, closer, tipoVenda, parcelasPagasSala, contratos, informacoesPagamento
+                  };
+
+                  // Baixar PDF 1: Cadastro
+                  const pdfCadastro = PDFGenerator.gerarPDFCadastroCliente(dadosCliente);
+                  const linkCadastro = document.createElement('a');
+                  linkCadastro.href = pdfCadastro;
+                  linkCadastro.download = 'Cadastro-Cliente.pdf';
+                  linkCadastro.click();
+
+                  // Baixar PDF 2: Negociação
+                  const pdfNegociacao = PDFGenerator.gerarPDFNegociacao(dadosCliente, dadosNegociacao);
+                  const linkNegociacao = document.createElement('a');
+                  linkNegociacao.href = pdfNegociacao;
+                  linkNegociacao.download = 'Negociacao-Cota.pdf';
+                  linkNegociacao.click();
+
+                  console.log('✅ Dois PDFs baixados com sucesso!');
+                } catch (error: any) {
+                  console.error('❌ Erro ao baixar PDFs:', error);
+                  alert(`Erro: ${error.message}`);
+                }
+              }}
+              className="flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Baixar PDFs
+            </Button>
+            <Button
+              variant="outline"
               onClick={imprimirFichas}
               className="flex items-center gap-2"
             >
@@ -1566,7 +1610,7 @@ const FichaNegociacao = () => {
               </svg>
               Imprimir PDFs
             </Button>
-            <Button 
+            <Button
               onClick={salvarFicha}
               className="flex items-center gap-2"
             >
