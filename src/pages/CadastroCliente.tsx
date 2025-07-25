@@ -61,6 +61,25 @@ const CadastroCliente = () => {
       profissao: '',
       dataNascimento: '',
       estadoCivil: '',
+      // Campos de endereço
+      logradouro: '',
+      numeroEndereco: '',
+      bairro: '',
+      complemento: '',
+      cep: '',
+      cidade: '',
+      ufEndereco: '',
+      // Campos do cônjuge
+      nomeConjuge: '',
+      cpfConjuge: '',
+      rgConjuge: '',
+      orgaoEmissorConjuge: '',
+      estadoEmissorConjuge: '',
+      emailConjuge: '',
+      telefoneConjuge: '',
+      profissaoConjuge: '',
+      dataNascimentoConjuge: '',
+      estadoCivilConjuge: '',
     },
   });
 
