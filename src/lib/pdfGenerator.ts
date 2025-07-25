@@ -298,7 +298,7 @@ export class PDFGenerator {
     }
   }
 
-  // PDF 2: Negociação (páginas 2 e 3 do formulário original)
+  // PDF 2: Negociação Página 2 (página 2 do formulário original)
   static gerarPDFNegociacao(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): string {
     const pdf = this.createPDFNegociacao(dadosCliente, dadosNegociacao);
     return pdf.output('datauristring');
@@ -306,6 +306,17 @@ export class PDFGenerator {
 
   static gerarPDFNegociacaoBlob(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): Blob {
     const pdf = this.createPDFNegociacao(dadosCliente, dadosNegociacao);
+    return pdf.output('blob');
+  }
+
+  // PDF 3: Negociação Página 3 (página 3 do formulário original - campos vazios)
+  static gerarPDFPagina3(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): string {
+    const pdf = this.createPDFPagina3(dadosCliente, dadosNegociacao);
+    return pdf.output('datauristring');
+  }
+
+  static gerarPDFPagina3Blob(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): Blob {
+    const pdf = this.createPDFPagina3(dadosCliente, dadosNegociacao);
     return pdf.output('blob');
   }
 
