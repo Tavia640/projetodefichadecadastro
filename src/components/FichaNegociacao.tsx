@@ -387,8 +387,21 @@ const FichaNegociacao = () => {
         if (errorTorres) throw errorTorres;
         setTorres(torresData || []);
 
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao carregar dados:', error);
+        console.error('Detalhes do erro:', {
+          message: error?.message || 'Erro desconhecido',
+          details: error?.details || 'Sem detalhes',
+          hint: error?.hint || 'Sem dicas',
+          code: error?.code || 'Sem código'
+        });
+
+        // Mostrar alerta com erro mais detalhado para debug
+        if (error?.message) {
+          alert(`Erro ao carregar dados: ${error.message}\nDetalhes: ${error.details || 'N/A'}\nDica: ${error.hint || 'N/A'}`);
+        } else {
+          alert(`Erro ao carregar dados: ${JSON.stringify(error)}`);
+        }
       } finally {
         setLoading(false);
       }
@@ -1323,7 +1336,7 @@ const FichaNegociacao = () => {
                           <SelectContent>
                             <SelectItem value="dinheiro">Dinheiro</SelectItem>
                             <SelectItem value="cartao-credito">Cartão de Crédito</SelectItem>
-                            <SelectItem value="cartao-debito">Cartão de Débito</SelectItem>
+                            <SelectItem value="cartao-debito">Cart��o de Débito</SelectItem>
                             <SelectItem value="pix">PIX</SelectItem>
                             <SelectItem value="transferencia">Transferência</SelectItem>
                             <SelectItem value="boleto">Boleto</SelectItem>
