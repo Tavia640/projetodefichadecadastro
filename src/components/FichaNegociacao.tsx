@@ -437,11 +437,26 @@ const FichaNegociacao = () => {
 
   // Filtrar categorias por empreendimento
   const getCategoriasPorEmpreendimento = (empreendimentoId: string) => {
+    if (!categoriasPreco || categoriasPreco.length === 0) {
+      // Fallback para quando não há dados no banco
+      return [
+        { categoria_preco: 'Bronze', vir_cota: 50000, empreendimento_id: empreendimentoId },
+        { categoria_preco: 'Prata', vir_cota: 75000, empreendimento_id: empreendimentoId },
+        { categoria_preco: 'Ouro', vir_cota: 100000, empreendimento_id: empreendimentoId },
+      ];
+    }
     return categoriasPreco.filter(cat => cat.empreendimento_id === empreendimentoId);
   };
 
   // Filtrar torres por empreendimento
   const getTorresPorEmpreendimento = (empreendimentoId: string) => {
+    if (!torres || torres.length === 0) {
+      // Fallback para quando não há dados no banco
+      return [
+        { id: '1', nome: 'Torre A', empreendimento_id: empreendimentoId },
+        { id: '2', nome: 'Torre B', empreendimento_id: empreendimentoId },
+      ];
+    }
     return torres.filter(torre => torre.empreendimento_id === empreendimentoId);
   };
 
