@@ -779,17 +779,17 @@ const FichaNegociacao = () => {
   const imprimirFichas = () => {
     try {
       console.log('🖨️ Iniciando processo de impressão...');
-      
+
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
         alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
         return;
       }
-      
+
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
       console.log('📋 Dados do cliente recuperados:', dadosCliente);
-      
+
       // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
@@ -799,44 +799,63 @@ const FichaNegociacao = () => {
         contratos,
         informacoesPagamento
       };
-      
+
       console.log('💼 Dados da negociação preparados:', dadosNegociacao);
       console.log('📄 Gerando PDFs para impressão...');
-      
-      // Gerar PDFs como blob URLs para impressão
+
+      // Gerar PDF 1: Cadastro de Cliente
+      console.log('📄 Gerando PDF 1: Cadastro de Cliente...');
       const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
+      console.log('✅ PDF 1 gerado:', pdfCadastroBlob.size, 'bytes');
+
+      // Gerar PDF 2: Negociação
+      console.log('📄 Gerando PDF 2: Negociação...');
       const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
-      
+      console.log('✅ PDF 2 gerado:', pdfNegociacaoBlob.size, 'bytes');
+
       console.log('🖨️ Abrindo PDFs para impressão...');
-      
+
       // Criar URLs para os blobs
       const urlCadastro = URL.createObjectURL(pdfCadastroBlob);
       const urlNegociacao = URL.createObjectURL(pdfNegociacaoBlob);
-      
-      // Abrir PDFs em novas janelas para impressão
-      const janelaCadastro = window.open(urlCadastro, '_blank');
-      const janelaNegociacao = window.open(urlNegociacao, '_blank');
-      
-      // Aguardar carregamento e imprimir
+
+      console.log('🔗 URL PDF 1:', urlCadastro);
+      console.log('🔗 URL PDF 2:', urlNegociacao);
+
+      // Abrir PDFs em novas janelas para impressão com delay entre eles
+      const janelaCadastro = window.open(urlCadastro, '_blank', 'width=800,height=600');
+      console.log('🪟 Janela PDF 1 aberta:', !!janelaCadastro);
+
       setTimeout(() => {
-        if (janelaCadastro) {
-          janelaCadastro.print();
-        }
-        if (janelaNegociacao) {
-          janelaNegociacao.print();
-        }
-        
-        // Limpar URLs após uso
+        const janelaNegociacao = window.open(urlNegociacao, '_blank', 'width=800,height=600');
+        console.log('🪟 Janela PDF 2 aberta:', !!janelaNegociacao);
+
+        // Aguardar carregamento e imprimir
         setTimeout(() => {
-          URL.revokeObjectURL(urlCadastro);
-          URL.revokeObjectURL(urlNegociacao);
-        }, 5000);
-      }, 1500);
-      
-      console.log('✅ PDFs abertos para impressão!');
-      
+          if (janelaCadastro) {
+            console.log('🖨️ Imprimindo PDF 1...');
+            janelaCadastro.print();
+          }
+          if (janelaNegociacao) {
+            console.log('🖨️ Imprimindo PDF 2...');
+            janelaNegociacao.print();
+          }
+        }, 2000);
+
+      }, 1000);
+
+      // Limpar URLs após uso
+      setTimeout(() => {
+        URL.revokeObjectURL(urlCadastro);
+        URL.revokeObjectURL(urlNegociacao);
+        console.log('🧹 URLs dos PDFs liberadas');
+      }, 10000);
+
+      console.log('✅ Processo de impressão iniciado! Dois PDFs devem abrir em janelas separadas.');
+
     } catch (error: any) {
       console.error('❌ Erro na impressão:', error);
+      console.error('📚 Stack trace:', error.stack);
       alert(`❌ Erro ao gerar PDFs para impressão: ${error.message || 'Erro desconhecido'}`);
     }
   };
@@ -969,7 +988,7 @@ const FichaNegociacao = () => {
 
                                 // Clonar valor para 1ª Entrada automaticamente
                                 const novasInformacoes = [...informacoesPagamento];
-                                const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
+                                const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1�� Entrada');
                                 if (primeiraEntradaIndex !== -1) {
                                   novasInformacoes[primeiraEntradaIndex].total = e.target.value;
                                   novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
