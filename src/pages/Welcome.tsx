@@ -39,7 +39,7 @@ const Welcome = () => {
         className="mt-6 text-3xl font-light opacity-0 animate-fade-in-up tracking-wide"
         style={{ letterSpacing: '1px' }}
       >
-        Parabéns, <span className="font-semibold text-[#58e1c1]" style={{ textShadow: '0 0 10px rgba(88, 225, 193, 0.6)' }}>Lobo do Sul!</span>
+        Parabéns, <span className="font-semibold text-[#58e1c1]" style={{ textShadow: '0 0 10px rgba(88, 225, 193, 0.6)' }}>300 do Sul!</span>
       </h1>
     </div>
   );
