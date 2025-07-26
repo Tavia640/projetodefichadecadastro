@@ -60,6 +60,34 @@ export interface DadosNegociacao {
 }
 
 export class PDFGenerator {
+  // Função para formatar data no padrão brasileiro
+  private static formatarDataBrasileira(data: string): string {
+    if (!data) return '';
+
+    try {
+      const date = new Date(data);
+      const dia = date.getDate().toString().padStart(2, '0');
+      const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+      const ano = date.getFullYear();
+      return `${dia}/${mes}/${ano}`;
+    } catch (error) {
+      return data; // Retorna original se não conseguir converter
+    }
+  }
+
+  // Função para buscar nome do empreendimento
+  private static buscarNomeEmpreendimento(empreendimentoId: string, dadosNegociacao: DadosNegociacao): string {
+    // Lista de empreendimentos mockados (mesmo que está na FichaNegociacao)
+    const empreendimentosMock = [
+      { id: '1', nome: 'Gran Garden' },
+      { id: '2', nome: 'Gran Valley' },
+      { id: '3', nome: 'Resort Paradise' }
+    ];
+
+    const empreendimento = empreendimentosMock.find(emp => emp.id === empreendimentoId);
+    return empreendimento?.nome || empreendimentoId || '';
+  }
+
   private static createFormHeader(pdf: jsPDF, title: string, pageInfo: string) {
     // Header principal com 3 colunas
     pdf.setDrawColor(0, 0, 0);
@@ -518,7 +546,7 @@ export class PDFGenerator {
       return pdf;
 
     } catch (error) {
-      console.error('Erro ao gerar PDF de negociação:', error);
+      console.error('Erro ao gerar PDF de negociaç��o:', error);
       throw new Error('Falha na geração do PDF de negociação');
     }
   }
