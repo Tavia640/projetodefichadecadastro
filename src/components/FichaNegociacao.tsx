@@ -889,7 +889,7 @@ const FichaNegociacao = () => {
 
   const salvarFicha = async () => {
     try {
-      console.log('🚀 Iniciando processo de salvamento e envio...');
+      console.log('���� Iniciando processo de salvamento e envio...');
       
       // Verificar se há alertas cr��ticos (apenas erros, não avisos)
       const alertasCriticos = Object.values(alertas).filter(alerta => 
@@ -1195,19 +1195,19 @@ const FichaNegociacao = () => {
                       </td>
                        <td className="border border-border p-3">
                          <Input
-                           value={formatarMoeda(parcela.valorDistribuido)}
+                           value={parcela.valorDistribuido ? formatarMoedaSimples(parcela.valorDistribuido) : ''}
                              onChange={(e) => {
-                              const valorLimpo = desformatarMoeda(e.target.value);
+                              const valorNumerico = obterValorNumerico(e.target.value);
                               const newParcelas = [...parcelasPagasSala];
-                              newParcelas[index].valorDistribuido = valorLimpo;
+                              newParcelas[index].valorDistribuido = valorNumerico;
                               setParcelasPagasSala(newParcelas);
 
                                 // Clonar valor para 1ª Entrada automaticamente
                                 const novasInformacoes = [...informacoesPagamento];
                                 const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
                                 if (primeiraEntradaIndex !== -1) {
-                                  novasInformacoes[primeiraEntradaIndex].total = valorLimpo;
-                                  novasInformacoes[primeiraEntradaIndex].valorParcela = valorLimpo;
+                                  novasInformacoes[primeiraEntradaIndex].total = valorNumerico;
+                                  novasInformacoes[primeiraEntradaIndex].valorParcela = valorNumerico;
                                   novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
 
                                   // Preencher forma de pagamento automaticamente se estiver vazia
