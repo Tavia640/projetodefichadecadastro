@@ -1063,7 +1063,7 @@ const FichaNegociacao = () => {
       setTimeout(() => {
         URL.revokeObjectURL(urlCadastro);
         URL.revokeObjectURL(urlNegociacao);
-        console.log('��� URLs dos PDFs liberadas');
+        console.log('🧹 URLs dos PDFs liberadas');
       }, 15000);
 
       // Notificar usuário
@@ -1444,12 +1444,11 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={mascararMoeda(contrato.valor || '')}
+                          value={formatarMoeda(contrato.valor || '')}
                           onChange={(e) => {
-                            const valorMascarado = mascararMoeda(e.target.value);
-                            const valorNumerico = obterValorNumerico(valorMascarado);
+                            const valorLimpo = obterValorLimpo(e.target.value);
                             const newContratos = [...contratos];
-                            newContratos[index].valor = valorNumerico;
+                            newContratos[index].valor = valorLimpo;
                             setContratos(newContratos);
                           }}
                           placeholder="0,00"
