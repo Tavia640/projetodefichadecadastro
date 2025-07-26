@@ -536,7 +536,7 @@ export class PDFGenerator {
         this.createTableCell(pdf, info?.formaPagamento || "", currentX, yPos, pagWidths[4], 8, 6);
         currentX += pagWidths[4];
         
-        this.createTableCell(pdf, info?.primeiroVencimento || "", currentX, yPos, pagWidths[5], 8, 6);
+        this.createTableCell(pdf, this.formatarDataBrasileira(info?.primeiroVencimento || ""), currentX, yPos, pagWidths[5], 8, 6);
         
         yPos += 8;
       }
