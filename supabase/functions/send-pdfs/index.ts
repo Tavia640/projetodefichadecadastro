@@ -35,6 +35,8 @@ interface EmailResponse {
 
 const handler = async (req: Request): Promise<Response> => {
   console.log("🚀 Send PDFs function iniciada");
+  console.log("🔍 Método da requisição:", req.method);
+  console.log("🔍 Headers da requisição:", Object.fromEntries(req.headers.entries()));
 
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -43,13 +45,26 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     console.log("📨 Processando requisição de envio de PDFs...");
-    
+
+    // Verificar variáveis de ambiente disponíveis
+    console.log("🔍 Verificando variáveis de ambiente...");
+    const availableEnvVars = [];
+    for (const key of Deno.env.toObject()) {
+      if (key.includes('RESEND') || key.includes('API')) {
+        availableEnvVars.push(key);
+      }
+    }
+    console.log("📋 Variáveis de ambiente disponíveis:", availableEnvVars);
+
     // Verificar se a API key está configurada
     const apiKey = Deno.env.get("RESEND_API_KEY");
     if (!apiKey) {
       console.error("❌ RESEND_API_KEY não configurada!");
+      console.error("🔍 Todas as variáveis de ambiente:", Object.keys(Deno.env.toObject()));
       throw new Error("Chave API do Resend não configurada. Configure RESEND_API_KEY nas configurações do projeto.");
     }
+
+    console.log("✅ RESEND_API_KEY encontrada:", apiKey ? `${apiKey.substring(0, 8)}...` : 'VAZIA');
 
     // Inicializar Resend
     const resend = new Resend(apiKey);
@@ -120,7 +135,7 @@ const handler = async (req: Request): Promise<Response> => {
           <!-- Header -->
           <div style="background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
             <h1 style="margin: 0; font-size: 28px; font-weight: bold;">
-              🏖️ GAV RESORTS
+              ��️ GAV RESORTS
             </h1>
             <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
               Nova Ficha de Negociação Recebida
