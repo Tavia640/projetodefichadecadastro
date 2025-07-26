@@ -464,7 +464,7 @@ export class PDFGenerator {
         this.createTableCell(pdf, "( ) Físico\n( ) Digital", currentX, yPos, contratoWidths[0], 12, 6);
         currentX += contratoWidths[0];
         
-        this.createTableCell(pdf, contrato?.empreendimento || "", currentX, yPos, contratoWidths[1], 12, 6);
+        this.createTableCell(pdf, this.buscarNomeEmpreendimento(contrato?.empreendimento || "", dadosNegociacao), currentX, yPos, contratoWidths[1], 12, 6);
         currentX += contratoWidths[1];
         
         this.createTableCell(pdf, contrato?.torre || "", currentX, yPos, contratoWidths[2], 12, 6);
@@ -546,7 +546,7 @@ export class PDFGenerator {
       return pdf;
 
     } catch (error) {
-      console.error('Erro ao gerar PDF de negociaç��o:', error);
+      console.error('Erro ao gerar PDF de negociação:', error);
       throw new Error('Falha na geração do PDF de negociação');
     }
   }
