@@ -105,15 +105,19 @@ export class PDFGenerator {
     // Buscar nome no mapeamento
     const nomeEncontrado = mapeamentoEmpreendimentos[empreendimentoId];
     if (nomeEncontrado) {
+      console.log(`🏢 Empreendimento encontrado: ${empreendimentoId} → ${nomeEncontrado}`);
       return nomeEncontrado;
     }
 
     // Se não encontrar, retornar o próprio ID ou uma versão formatada
     if (empreendimentoId) {
       // Tentar formatar o ID para um nome legível
-      return empreendimentoId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const nomeFormatado = empreendimentoId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      console.log(`🏢 Empreendimento formatado: ${empreendimentoId} → ${nomeFormatado}`);
+      return nomeFormatado;
     }
 
+    console.log(`⚠️ Empreendimento vazio ou não encontrado: ${empreendimentoId}`);
     return '';
   }
 
