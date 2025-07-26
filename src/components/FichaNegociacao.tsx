@@ -1666,14 +1666,14 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={info.valorParcela}
+                          value={formatarMoeda(info.valorParcela)}
                           onChange={(e) => {
+                            const valorLimpo = desformatarMoeda(e.target.value);
                             const newInfos = [...informacoesPagamento];
-                            newInfos[index].valorParcela = e.target.value;
+                            newInfos[index].valorParcela = valorLimpo;
                             setInformacoesPagamento(newInfos);
                           }}
-                          placeholder="Valor"
-                          type="number"
+                          placeholder="R$ 0,00"
                         />
                       </td>
                       <td className="border border-border p-3">
