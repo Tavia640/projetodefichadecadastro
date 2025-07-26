@@ -975,34 +975,67 @@ const FichaNegociacao = () => {
       console.log('🔗 URL PDF 1:', urlCadastro);
       console.log('🔗 URL PDF 2:', urlNegociacao);
 
-      // Abrir PDFs em novas janelas para impressão com delay entre eles
-      const janelaCadastro = window.open(urlCadastro, '_blank', 'width=800,height=600');
-      console.log('🪟 Janela PDF 1 aberta:', !!janelaCadastro);
+      // Tentar abrir primeiro PDF
+      const janelaCadastro = window.open(urlCadastro, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
 
+      if (!janelaCadastro) {
+        alert('⚠️ Bloqueador de pop-ups ativo! Por favor, permita pop-ups para este site e tente novamente.\n\nSerão abertos 2 PDFs para impressão.');
+        return;
+      }
+
+      console.log('🪟 Janela PDF 1 aberta com sucesso');
+
+      // Aguardar um pouco e abrir segundo PDF
       setTimeout(() => {
-        const janelaNegociacao = window.open(urlNegociacao, '_blank', 'width=800,height=600');
-        console.log('🪟 Janela PDF 2 aberta:', !!janelaNegociacao);
+        const janelaNegociacao = window.open(urlNegociacao, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
 
-        // Aguardar carregamento e imprimir
+        if (!janelaNegociacao) {
+          console.warn('⚠️ Falha ao abrir segunda janela');
+          alert('⚠️ Falha ao abrir o segundo PDF. Verifique o bloqueador de pop-ups.');
+          return;
+        }
+
+        console.log('🪟 Janela PDF 2 aberta com sucesso');
+
+        // Aguardar carregamento dos PDFs e tentar imprimir automaticamente
         setTimeout(() => {
-          if (janelaCadastro) {
-            console.log('🖨️ Imprimindo PDF 1...');
-            janelaCadastro.print();
+          try {
+            if (janelaCadastro && !janelaCadastro.closed) {
+              console.log('🖨️ Tentando imprimir PDF 1...');
+              janelaCadastro.focus();
+              janelaCadastro.print();
+            }
+          } catch (e) {
+            console.warn('⚠️ Falha ao imprimir PDF 1 automaticamente:', e);
           }
-          if (janelaNegociacao) {
-            console.log('🖨️ Imprimindo PDF 2...');
-            janelaNegociacao.print();
-          }
-        }, 2000);
 
-      }, 1000);
+          setTimeout(() => {
+            try {
+              if (janelaNegociacao && !janelaNegociacao.closed) {
+                console.log('🖨️ Tentando imprimir PDF 2...');
+                janelaNegociacao.focus();
+                janelaNegociacao.print();
+              }
+            } catch (e) {
+              console.warn('⚠️ Falha ao imprimir PDF 2 automaticamente:', e);
+            }
+          }, 1000);
+
+        }, 3000); // Aguardar mais tempo para garantir carregamento
+
+      }, 1500); // Delay maior entre aberturas
 
       // Limpar URLs após uso
       setTimeout(() => {
         URL.revokeObjectURL(urlCadastro);
         URL.revokeObjectURL(urlNegociacao);
         console.log('🧹 URLs dos PDFs liberadas');
-      }, 10000);
+      }, 15000);
+
+      // Notificar usuário
+      setTimeout(() => {
+        alert('✅ Dois PDFs foram abertos para impressão:\n\n1️⃣ Cadastro do Cliente\n2️⃣ Ficha de Negociação\n\nSe a impressão automática não funcionar, use Ctrl+P em cada janela.');
+      }, 1000);
 
       console.log('✅ Processo de impressão iniciado! Dois PDFs devem abrir em janelas separadas.');
 
