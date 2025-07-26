@@ -704,7 +704,7 @@ const FichaNegociacao = () => {
           console.log('✅ Torres mockadas carregadas:', torresMock.length);
         }
 
-        console.log('🎉 Carregamento de dados concluído com sucesso!');
+        console.log('🎉 Carregamento de dados conclu��do com sucesso!');
 
       } catch (error: any) {
         console.error('💥 Erro crítico ao carregar dados:', error);
@@ -1698,14 +1698,15 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={formatarMoeda(info.valorParcela)}
+                          value={mascararMoeda(info.valorParcela || '')}
                           onChange={(e) => {
-                            const valorLimpo = desformatarMoeda(e.target.value);
+                            const valorMascarado = mascararMoeda(e.target.value);
+                            const valorNumerico = obterValorNumerico(valorMascarado);
                             const newInfos = [...informacoesPagamento];
-                            newInfos[index].valorParcela = valorLimpo;
+                            newInfos[index].valorParcela = valorNumerico;
                             setInformacoesPagamento(newInfos);
                           }}
-                          placeholder="R$ 0,00"
+                          placeholder="0,00"
                         />
                       </td>
                       <td className="border border-border p-3">
