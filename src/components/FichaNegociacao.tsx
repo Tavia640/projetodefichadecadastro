@@ -397,7 +397,7 @@ const FichaNegociacao = () => {
         console.log('🔄 Iniciando carregamento dos dados...');
 
         // Testar conectividade básica primeiro
-        console.log('🔌 Testando conectividade com Supabase...');
+        console.log('���� Testando conectividade com Supabase...');
         console.log('🌐 URL:', 'https://msxhwlwxpvrtmyngwwcp.supabase.co');
 
         try {
@@ -1561,7 +1561,9 @@ const FichaNegociacao = () => {
                                   setInformacoesPagamento(newInfos);
                                 }
                             }}
-                           placeholder="0,00"
+                           placeholder="1000.00"
+                           type="number"
+                           step="0.01"
                            min={info.tipo === '1ª Entrada' ? 1000 : undefined}
                            className={`bg-background ${
                              info.tipo === '1ª Entrada' && parseFloat(info.total) > 0 && parseFloat(info.total) < 1000 
