@@ -12,55 +12,80 @@ export class EmailService {
   static async enviarPDFs(payload: EmailPayload): Promise<{ success: boolean; message: string; messageId?: string }> {
     try {
       console.log('🚀 Iniciando envio de PDFs via email...');
-      
+      console.log('📋 Dados do payload:', {
+        temClientData: !!payload.clientData,
+        temFichaData: !!payload.fichaData,
+        nomeCliente: payload.clientData?.nome,
+        tamanhoPdf1: payload.pdfData1?.length || 0,
+        tamanhoPdf2: payload.pdfData2?.length || 0
+      });
+
       // Validar dados antes do envio
       this.validarPayload(payload);
-      
-      // Invocar edge function
+
+      // Invocar edge function com timeout
+      console.log('🔄 Invocando edge function do Supabase...');
       const response = await supabase.functions.invoke('send-pdfs', {
         body: payload
       });
-      
-      console.log('📨 Resposta da edge function:', response);
-      
+
+      console.log('📨 Resposta completa da edge function:', {
+        error: response.error,
+        data: response.data,
+        status: response.status
+      });
+
       // Verificar erros da edge function
       if (response.error) {
         console.error('❌ Erro da edge function:', response.error);
+
+        // Melhor diagnóstico do erro
+        if (response.error.message?.includes('Edge Function returned a non-2xx status code')) {
+          // Se temos dados de erro na resposta, usar essa informação
+          if (response.data && typeof response.data === 'object') {
+            throw new Error(`Servidor retornou erro: ${response.data.error || response.data.message || 'Erro interno'}`);
+          }
+          throw new Error('Erro interno no servidor de email. Verifique as configurações da API key do Resend.');
+        }
+
         throw new Error(`Erro no envio: ${response.error.message}`);
       }
-      
+
       // Verificar resposta de sucesso
       if (!response.data) {
         throw new Error('Resposta vazia da edge function');
       }
-      
+
       if (!response.data.success) {
         console.error('❌ Falha reportada pela edge function:', response.data);
-        throw new Error(response.data.error || 'Erro desconhecido no servidor');
+        throw new Error(response.data.error || response.data.message || 'Erro desconhecido no servidor');
       }
-      
+
       console.log('✅ PDFs enviados com sucesso!');
-      
+
       return {
         success: true,
         message: 'PDFs enviados com sucesso para admudrive2025@gavresorts.com.br',
         messageId: response.data.messageId
       };
-      
+
     } catch (error: any) {
       console.error('❌ Erro no envio de PDFs:', error);
-      
+      console.error('📚 Stack trace completo:', error.stack);
+
       // Tratamento de erros específicos
       let errorMessage = 'Erro desconhecido no envio de PDFs';
-      
+
       if (error.message?.includes('RESEND_API_KEY')) {
-        errorMessage = 'Chave API do Resend não configurada. Configure nas configurações do projeto.';
+        errorMessage = 'Chave API do Resend não configurada. Acesse as configurações do projeto Supabase e configure a variável RESEND_API_KEY.';
       } else if (error.message?.includes('Failed to fetch')) {
-        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        errorMessage = 'Erro de conexão com o servidor. Verifique sua internet e tente novamente.';
+      } else if (error.message?.includes('non-2xx status code')) {
+        errorMessage = 'Erro interno no servidor de email. Verifique as configurações da API key do Resend no painel do Supabase.';
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       return {
         success: false,
         message: errorMessage
