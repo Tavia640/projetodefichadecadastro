@@ -12,33 +12,25 @@ import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
 import { EmailService } from '@/lib/emailService';
 
-// Função para formatação de moeda brasileira mais simples
-const formatarMoedaSimples = (valor: string): string => {
+// Função para formatação de moeda brasileira
+const formatarMoeda = (valor: string | number): string => {
   if (!valor) return '';
-
-  // Remove tudo que não é dígito
-  const numeroLimpo = valor.replace(/\D/g, '');
-
-  if (!numeroLimpo) return '';
-
-  // Converte para número com centavos
-  const numero = parseFloat(numeroLimpo) / 100;
-
-  // Formatar em reais brasileiros
+  const numero = typeof valor === 'string' ?
+    parseFloat(valor.replace(/[^\d.,]/g, '').replace(',', '.')) || 0 :
+    valor;
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
   }).format(numero);
 };
 
-// Função para obter valor numérico limpo
-const obterValorNumerico = (valorFormatado: string): string => {
+// Função para converter moeda formatada para valor numérico
+const desformatarMoeda = (valorFormatado: string): string => {
   if (!valorFormatado) return '';
-  // Remove tudo que não é dígito
-  const numeroLimpo = valorFormatado.replace(/\D/g, '');
-  if (!numeroLimpo) return '';
-  // Retorna como string numérica (centavos)
-  return (parseFloat(numeroLimpo) / 100).toString();
+  return valorFormatado
+    .replace(/[^\d.,]/g, '')
+    .replace(',', '.')
+    .replace(/\.(?=.*\.)/g, '');
 };
 
 interface ParcelaPagaSala {
@@ -411,7 +403,7 @@ const FichaNegociacao = () => {
     }
   };
 
-  // Carregar dados com fallback robusto
+  // Carregar dados do Supabase
   useEffect(() => {
     const carregarDados = async () => {
       try {
@@ -712,109 +704,7 @@ const FichaNegociacao = () => {
       }
     };
 
-    // Carregar dados mockados diretamente (modo estável)
-    console.log('🔄 Carregando dados (modo offline estável)...');
-
-    const empreendimentosMock = [
-      {
-        id: '1',
-        nome: 'Gran Garden',
-        descricao: 'Empreendimento Gran Garden',
-        status: 'ATIVO',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '2',
-        nome: 'Gran Valley',
-        descricao: 'Empreendimento Gran Valley',
-        status: 'ATIVO',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '3',
-        nome: 'Residencial Primavera',
-        descricao: 'Empreendimento Residencial Primavera',
-        status: 'ATIVO',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    ];
-
-    const categoriasMock = [
-      {
-        id: '1',
-        nome: 'VIR COTA 1',
-        empreendimento_id: '1',
-        vir_cota: 50000,
-        total_sinal: 5000,
-        total_saldo: 45000,
-        sinal_qtd: 5,
-        saldo_qtd: 60,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '2',
-        nome: 'VIR COTA 2',
-        empreendimento_id: '1',
-        vir_cota: 75000,
-        total_sinal: 7500,
-        total_saldo: 67500,
-        sinal_qtd: 5,
-        saldo_qtd: 60,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '3',
-        nome: 'VIR COTA 3',
-        empreendimento_id: '2',
-        vir_cota: 100000,
-        total_sinal: 10000,
-        total_saldo: 90000,
-        sinal_qtd: 5,
-        saldo_qtd: 60,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    ];
-
-    const torresMock = [
-      {
-        id: '1',
-        nome: 'Torre A',
-        empreendimento_id: '1',
-        descricao: 'Torre A - Gran Garden',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: '2',
-        nome: 'Torre B',
-        empreendimento_id: '1',
-        descricao: 'Torre B - Gran Garden',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: '3',
-        nome: 'Torre Central',
-        empreendimento_id: '2',
-        descricao: 'Torre Central - Gran Valley',
-        created_at: new Date().toISOString()
-      }
-    ];
-
-    setEmpreendimentos(empreendimentosMock);
-    setCategoriasPreco(categoriasMock);
-    setTorres(torresMock);
-    setLoading(false);
-
-    console.log('✅ Dados mockados carregados:', {
-      empreendimentos: empreendimentosMock.length,
-      categorias: categoriasMock.length,
-      torres: torresMock.length
-    });
+    carregarDados();
   }, []);
 
   // Filtrar categorias por empreendimento
@@ -1095,7 +985,7 @@ const FichaNegociacao = () => {
       // Gerar PDF 2: Negociação (Páginas 2 e 3)
       console.log('📄 Gerando PDF 2: Negociação...');
       const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
-      console.log('��� PDF 2 gerado:', pdfNegociacaoBlob.size, 'bytes');
+      console.log('✅ PDF 2 gerado:', pdfNegociacaoBlob.size, 'bytes');
 
       console.log('🖨️ Abrindo PDFs para impressão...');
 
@@ -1285,11 +1175,11 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={parcela.valorTotal ? formatarMoedaSimples(parcela.valorTotal) : ''}
+                          value={formatarMoeda(parcela.valorTotal)}
                           onChange={(e) => {
-                            const valorNumerico = obterValorNumerico(e.target.value);
+                            const valorLimpo = desformatarMoeda(e.target.value);
                             const newParcelas = [...parcelasPagasSala];
-                            newParcelas[index].valorTotal = valorNumerico;
+                            newParcelas[index].valorTotal = valorLimpo;
                             setParcelasPagasSala(newParcelas);
                           }}
                           placeholder="R$ 0,00"
@@ -1297,19 +1187,19 @@ const FichaNegociacao = () => {
                       </td>
                        <td className="border border-border p-3">
                          <Input
-                           value={parcela.valorDistribuido ? formatarMoedaSimples(parcela.valorDistribuido) : ''}
+                           value={formatarMoeda(parcela.valorDistribuido)}
                              onChange={(e) => {
-                              const valorNumerico = obterValorNumerico(e.target.value);
+                              const valorLimpo = desformatarMoeda(e.target.value);
                               const newParcelas = [...parcelasPagasSala];
-                              newParcelas[index].valorDistribuido = valorNumerico;
+                              newParcelas[index].valorDistribuido = valorLimpo;
                               setParcelasPagasSala(newParcelas);
 
                                 // Clonar valor para 1ª Entrada automaticamente
                                 const novasInformacoes = [...informacoesPagamento];
                                 const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
                                 if (primeiraEntradaIndex !== -1) {
-                                  novasInformacoes[primeiraEntradaIndex].total = valorNumerico;
-                                  novasInformacoes[primeiraEntradaIndex].valorParcela = valorNumerico;
+                                  novasInformacoes[primeiraEntradaIndex].total = valorLimpo;
+                                  novasInformacoes[primeiraEntradaIndex].valorParcela = valorLimpo;
                                   novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
 
                                   // Preencher forma de pagamento automaticamente se estiver vazia
@@ -1540,11 +1430,11 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={contrato.valor ? formatarMoedaSimples(contrato.valor) : ''}
+                          value={formatarMoeda(contrato.valor)}
                           onChange={(e) => {
-                            const valorNumerico = obterValorNumerico(e.target.value);
+                            const valorLimpo = desformatarMoeda(e.target.value);
                             const newContratos = [...contratos];
-                            newContratos[index].valor = valorNumerico;
+                            newContratos[index].valor = valorLimpo;
                             setContratos(newContratos);
                           }}
                           placeholder="R$ 0,00"
@@ -1654,10 +1544,10 @@ const FichaNegociacao = () => {
                           </td>
                        <td className="border border-border p-3">
                          <Input
-                           value={info.total ? formatarMoedaSimples(info.total) : ''}
+                           value={formatarMoeda(info.total)}
                             onChange={(e) => {
-                              const valorNumerico = obterValorNumerico(e.target.value);
-                              const valor = parseFloat(valorNumerico) || 0;
+                              const valorLimpo = desformatarMoeda(e.target.value);
+                              const valor = parseFloat(valorLimpo) || 0;
 
                               // Validação específica para 1ª Entrada - não pode ser menor que R$ 1.000
                               if (info.tipo === '1ª Entrada' && valor > 0 && valor < 1000) {
@@ -1665,11 +1555,11 @@ const FichaNegociacao = () => {
                               }
 
                               const newInfos = [...informacoesPagamento];
-                              newInfos[index].total = valorNumerico;
+                              newInfos[index].total = valorLimpo;
 
                               // Recalcular valor da parcela automaticamente quando alterar total
                               if (newInfos[index].qtdParcelas && parseInt(newInfos[index].qtdParcelas) > 0) {
-                                const total = parseFloat(valorNumerico) || 0;
+                                const total = parseFloat(valorLimpo) || 0;
                                 const qtdParcelas = parseInt(newInfos[index].qtdParcelas);
                                 newInfos[index].valorParcela = (total / qtdParcelas).toFixed(2);
                               }
@@ -1775,11 +1665,11 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={info.valorParcela ? formatarMoedaSimples(info.valorParcela) : ''}
+                          value={formatarMoeda(info.valorParcela)}
                           onChange={(e) => {
-                            const valorNumerico = obterValorNumerico(e.target.value);
+                            const valorLimpo = desformatarMoeda(e.target.value);
                             const newInfos = [...informacoesPagamento];
-                            newInfos[index].valorParcela = valorNumerico;
+                            newInfos[index].valorParcela = valorLimpo;
                             setInformacoesPagamento(newInfos);
                           }}
                           placeholder="R$ 0,00"
