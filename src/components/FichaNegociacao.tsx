@@ -12,52 +12,36 @@ import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
 import { EmailService } from '@/lib/emailService';
 
-// Função para exibir valor formatado (somente leitura)
-const exibirMoeda = (valor: string): string => {
-  if (!valor) return '';
-  const numero = parseFloat(valor) || 0;
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(numero);
-};
-
-// Função para mascarar input enquanto digita
-const mascararMoeda = (valor: string): string => {
-  if (!valor) return '';
+// Função para formatar valor monetário brasileiro
+const formatarMoeda = (valor: string): string => {
+  if (!valor || valor === '0') return '';
 
   // Remove tudo que não é dígito
-  let numeros = valor.replace(/\D/g, '');
+  const apenasNumeros = valor.replace(/\D/g, '');
 
-  if (!numeros) return '';
+  if (!apenasNumeros) return '';
 
-  // Adiciona vírgula para centavos
-  if (numeros.length === 1) {
-    return `0,0${numeros}`;
-  } else if (numeros.length === 2) {
-    return `0,${numeros}`;
-  } else {
-    const centavos = numeros.slice(-2);
-    const reais = numeros.slice(0, -2);
+  // Converte para número
+  const numero = parseFloat(apenasNumeros) / 100;
 
-    // Adiciona pontos para milhares
-    const reaisFormatados = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-
-    return `${reaisFormatados},${centavos}`;
-  }
+  // Formata como moeda brasileira
+  return numero.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 };
 
-// Função para obter valor numérico do input mascarado
-const obterValorNumerico = (valorMascarado: string): string => {
-  if (!valorMascarado) return '';
+// Função para obter valor limpo (só números) do campo formatado
+const obterValorLimpo = (valorFormatado: string): string => {
+  if (!valorFormatado) return '';
 
   // Remove tudo que não é dígito
-  const numeros = valorMascarado.replace(/\D/g, '');
+  const apenasNumeros = valorFormatado.replace(/\D/g, '');
 
-  if (!numeros) return '';
+  if (!apenasNumeros) return '';
 
-  // Converte para decimal (centavos para reais)
-  const valorDecimal = parseFloat(numeros) / 100;
+  // Converte centavos para valor decimal
+  const valorDecimal = parseFloat(apenasNumeros) / 100;
 
   return valorDecimal.toString();
 };
