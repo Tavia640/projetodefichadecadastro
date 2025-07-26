@@ -889,9 +889,9 @@ const FichaNegociacao = () => {
 
   const salvarFicha = async () => {
     try {
-      console.log('���� Iniciando processo de salvamento e envio...');
+      console.log('🚀 Iniciando processo de salvamento e envio...');
       
-      // Verificar se há alertas cr��ticos (apenas erros, não avisos)
+      // Verificar se há alertas cr����ticos (apenas erros, não avisos)
       const alertasCriticos = Object.values(alertas).filter(alerta => 
         alerta.includes('ERRO') && !alerta.includes('AVISO')
       );
@@ -1438,11 +1438,11 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={formatarMoeda(contrato.valor)}
+                          value={contrato.valor ? formatarMoedaSimples(contrato.valor) : ''}
                           onChange={(e) => {
-                            const valorLimpo = desformatarMoeda(e.target.value);
+                            const valorNumerico = obterValorNumerico(e.target.value);
                             const newContratos = [...contratos];
-                            newContratos[index].valor = valorLimpo;
+                            newContratos[index].valor = valorNumerico;
                             setContratos(newContratos);
                           }}
                           placeholder="R$ 0,00"
