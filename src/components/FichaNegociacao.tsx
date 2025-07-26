@@ -1187,32 +1187,32 @@ const FichaNegociacao = () => {
                       </td>
                        <td className="border border-border p-3">
                          <Input
-                           value={parcela.valorDistribuido}
+                           value={formatarMoeda(parcela.valorDistribuido)}
                              onChange={(e) => {
+                              const valorLimpo = desformatarMoeda(e.target.value);
                               const newParcelas = [...parcelasPagasSala];
-                              newParcelas[index].valorDistribuido = e.target.value;
+                              newParcelas[index].valorDistribuido = valorLimpo;
                               setParcelasPagasSala(newParcelas);
 
                                 // Clonar valor para 1ª Entrada automaticamente
                                 const novasInformacoes = [...informacoesPagamento];
                                 const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
                                 if (primeiraEntradaIndex !== -1) {
-                                  novasInformacoes[primeiraEntradaIndex].total = e.target.value;
-                                  novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
+                                  novasInformacoes[primeiraEntradaIndex].total = valorLimpo;
+                                  novasInformacoes[primeiraEntradaIndex].valorParcela = valorLimpo;
                                   novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
-                                  
+
                                   // Preencher forma de pagamento automaticamente se estiver vazia
                                   if (!novasInformacoes[primeiraEntradaIndex].formaPagamento && parcela.formasPagamento[0]) {
                                     novasInformacoes[primeiraEntradaIndex].formaPagamento = parcela.formasPagamento[0];
                                   }
                                 }
-                                
+
                                 // Recalcular restante da entrada
                                 const informacoesAtualizadas = recalcularRestanteEntrada(novasInformacoes);
                                 setInformacoesPagamento(informacoesAtualizadas);
                             }}
-                           placeholder="Valor distribuído"
-                           type="number"
+                           placeholder="R$ 0,00"
                          />
                        </td>
                       <td className="border border-border p-3">
