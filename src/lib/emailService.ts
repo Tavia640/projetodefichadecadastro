@@ -9,6 +9,37 @@ export interface EmailPayload {
 }
 
 export class EmailService {
+  // Função para testar a conectividade do sistema de email
+  static async testarConectividade(): Promise<{ success: boolean; message: string }> {
+    try {
+      console.log('🔍 Testando conectividade do sistema de email...');
+
+      const response = await supabase.functions.invoke('send-pdfs', {
+        body: { test: true }
+      });
+
+      console.log('📡 Resultado do teste:', response);
+
+      if (response.error) {
+        return {
+          success: false,
+          message: `Erro de conectividade: ${response.error.message}`
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Sistema de email está funcionando corretamente'
+      };
+
+    } catch (error: any) {
+      console.error('❌ Erro no teste de conectividade:', error);
+      return {
+        success: false,
+        message: `Erro no teste: ${error.message}`
+      };
+    }
+  }
   static async enviarPDFs(payload: EmailPayload): Promise<{ success: boolean; message: string; messageId?: string }> {
     try {
       console.log('🚀 Iniciando envio de PDFs via email...');
