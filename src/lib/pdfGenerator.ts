@@ -575,7 +575,140 @@ export class PDFGenerator {
         yPos += 8;
       }
 
+      // ADICIONAR PÁGINA 3 (campos vazios)
+      pdf.addPage();
 
+      // Header da página 3
+      this.createFormHeader(pdf, "Ficha de Negociação de Cota", "Página: 2 de 2");
+
+      yPos = 50;
+
+      // Primeira seção: Tipo de Parcela Paga em Sala (cabeçalhos)
+      const headers1Page3 = [
+        "Tipo de Parcela Paga em Sala",
+        "Valor Total Pago em Sala",
+        "Quantidade de cotas",
+        "Valor distribuido para cada Unidade",
+        "Forma de Pagamento"
+      ];
+      const widths1Page3 = [38, 38, 38, 38, 38];
+
+      // Cabeçalho da tabela
+      currentX = 10;
+      headers1Page3.forEach((header, i) => {
+        this.createTableCell(pdf, header, currentX, yPos, widths1Page3[i], 12, 7, true);
+        currentX += widths1Page3[i];
+      });
+      yPos += 12;
+
+      // 3 linhas para parcelas (vazias)
+      const tiposFixosPage3 = ["( ) Entrada", "( ) Sinal", "( ) Saldo"];
+      for (let i = 0; i < 3; i++) {
+        currentX = 10;
+
+        this.createTableCell(pdf, tiposFixosPage3[i], currentX, yPos, widths1Page3[0], 8);
+        currentX += widths1Page3[0];
+
+        this.createTableCell(pdf, "", currentX, yPos, widths1Page3[1], 8);
+        currentX += widths1Page3[1];
+
+        this.createTableCell(pdf, "", currentX, yPos, widths1Page3[2], 8);
+        currentX += widths1Page3[2];
+
+        this.createTableCell(pdf, "", currentX, yPos, widths1Page3[3], 8);
+        currentX += widths1Page3[3];
+
+        this.createTableCell(pdf, "", currentX, yPos, widths1Page3[4], 8);
+
+        yPos += 8;
+      }
+      yPos += 10;
+
+      // Tabela de contratos (vazia)
+      currentX = 10;
+      contratoHeaders.forEach((header, i) => {
+        this.createTableCell(pdf, header, currentX, yPos, contratoWidths[i], 10, 7, true);
+        currentX += contratoWidths[i];
+      });
+      yPos += 10;
+
+      // 4 linhas de contratos vazias
+      for (let i = 0; i < 4; i++) {
+        currentX = 10;
+
+        this.createTableCell(pdf, "( ) Físico\n( ) Digital", currentX, yPos, contratoWidths[0], 12, 6);
+        currentX += contratoWidths[0];
+
+        this.createTableCell(pdf, "", currentX, yPos, contratoWidths[1], 12, 6);
+        currentX += contratoWidths[1];
+
+        this.createTableCell(pdf, "", currentX, yPos, contratoWidths[2], 12, 6);
+        currentX += contratoWidths[2];
+
+        this.createTableCell(pdf, "", currentX, yPos, contratoWidths[3], 12, 6);
+        currentX += contratoWidths[3];
+
+        this.createTableCell(pdf, "", currentX, yPos, contratoWidths[4], 12, 6);
+        currentX += contratoWidths[4];
+
+        this.createTableCell(pdf, "( ) Sim\n( ) Não", currentX, yPos, contratoWidths[5], 12, 6);
+        currentX += contratoWidths[5];
+
+        this.createTableCell(pdf, "( ) Sim\n( ) Não", currentX, yPos, contratoWidths[6], 12, 6);
+        currentX += contratoWidths[6];
+
+        this.createTableCell(pdf, "", currentX, yPos, contratoWidths[7], 12, 6);
+
+        yPos += 12;
+      }
+      yPos += 5;
+
+      // Texto explicativo
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.text("O financeiro descrito abaixo é referente a cada unidade separadamente.", 10, yPos);
+      yPos += 8;
+
+      // Tabela de informações de pagamento (vazia)
+      currentX = 10;
+      pagHeaders.forEach((header, i) => {
+        this.createTableCell(pdf, header, currentX, yPos, pagWidths[i], 8, 7, true);
+        currentX += pagWidths[i];
+      });
+      yPos += 8;
+
+      // 5 linhas vazias de informações de pagamento
+      const tiposPagamentoPage3 = ["Entrada", "Entrada", "Entrada Restante", "Sinal", "Saldo"];
+      for (let i = 0; i < 5; i++) {
+        currentX = 10;
+
+        this.createTableCell(pdf, tiposPagamentoPage3[i], currentX, yPos, pagWidths[0], 8, 6);
+        currentX += pagWidths[0];
+
+        this.createTableCell(pdf, "", currentX, yPos, pagWidths[1], 8, 6);
+        currentX += pagWidths[1];
+
+        this.createTableCell(pdf, "", currentX, yPos, pagWidths[2], 8, 6);
+        currentX += pagWidths[2];
+
+        this.createTableCell(pdf, "", currentX, yPos, pagWidths[3], 8, 6);
+        currentX += pagWidths[3];
+
+        this.createTableCell(pdf, "", currentX, yPos, pagWidths[4], 8, 6);
+        currentX += pagWidths[4];
+
+        this.createTableCell(pdf, "", currentX, yPos, pagWidths[5], 8, 6);
+
+        yPos += 8;
+      }
+
+      // Linha de assinatura no final
+      yPos += 20;
+      pdf.line(10, yPos, 200, yPos);
+      yPos += 5;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.text("Assinatura do Cliente", 90, yPos);
 
       return pdf;
 
