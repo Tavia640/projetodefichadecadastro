@@ -891,7 +891,7 @@ const FichaNegociacao = () => {
     try {
       console.log('🚀 Iniciando processo de salvamento e envio...');
       
-      // Verificar se há alertas cr����ticos (apenas erros, não avisos)
+      // Verificar se há alertas cr��ticos (apenas erros, não avisos)
       const alertasCriticos = Object.values(alertas).filter(alerta => 
         alerta.includes('ERRO') && !alerta.includes('AVISO')
       );
@@ -1525,7 +1525,7 @@ const FichaNegociacao = () => {
                     <th className="border border-border p-3 text-left">Qtd. Parcelas *</th>
                     <th className="border border-border p-3 text-left">Valor Parcela *</th>
                     <th className="border border-border p-3 text-left">Forma de Pag. *</th>
-                    <th className="border border-border p-3 text-left">1º Vencimento *</th>
+                    <th className="border border-border p-3 text-left">1�� Vencimento *</th>
                     <th className="border border-border p-3 text-left">Ações</th>
                   </tr>
                 </thead>
@@ -1552,10 +1552,10 @@ const FichaNegociacao = () => {
                           </td>
                        <td className="border border-border p-3">
                          <Input
-                           value={formatarMoeda(info.total)}
+                           value={info.total ? formatarMoedaSimples(info.total) : ''}
                             onChange={(e) => {
-                              const valorLimpo = desformatarMoeda(e.target.value);
-                              const valor = parseFloat(valorLimpo) || 0;
+                              const valorNumerico = obterValorNumerico(e.target.value);
+                              const valor = parseFloat(valorNumerico) || 0;
 
                               // Validação específica para 1ª Entrada - não pode ser menor que R$ 1.000
                               if (info.tipo === '1ª Entrada' && valor > 0 && valor < 1000) {
@@ -1563,11 +1563,11 @@ const FichaNegociacao = () => {
                               }
 
                               const newInfos = [...informacoesPagamento];
-                              newInfos[index].total = valorLimpo;
+                              newInfos[index].total = valorNumerico;
 
                               // Recalcular valor da parcela automaticamente quando alterar total
                               if (newInfos[index].qtdParcelas && parseInt(newInfos[index].qtdParcelas) > 0) {
-                                const total = parseFloat(valorLimpo) || 0;
+                                const total = parseFloat(valorNumerico) || 0;
                                 const qtdParcelas = parseInt(newInfos[index].qtdParcelas);
                                 newInfos[index].valorParcela = (total / qtdParcelas).toFixed(2);
                               }
