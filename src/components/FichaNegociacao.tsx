@@ -712,7 +712,109 @@ const FichaNegociacao = () => {
       }
     };
 
-    carregarDados();
+    // Carregar dados mockados diretamente (modo estável)
+    console.log('🔄 Carregando dados (modo offline estável)...');
+
+    const empreendimentosMock = [
+      {
+        id: '1',
+        nome: 'Gran Garden',
+        descricao: 'Empreendimento Gran Garden',
+        status: 'ATIVO',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '2',
+        nome: 'Gran Valley',
+        descricao: 'Empreendimento Gran Valley',
+        status: 'ATIVO',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '3',
+        nome: 'Residencial Primavera',
+        descricao: 'Empreendimento Residencial Primavera',
+        status: 'ATIVO',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ];
+
+    const categoriasMock = [
+      {
+        id: '1',
+        nome: 'VIR COTA 1',
+        empreendimento_id: '1',
+        vir_cota: 50000,
+        total_sinal: 5000,
+        total_saldo: 45000,
+        sinal_qtd: 5,
+        saldo_qtd: 60,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '2',
+        nome: 'VIR COTA 2',
+        empreendimento_id: '1',
+        vir_cota: 75000,
+        total_sinal: 7500,
+        total_saldo: 67500,
+        sinal_qtd: 5,
+        saldo_qtd: 60,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '3',
+        nome: 'VIR COTA 3',
+        empreendimento_id: '2',
+        vir_cota: 100000,
+        total_sinal: 10000,
+        total_saldo: 90000,
+        sinal_qtd: 5,
+        saldo_qtd: 60,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ];
+
+    const torresMock = [
+      {
+        id: '1',
+        nome: 'Torre A',
+        empreendimento_id: '1',
+        descricao: 'Torre A - Gran Garden',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: '2',
+        nome: 'Torre B',
+        empreendimento_id: '1',
+        descricao: 'Torre B - Gran Garden',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: '3',
+        nome: 'Torre Central',
+        empreendimento_id: '2',
+        descricao: 'Torre Central - Gran Valley',
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    setEmpreendimentos(empreendimentosMock);
+    setCategoriasPreco(categoriasMock);
+    setTorres(torresMock);
+    setLoading(false);
+
+    console.log('✅ Dados mockados carregados:', {
+      empreendimentos: empreendimentosMock.length,
+      categorias: categoriasMock.length,
+      torres: torresMock.length
+    });
   }, []);
 
   // Filtrar categorias por empreendimento
