@@ -12,25 +12,33 @@ import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
 import { EmailService } from '@/lib/emailService';
 
-// Função para formatação de moeda brasileira
-const formatarMoeda = (valor: string | number): string => {
+// Função para formatação de moeda brasileira mais simples
+const formatarMoedaSimples = (valor: string): string => {
   if (!valor) return '';
-  const numero = typeof valor === 'string' ?
-    parseFloat(valor.replace(/[^\d.,]/g, '').replace(',', '.')) || 0 :
-    valor;
+
+  // Remove tudo que não é dígito
+  const numeroLimpo = valor.replace(/\D/g, '');
+
+  if (!numeroLimpo) return '';
+
+  // Converte para número com centavos
+  const numero = parseFloat(numeroLimpo) / 100;
+
+  // Formatar em reais brasileiros
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
   }).format(numero);
 };
 
-// Função para converter moeda formatada para valor numérico
-const desformatarMoeda = (valorFormatado: string): string => {
+// Função para obter valor numérico limpo
+const obterValorNumerico = (valorFormatado: string): string => {
   if (!valorFormatado) return '';
-  return valorFormatado
-    .replace(/[^\d.,]/g, '')
-    .replace(',', '.')
-    .replace(/\.(?=.*\.)/g, '');
+  // Remove tudo que não é dígito
+  const numeroLimpo = valorFormatado.replace(/\D/g, '');
+  if (!numeroLimpo) return '';
+  // Retorna como string numérica (centavos)
+  return (parseFloat(numeroLimpo) / 100).toString();
 };
 
 interface ParcelaPagaSala {
@@ -1600,7 +1608,7 @@ const FichaNegociacao = () => {
                                    onChange={(e) => {
                                      const valor = parseInt(e.target.value) || 0;
                                      if (maxParcelas && valor > maxParcelas) {
-                                       return; // Bloqueia entrada superior ao máximo
+                                       return; // Bloqueia entrada superior ao m��ximo
                                      }
                                      const newInfos = [...informacoesPagamento];
                                      newInfos[index].qtdParcelas = e.target.value;
