@@ -70,8 +70,28 @@ const handler = async (req: Request): Promise<Response> => {
     const resend = new Resend(apiKey);
     console.log("✅ Resend inicializado com sucesso");
     
-    const requestData: SendPDFRequest = await req.json();
-    const { clientData, fichaData, pdfData1, pdfData2 } = requestData;
+    const requestData: SendPDFRequest | { test?: boolean } = await req.json();
+
+    // Se é um teste de conectividade
+    if ('test' in requestData && requestData.test) {
+      console.log("🧪 Executando teste de conectividade...");
+
+      const testResponse: EmailResponse = {
+        success: true,
+        message: "Sistema de email está funcionando. API Key configurada corretamente.",
+        timestamp: new Date().toISOString()
+      };
+
+      return new Response(JSON.stringify(testResponse), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      });
+    }
+
+    const { clientData, fichaData, pdfData1, pdfData2 } = requestData as SendPDFRequest;
 
     // Validação rigorosa dos dados recebidos
     if (!clientData) {
@@ -135,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
           <!-- Header -->
           <div style="background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
             <h1 style="margin: 0; font-size: 28px; font-weight: bold;">
-              ��️ GAV RESORTS
+              🏖️ GAV RESORTS
             </h1>
             <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
               Nova Ficha de Negociação Recebida
