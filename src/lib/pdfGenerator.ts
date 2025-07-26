@@ -65,12 +65,27 @@ export class PDFGenerator {
     if (!data) return '';
 
     try {
+      // Se já está no formato brasileiro, retornar como está
+      if (data.includes('/')) {
+        return data;
+      }
+
       const date = new Date(data);
+
+      // Verificar se a data é válida
+      if (isNaN(date.getTime())) {
+        return data;
+      }
+
       const dia = date.getDate().toString().padStart(2, '0');
       const mes = (date.getMonth() + 1).toString().padStart(2, '0');
       const ano = date.getFullYear();
-      return `${dia}/${mes}/${ano}`;
+      const dataFormatada = `${dia}/${mes}/${ano}`;
+
+      console.log(`📅 Convertendo data: ${data} → ${dataFormatada}`);
+      return dataFormatada;
     } catch (error) {
+      console.error('❌ Erro ao formatar data:', error);
       return data; // Retorna original se não conseguir converter
     }
   }
