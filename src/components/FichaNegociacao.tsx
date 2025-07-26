@@ -25,6 +25,7 @@ interface Contrato {
   id: string;
   tipoContrato: string;
   empreendimento: string;
+  nomeEmpreendimento?: string;
   torre: string;
   apartamento: string;
   cota: string;
@@ -831,7 +832,7 @@ const FichaNegociacao = () => {
 
       // Abrir PDFs em novas janelas para impressão com delay entre eles
       const janelaCadastro = window.open(urlCadastro, '_blank', 'width=800,height=600');
-      console.log('�� Janela PDF 1 aberta:', !!janelaCadastro);
+      console.log('🪟 Janela PDF 1 aberta:', !!janelaCadastro);
 
       setTimeout(() => {
         const janelaNegociacao = window.open(urlNegociacao, '_blank', 'width=800,height=600');
@@ -1509,7 +1510,7 @@ const FichaNegociacao = () => {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                            <SelectItem value="cartao-credito">Cart��o de Crédito</SelectItem>
+                            <SelectItem value="cartao-credito">Cartão de Crédito</SelectItem>
                             <SelectItem value="cartao-debito">Cartão de Débito</SelectItem>
                             <SelectItem value="pix">PIX</SelectItem>
                             <SelectItem value="transferencia">Transferência</SelectItem>
