@@ -501,7 +501,7 @@ const FichaNegociacao = () => {
 
           if (errorTiposVenda) {
             console.warn('⚠️ Erro ao acessar tipos de venda no Supabase:', errorTiposVenda.message);
-            console.log('📋 Usando categorias mockadas...');
+            console.log('��� Usando categorias mockadas...');
             throw new Error('Usar dados mockados');
           }
 
@@ -1162,15 +1162,15 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={formatarMoeda(parcela.valorTotal || '')}
+                          value={parcela.valorTotal || ''}
                           onChange={(e) => {
-                            const valorFormatado = formatarMoeda(e.target.value);
-                            const valorLimpo = obterValorLimpo(e.target.value);
                             const newParcelas = [...parcelasPagasSala];
-                            newParcelas[index].valorTotal = valorLimpo;
+                            newParcelas[index].valorTotal = e.target.value;
                             setParcelasPagasSala(newParcelas);
                           }}
-                          placeholder="0,00"
+                          placeholder="1000.00"
+                          type="number"
+                          step="0.01"
                         />
                       </td>
                        <td className="border border-border p-3">
