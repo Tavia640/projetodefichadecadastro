@@ -993,7 +993,7 @@ const FichaNegociacao = () => {
       // Gerar PDF 2: Negociação (Páginas 2 e 3)
       console.log('📄 Gerando PDF 2: Negociação...');
       const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
-      console.log('✅ PDF 2 gerado:', pdfNegociacaoBlob.size, 'bytes');
+      console.log('��� PDF 2 gerado:', pdfNegociacaoBlob.size, 'bytes');
 
       console.log('🖨️ Abrindo PDFs para impressão...');
 
@@ -1525,7 +1525,7 @@ const FichaNegociacao = () => {
                     <th className="border border-border p-3 text-left">Qtd. Parcelas *</th>
                     <th className="border border-border p-3 text-left">Valor Parcela *</th>
                     <th className="border border-border p-3 text-left">Forma de Pag. *</th>
-                    <th className="border border-border p-3 text-left">1�� Vencimento *</th>
+                    <th className="border border-border p-3 text-left">1º Vencimento *</th>
                     <th className="border border-border p-3 text-left">Ações</th>
                   </tr>
                 </thead>
@@ -1673,11 +1673,11 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={formatarMoeda(info.valorParcela)}
+                          value={info.valorParcela ? formatarMoedaSimples(info.valorParcela) : ''}
                           onChange={(e) => {
-                            const valorLimpo = desformatarMoeda(e.target.value);
+                            const valorNumerico = obterValorNumerico(e.target.value);
                             const newInfos = [...informacoesPagamento];
-                            newInfos[index].valorParcela = valorLimpo;
+                            newInfos[index].valorParcela = valorNumerico;
                             setInformacoesPagamento(newInfos);
                           }}
                           placeholder="R$ 0,00"
