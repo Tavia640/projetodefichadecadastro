@@ -35,7 +35,7 @@ interface EmailResponse {
 
 const handler = async (req: Request): Promise<Response> => {
   console.log("🚀 Send PDFs function iniciada");
-  console.log("🔍 Método da requisição:", req.method);
+  console.log("��� Método da requisição:", req.method);
   console.log("🔍 Headers da requisição:", Object.fromEntries(req.headers.entries()));
 
   // Handle CORS preflight requests
@@ -48,23 +48,60 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Verificar variáveis de ambiente disponíveis
     console.log("🔍 Verificando variáveis de ambiente...");
-    const availableEnvVars = [];
-    for (const key of Deno.env.toObject()) {
-      if (key.includes('RESEND') || key.includes('API')) {
-        availableEnvVars.push(key);
-      }
-    }
-    console.log("📋 Variáveis de ambiente disponíveis:", availableEnvVars);
+    const envObject = Deno.env.toObject();
+    const availableEnvVars = Object.keys(envObject).filter(key =>
+      key.includes('RESEND') || key.includes('API') || key.includes('SUPABASE')
+    );
+    console.log("📋 Variáveis relacionadas disponíveis:", availableEnvVars);
 
     // Verificar se a API key está configurada
     const apiKey = Deno.env.get("RESEND_API_KEY");
+    console.log("🔑 RESEND_API_KEY status:", {
+      exists: !!apiKey,
+      length: apiKey?.length || 0,
+      startsWithRe: apiKey?.startsWith('re_') || false,
+      preview: apiKey ? `${apiKey.substring(0, 8)}...` : 'NÃO CONFIGURADA'
+    });
+
     if (!apiKey) {
       console.error("❌ RESEND_API_KEY não configurada!");
-      console.error("🔍 Todas as variáveis de ambiente:", Object.keys(Deno.env.toObject()));
-      throw new Error("Chave API do Resend não configurada. Configure RESEND_API_KEY nas configurações do projeto.");
+      console.error("🔍 Todas as variáveis de ambiente:", Object.keys(envObject));
+
+      const errorResponse: EmailResponse = {
+        success: false,
+        message: "❌ RESEND_API_KEY não configurada no Supabase.\n\n📋 Passos para configurar:\n1. Acesse o painel do Supabase\n2. Settings → Edge Functions\n3. Adicione: RESEND_API_KEY = sua_chave_do_resend",
+        error: "RESEND_API_KEY não configurada",
+        timestamp: new Date().toISOString()
+      };
+
+      return new Response(JSON.stringify(errorResponse), {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders
+        },
+      });
     }
 
-    console.log("✅ RESEND_API_KEY encontrada:", apiKey ? `${apiKey.substring(0, 8)}...` : 'VAZIA');
+    if (!apiKey.startsWith('re_')) {
+      console.error("❌ RESEND_API_KEY parece estar incorreta! Deve começar com 're_'");
+      const errorResponse: EmailResponse = {
+        success: false,
+        message: "❌ RESEND_API_KEY parece estar incorreta.\n\nA chave deve começar com 're_'\nVerifique se copiou a chave correta do painel do Resend.",
+        error: "RESEND_API_KEY inválida",
+        timestamp: new Date().toISOString()
+      };
+
+      return new Response(JSON.stringify(errorResponse), {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders
+        },
+      });
+    }
+
+    console.log("✅ RESEND_API_KEY parece estar configurada corretamente");
 
     // Inicializar Resend
     const resend = new Resend(apiKey);
