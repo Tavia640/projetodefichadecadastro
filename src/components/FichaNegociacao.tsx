@@ -411,7 +411,7 @@ const FichaNegociacao = () => {
     }
   };
 
-  // Carregar dados do Supabase
+  // Carregar dados com fallback robusto
   useEffect(() => {
     const carregarDados = async () => {
       try {
