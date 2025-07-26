@@ -178,7 +178,7 @@ const FichaNegociacao = () => {
     if (valor > 1330) {
       return null; // Sem mensagem
     }
-    return 'Precisa de autorização do l��der de sala';
+    return 'Precisa de autorização do líder de sala';
   };
 
   // Função para validar restante da entrada
@@ -1461,14 +1461,15 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={formatarMoeda(contrato.valor)}
+                          value={mascararMoeda(contrato.valor || '')}
                           onChange={(e) => {
-                            const valorLimpo = desformatarMoeda(e.target.value);
+                            const valorMascarado = mascararMoeda(e.target.value);
+                            const valorNumerico = obterValorNumerico(valorMascarado);
                             const newContratos = [...contratos];
-                            newContratos[index].valor = valorLimpo;
+                            newContratos[index].valor = valorNumerico;
                             setContratos(newContratos);
                           }}
-                          placeholder="R$ 0,00"
+                          placeholder="0,00"
                         />
                       </td>
                       <td className="border border-border p-3">
