@@ -1679,12 +1679,11 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={mascararMoeda(info.valorParcela || '')}
+                          value={formatarMoeda(info.valorParcela || '')}
                           onChange={(e) => {
-                            const valorMascarado = mascararMoeda(e.target.value);
-                            const valorNumerico = obterValorNumerico(valorMascarado);
+                            const valorLimpo = obterValorLimpo(e.target.value);
                             const newInfos = [...informacoesPagamento];
-                            newInfos[index].valorParcela = valorNumerico;
+                            newInfos[index].valorParcela = valorLimpo;
                             setInformacoesPagamento(newInfos);
                           }}
                           placeholder="0,00"
