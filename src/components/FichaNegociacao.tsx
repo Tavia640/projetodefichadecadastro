@@ -1183,11 +1183,11 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={formatarMoeda(parcela.valorTotal)}
+                          value={parcela.valorTotal ? formatarMoedaSimples(parcela.valorTotal) : ''}
                           onChange={(e) => {
-                            const valorLimpo = desformatarMoeda(e.target.value);
+                            const valorNumerico = obterValorNumerico(e.target.value);
                             const newParcelas = [...parcelasPagasSala];
-                            newParcelas[index].valorTotal = valorLimpo;
+                            newParcelas[index].valorTotal = valorNumerico;
                             setParcelasPagasSala(newParcelas);
                           }}
                           placeholder="R$ 0,00"
@@ -1608,7 +1608,7 @@ const FichaNegociacao = () => {
                                    onChange={(e) => {
                                      const valor = parseInt(e.target.value) || 0;
                                      if (maxParcelas && valor > maxParcelas) {
-                                       return; // Bloqueia entrada superior ao m��ximo
+                                       return; // Bloqueia entrada superior ao máximo
                                      }
                                      const newInfos = [...informacoesPagamento];
                                      newInfos[index].qtdParcelas = e.target.value;
