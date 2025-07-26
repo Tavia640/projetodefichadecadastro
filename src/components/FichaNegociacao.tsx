@@ -1558,11 +1558,10 @@ const FichaNegociacao = () => {
                           </td>
                        <td className="border border-border p-3">
                          <Input
-                           value={mascararMoeda(info.total || '')}
+                           value={formatarMoeda(info.total || '')}
                             onChange={(e) => {
-                              const valorMascarado = mascararMoeda(e.target.value);
-                              const valorNumerico = obterValorNumerico(valorMascarado);
-                              const valor = parseFloat(valorNumerico) || 0;
+                              const valorLimpo = obterValorLimpo(e.target.value);
+                              const valor = parseFloat(valorLimpo) || 0;
 
                               // Validação específica para 1ª Entrada - não pode ser menor que R$ 1.000
                               if (info.tipo === '1ª Entrada' && valor > 0 && valor < 1000) {
@@ -1570,11 +1569,11 @@ const FichaNegociacao = () => {
                               }
 
                               const newInfos = [...informacoesPagamento];
-                              newInfos[index].total = valorNumerico;
+                              newInfos[index].total = valorLimpo;
 
                               // Recalcular valor da parcela automaticamente quando alterar total
                               if (newInfos[index].qtdParcelas && parseInt(newInfos[index].qtdParcelas) > 0) {
-                                const total = parseFloat(valorNumerico) || 0;
+                                const total = parseFloat(valorLimpo) || 0;
                                 const qtdParcelas = parseInt(newInfos[index].qtdParcelas);
                                 newInfos[index].valorParcela = (total / qtdParcelas).toFixed(2);
                               }
