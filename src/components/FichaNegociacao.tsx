@@ -704,7 +704,7 @@ const FichaNegociacao = () => {
           console.log('✅ Torres mockadas carregadas:', torresMock.length);
         }
 
-        console.log('🎉 Carregamento de dados conclu��do com sucesso!');
+        console.log('🎉 Carregamento de dados concluído com sucesso!');
 
       } catch (error: any) {
         console.error('💥 Erro crítico ao carregar dados:', error);
@@ -1605,7 +1605,7 @@ const FichaNegociacao = () => {
                                   setInformacoesPagamento(newInfos);
                                 }
                             }}
-                           placeholder="R$ 0,00"
+                           placeholder="0,00"
                            min={info.tipo === '1ª Entrada' ? 1000 : undefined}
                            className={`bg-background ${
                              info.tipo === '1ª Entrada' && parseFloat(info.total) > 0 && parseFloat(info.total) < 1000 
