@@ -42,6 +42,7 @@ export interface DadosNegociacao {
   }>;
   contratos: Array<{
     empreendimento: string;
+    nomeEmpreendimento?: string;
     categoriaPreco: string;
     valor: string;
     torre?: string;
