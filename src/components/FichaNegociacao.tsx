@@ -950,6 +950,22 @@ const FichaNegociacao = () => {
     }
   };
 
+  const testarEmail = async () => {
+    try {
+      console.log('🧪 Testando sistema de email...');
+      const resultado = await EmailService.testarConectividade();
+
+      if (resultado.success) {
+        alert(`✅ Teste bem-sucedido!\n\n${resultado.message}`);
+      } else {
+        alert(`❌ Teste falhou:\n\n${resultado.message}`);
+      }
+    } catch (error: any) {
+      console.error('❌ Erro no teste:', error);
+      alert(`❌ Erro no teste: ${error.message}`);
+    }
+  };
+
   const imprimirFichas = () => {
     try {
       console.log('🖨️ Iniciando processo de impressão...');
