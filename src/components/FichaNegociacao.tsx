@@ -1419,14 +1419,15 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={formatarMoeda(contrato.valor || '')}
+                          value={contrato.valor || ''}
                           onChange={(e) => {
-                            const valorLimpo = obterValorLimpo(e.target.value);
                             const newContratos = [...contratos];
-                            newContratos[index].valor = valorLimpo;
+                            newContratos[index].valor = e.target.value;
                             setContratos(newContratos);
                           }}
-                          placeholder="0,00"
+                          placeholder="50000.00"
+                          type="number"
+                          step="0.01"
                         />
                       </td>
                       <td className="border border-border p-3">
