@@ -77,15 +77,29 @@ export class PDFGenerator {
 
   // Função para buscar nome do empreendimento
   private static buscarNomeEmpreendimento(empreendimentoId: string, dadosNegociacao: DadosNegociacao): string {
-    // Lista de empreendimentos mockados (mesmo que está na FichaNegociacao)
-    const empreendimentosMock = [
-      { id: '1', nome: 'Gran Garden' },
-      { id: '2', nome: 'Gran Valley' },
-      { id: '3', nome: 'Resort Paradise' }
-    ];
+    // Mapear IDs para nomes dos empreendimentos
+    const mapeamentoEmpreendimentos: { [key: string]: string } = {
+      '1': 'Gran Garden',
+      '2': 'Gran Valley',
+      '3': 'Paradise Resort',
+      'gran-garden': 'Gran Garden',
+      'gran-valley': 'Gran Valley',
+      'paradise-resort': 'Paradise Resort'
+    };
 
-    const empreendimento = empreendimentosMock.find(emp => emp.id === empreendimentoId);
-    return empreendimento?.nome || empreendimentoId || '';
+    // Buscar nome no mapeamento
+    const nomeEncontrado = mapeamentoEmpreendimentos[empreendimentoId];
+    if (nomeEncontrado) {
+      return nomeEncontrado;
+    }
+
+    // Se não encontrar, retornar o próprio ID ou uma versão formatada
+    if (empreendimentoId) {
+      // Tentar formatar o ID para um nome legível
+      return empreendimentoId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    return '';
   }
 
   private static createFormHeader(pdf: jsPDF, title: string, pageInfo: string) {
