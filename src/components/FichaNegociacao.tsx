@@ -397,7 +397,7 @@ const FichaNegociacao = () => {
         console.log('🔄 Iniciando carregamento dos dados...');
 
         // Testar conectividade básica primeiro
-        console.log('���� Testando conectividade com Supabase...');
+        console.log('🔌 Testando conectividade com Supabase...');
         console.log('🌐 URL:', 'https://msxhwlwxpvrtmyngwwcp.supabase.co');
 
         try {
@@ -1119,7 +1119,7 @@ const FichaNegociacao = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="padrao" id="padrao" />
-                  <Label htmlFor="padrao">Padrão</Label>
+                  <Label htmlFor="padrao">Padr��o</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="linear" id="linear" />
@@ -1656,14 +1656,15 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={formatarMoeda(info.valorParcela || '')}
+                          value={info.valorParcela || ''}
                           onChange={(e) => {
-                            const valorLimpo = obterValorLimpo(e.target.value);
                             const newInfos = [...informacoesPagamento];
-                            newInfos[index].valorParcela = valorLimpo;
+                            newInfos[index].valorParcela = e.target.value;
                             setInformacoesPagamento(newInfos);
                           }}
-                          placeholder="0,00"
+                          placeholder="500.00"
+                          type="number"
+                          step="0.01"
                         />
                       </td>
                       <td className="border border-border p-3">
