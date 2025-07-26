@@ -12,38 +12,12 @@ import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
 import { EmailService } from '@/lib/emailService';
 
-// Função para formatar valor monetário brasileiro
-const formatarMoeda = (valor: string): string => {
-  if (!valor || valor === '0') return '';
-
-  // Remove tudo que não é dígito
-  const apenasNumeros = valor.replace(/\D/g, '');
-
-  if (!apenasNumeros) return '';
-
-  // Converte para número
-  const numero = parseFloat(apenasNumeros) / 100;
-
-  // Formata como moeda brasileira
-  return numero.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-};
-
-// Função para obter valor limpo (só números) do campo formatado
-const obterValorLimpo = (valorFormatado: string): string => {
-  if (!valorFormatado) return '';
-
-  // Remove tudo que não é dígito
-  const apenasNumeros = valorFormatado.replace(/\D/g, '');
-
-  if (!apenasNumeros) return '';
-
-  // Converte centavos para valor decimal
-  const valorDecimal = parseFloat(apenasNumeros) / 100;
-
-  return valorDecimal.toString();
+// Formatação monetária simples para exibição
+const exibirValor = (valor: string): string => {
+  if (!valor) return '';
+  const num = parseFloat(valor);
+  if (isNaN(num)) return '';
+  return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 interface ParcelaPagaSala {
