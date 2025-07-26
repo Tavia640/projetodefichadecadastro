@@ -12,6 +12,27 @@ import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
 import { EmailService } from '@/lib/emailService';
 
+// Função para formataç��o de moeda brasileira
+const formatarMoeda = (valor: string | number): string => {
+  if (!valor) return '';
+  const numero = typeof valor === 'string' ?
+    parseFloat(valor.replace(/[^\d.,]/g, '').replace(',', '.')) || 0 :
+    valor;
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(numero);
+};
+
+// Função para converter moeda formatada para valor numérico
+const desformatarMoeda = (valorFormatado: string): string => {
+  if (!valorFormatado) return '';
+  return valorFormatado
+    .replace(/[^\d.,]/g, '')
+    .replace(',', '.')
+    .replace(/\.(?=.*\.)/g, '');
+};
+
 interface ParcelaPagaSala {
   id: string;
   tipo: string;
@@ -351,7 +372,7 @@ const FichaNegociacao = () => {
   // Função para criar dados iniciais no Supabase
   const criarDadosIniciais = async () => {
     try {
-      console.log('🏗️ Criando empreendimentos iniciais...');
+      console.log('🏗��� Criando empreendimentos iniciais...');
 
       // Criar empreendimentos
       const { data: empData, error: empError } = await supabase
