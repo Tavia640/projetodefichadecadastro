@@ -501,7 +501,7 @@ const FichaNegociacao = () => {
 
           if (errorTiposVenda) {
             console.warn('⚠️ Erro ao acessar tipos de venda no Supabase:', errorTiposVenda.message);
-            console.log('��� Usando categorias mockadas...');
+            console.log('📋 Usando categorias mockadas...');
             throw new Error('Usar dados mockados');
           }
 
@@ -1175,19 +1175,18 @@ const FichaNegociacao = () => {
                       </td>
                        <td className="border border-border p-3">
                          <Input
-                           value={formatarMoeda(parcela.valorDistribuido || '')}
+                           value={parcela.valorDistribuido || ''}
                              onChange={(e) => {
-                              const valorLimpo = obterValorLimpo(e.target.value);
                               const newParcelas = [...parcelasPagasSala];
-                              newParcelas[index].valorDistribuido = valorLimpo;
+                              newParcelas[index].valorDistribuido = e.target.value;
                               setParcelasPagasSala(newParcelas);
 
                                 // Clonar valor para 1ª Entrada automaticamente
                                 const novasInformacoes = [...informacoesPagamento];
                                 const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
                                 if (primeiraEntradaIndex !== -1) {
-                                  novasInformacoes[primeiraEntradaIndex].total = valorLimpo;
-                                  novasInformacoes[primeiraEntradaIndex].valorParcela = valorLimpo;
+                                  novasInformacoes[primeiraEntradaIndex].total = e.target.value;
+                                  novasInformacoes[primeiraEntradaIndex].valorParcela = e.target.value;
                                   novasInformacoes[primeiraEntradaIndex].qtdParcelas = '1';
 
                                   // Preencher forma de pagamento automaticamente se estiver vazia
@@ -1200,7 +1199,9 @@ const FichaNegociacao = () => {
                                 const informacoesAtualizadas = recalcularRestanteEntrada(novasInformacoes);
                                 setInformacoesPagamento(informacoesAtualizadas);
                             }}
-                           placeholder="0,00"
+                           placeholder="1000.00"
+                           type="number"
+                           step="0.01"
                          />
                        </td>
                       <td className="border border-border p-3">
