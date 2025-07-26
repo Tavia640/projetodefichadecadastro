@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
 import { EmailService } from '@/lib/emailService';
 
-// Função para formataç��o de moeda brasileira
+// Função para formatação de moeda brasileira
 const formatarMoeda = (valor: string | number): string => {
   if (!valor) return '';
   const numero = typeof valor === 'string' ?
@@ -372,7 +372,7 @@ const FichaNegociacao = () => {
   // Função para criar dados iniciais no Supabase
   const criarDadosIniciais = async () => {
     try {
-      console.log('🏗��� Criando empreendimentos iniciais...');
+      console.log('🏗️ Criando empreendimentos iniciais...');
 
       // Criar empreendimentos
       const { data: empData, error: empError } = await supabase
@@ -1175,14 +1175,14 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Input
-                          value={parcela.valorTotal}
+                          value={formatarMoeda(parcela.valorTotal)}
                           onChange={(e) => {
+                            const valorLimpo = desformatarMoeda(e.target.value);
                             const newParcelas = [...parcelasPagasSala];
-                            newParcelas[index].valorTotal = e.target.value;
+                            newParcelas[index].valorTotal = valorLimpo;
                             setParcelasPagasSala(newParcelas);
                           }}
-                          placeholder="Valor total"
-                          type="number"
+                          placeholder="R$ 0,00"
                         />
                       </td>
                        <td className="border border-border p-3">
