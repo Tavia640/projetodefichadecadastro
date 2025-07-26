@@ -831,7 +831,7 @@ const FichaNegociacao = () => {
 
       // Abrir PDFs em novas janelas para impressão com delay entre eles
       const janelaCadastro = window.open(urlCadastro, '_blank', 'width=800,height=600');
-      console.log('🪟 Janela PDF 1 aberta:', !!janelaCadastro);
+      console.log('�� Janela PDF 1 aberta:', !!janelaCadastro);
 
       setTimeout(() => {
         const janelaNegociacao = window.open(urlNegociacao, '_blank', 'width=800,height=600');
@@ -1143,6 +1143,16 @@ const FichaNegociacao = () => {
                           onValueChange={(value) => {
                             const newContratos = [...contratos];
                             newContratos[index].empreendimento = value;
+
+                            // Buscar e salvar o nome do empreendimento também
+                            const empreendimentosDisponiveis = empreendimentos.length > 0 ? empreendimentos : [
+                              { id: '1', nome: 'Gran Garden' },
+                              { id: '2', nome: 'Gran Valley' },
+                              { id: '3', nome: 'Empreendimento Demo' }
+                            ];
+                            const empSelecionado = empreendimentosDisponiveis.find(emp => emp.id === value);
+                            newContratos[index].nomeEmpreendimento = empSelecionado?.nome || '';
+
                             // Limpar categoria e torre quando mudar empreendimento
                             newContratos[index].categoriaPreco = '';
                             newContratos[index].torre = '';
@@ -1499,7 +1509,7 @@ const FichaNegociacao = () => {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                            <SelectItem value="cartao-credito">Cartão de Crédito</SelectItem>
+                            <SelectItem value="cartao-credito">Cart��o de Crédito</SelectItem>
                             <SelectItem value="cartao-debito">Cartão de Débito</SelectItem>
                             <SelectItem value="pix">PIX</SelectItem>
                             <SelectItem value="transferencia">Transferência</SelectItem>
