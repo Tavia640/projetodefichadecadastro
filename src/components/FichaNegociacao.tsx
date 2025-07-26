@@ -1280,12 +1280,7 @@ const FichaNegociacao = () => {
                             newContratos[index].empreendimento = value;
 
                             // Buscar e salvar o nome do empreendimento também
-                            const empreendimentosDisponiveis = empreendimentos.length > 0 ? empreendimentos : [
-                              { id: '1', nome: 'Gran Garden' },
-                              { id: '2', nome: 'Gran Valley' },
-                              { id: '3', nome: 'Empreendimento Demo' }
-                            ];
-                            const empSelecionado = empreendimentosDisponiveis.find(emp => emp.id === value);
+                            const empSelecionado = empreendimentos.find(emp => emp.id === value);
                             newContratos[index].nomeEmpreendimento = empSelecionado?.nome || '';
 
                             // Limpar categoria e torre quando mudar empreendimento
