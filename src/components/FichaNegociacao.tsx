@@ -928,7 +928,20 @@ const FichaNegociacao = () => {
         alert(`✅ Ficha salva e PDFs enviados com sucesso!\n\n${resultado.message}`);
       } else {
         console.error('❌ Falha no envio:', resultado.message);
-        alert(`❌ Erro no envio: ${resultado.message}\n\nOs PDFs foram gerados mas não puderam ser enviados.`);
+
+        // Melhor feedback para diferentes tipos de erro
+        let mensagemDetalhada = resultado.message;
+
+        if (resultado.message.includes('RESEND_API_KEY')) {
+          mensagemDetalhada += '\n\n💡 Solução: Configure a chave API do Resend no painel do Supabase:\n' +
+                               '1. Acesse o painel do Supabase\n' +
+                               '2. Vá em Settings > Edge Functions\n' +
+                               '3. Adicione a variável RESEND_API_KEY';
+        } else if (resultado.message.includes('conexão')) {
+          mensagemDetalhada += '\n\n💡 Tente novamente em alguns segundos.';
+        }
+
+        alert(`❌ Erro no envio de email:\n\n${mensagemDetalhada}\n\n📄 Os PDFs foram gerados mas não puderam ser enviados por email.`);
       }
       
     } catch (error: any) {
