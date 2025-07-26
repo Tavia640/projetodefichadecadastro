@@ -12,25 +12,54 @@ import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
 import { EmailService } from '@/lib/emailService';
 
-// Função para formatação de moeda brasileira
-const formatarMoeda = (valor: string | number): string => {
+// Função para exibir valor formatado (somente leitura)
+const exibirMoeda = (valor: string): string => {
   if (!valor) return '';
-  const numero = typeof valor === 'string' ?
-    parseFloat(valor.replace(/[^\d.,]/g, '').replace(',', '.')) || 0 :
-    valor;
+  const numero = parseFloat(valor) || 0;
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
   }).format(numero);
 };
 
-// Função para converter moeda formatada para valor numérico
-const desformatarMoeda = (valorFormatado: string): string => {
-  if (!valorFormatado) return '';
-  return valorFormatado
-    .replace(/[^\d.,]/g, '')
-    .replace(',', '.')
-    .replace(/\.(?=.*\.)/g, '');
+// Função para mascarar input enquanto digita
+const mascararMoeda = (valor: string): string => {
+  if (!valor) return '';
+
+  // Remove tudo que não é dígito
+  let numeros = valor.replace(/\D/g, '');
+
+  if (!numeros) return '';
+
+  // Adiciona vírgula para centavos
+  if (numeros.length === 1) {
+    return `0,0${numeros}`;
+  } else if (numeros.length === 2) {
+    return `0,${numeros}`;
+  } else {
+    const centavos = numeros.slice(-2);
+    const reais = numeros.slice(0, -2);
+
+    // Adiciona pontos para milhares
+    const reaisFormatados = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+    return `${reaisFormatados},${centavos}`;
+  }
+};
+
+// Função para obter valor numérico do input mascarado
+const obterValorNumerico = (valorMascarado: string): string => {
+  if (!valorMascarado) return '';
+
+  // Remove tudo que não é dígito
+  const numeros = valorMascarado.replace(/\D/g, '');
+
+  if (!numeros) return '';
+
+  // Converte para decimal (centavos para reais)
+  const valorDecimal = parseFloat(numeros) / 100;
+
+  return valorDecimal.toString();
 };
 
 interface ParcelaPagaSala {
@@ -1081,7 +1110,7 @@ const FichaNegociacao = () => {
               Voltar
             </Button>
             <CardTitle className="text-2xl font-bold">
-              Ficha de Negociação de Cota
+              Ficha de Negociaç��o de Cota
             </CardTitle>
             <div className="w-20" /> {/* Spacer for centering */}
           </div>
