@@ -1451,7 +1451,7 @@ const FichaNegociacao = () => {
           </div>
 
           {/* Botões de Ação */}
-          <div className="flex justify-center space-x-4 pt-6">
+          <div className="flex justify-center space-x-3 pt-6 flex-wrap gap-2">
             <Button variant="outline" onClick={limparFicha}>
               Limpar
             </Button>
