@@ -26,64 +26,42 @@ export class EmailJsService {
   };
 
   static async init(config?: Partial<EmailJsConfig>): Promise<void> {
+    console.log('🚀 Inicializando EmailJS com configurações padrão...');
+
+    // Tentar carregar do localStorage primeiro (mais confiável que Supabase)
     try {
-      // Tentar carregar configurações do Supabase se a tabela existir
-      console.log('🔍 Tentando carregar configurações do EmailJS...');
+      const localConfig = {
+        serviceId: localStorage.getItem('EMAILJS_SERVICE_ID'),
+        templateId: localStorage.getItem('EMAILJS_TEMPLATE_ID'),
+        publicKey: localStorage.getItem('EMAILJS_PUBLIC_KEY'),
+        destinationEmail: localStorage.getItem('EMAILJS_DESTINATION_EMAIL'),
+        fromEmail: localStorage.getItem('EMAILJS_FROM_EMAIL')
+      };
 
-      try {
-        const configs = await ConfigService.getConfigs([
-          'EMAILJS_SERVICE_ID',
-          'EMAILJS_TEMPLATE_ID',
-          'EMAILJS_PUBLIC_KEY',
-          'EMAILJS_DESTINATION_EMAIL',
-          'EMAILJS_FROM_EMAIL'
-        ]);
+      if (localConfig.serviceId) this.config.serviceId = localConfig.serviceId;
+      if (localConfig.templateId) this.config.templateId = localConfig.templateId;
+      if (localConfig.publicKey) this.config.publicKey = localConfig.publicKey;
+      if (localConfig.destinationEmail) this.config.destinationEmail = localConfig.destinationEmail;
+      if (localConfig.fromEmail) this.config.fromEmail = localConfig.fromEmail;
 
-        // Aplicar configurações do Supabase se disponíveis
-        if (configs.EMAILJS_SERVICE_ID) this.config.serviceId = configs.EMAILJS_SERVICE_ID;
-        if (configs.EMAILJS_TEMPLATE_ID) this.config.templateId = configs.EMAILJS_TEMPLATE_ID;
-        if (configs.EMAILJS_PUBLIC_KEY) this.config.publicKey = configs.EMAILJS_PUBLIC_KEY;
-        if (configs.EMAILJS_DESTINATION_EMAIL) this.config.destinationEmail = configs.EMAILJS_DESTINATION_EMAIL;
-        if (configs.EMAILJS_FROM_EMAIL) this.config.fromEmail = configs.EMAILJS_FROM_EMAIL;
-
-        console.log('✅ Configurações do EmailJS carregadas do Supabase');
-      } catch (configError: any) {
-        console.warn('⚠️ Tabela de configurações não existe ou não é acessível, tentando localStorage...');
-
-        // Tentar carregar do localStorage como fallback
-        try {
-          const localConfig = {
-            serviceId: localStorage.getItem('EMAILJS_SERVICE_ID'),
-            templateId: localStorage.getItem('EMAILJS_TEMPLATE_ID'),
-            publicKey: localStorage.getItem('EMAILJS_PUBLIC_KEY'),
-            destinationEmail: localStorage.getItem('EMAILJS_DESTINATION_EMAIL'),
-            fromEmail: localStorage.getItem('EMAILJS_FROM_EMAIL')
-          };
-
-          if (localConfig.serviceId) this.config.serviceId = localConfig.serviceId;
-          if (localConfig.templateId) this.config.templateId = localConfig.templateId;
-          if (localConfig.publicKey) this.config.publicKey = localConfig.publicKey;
-          if (localConfig.destinationEmail) this.config.destinationEmail = localConfig.destinationEmail;
-          if (localConfig.fromEmail) this.config.fromEmail = localConfig.fromEmail;
-
-          console.log('📋 Configurações carregadas do localStorage');
-        } catch (localError) {
-          console.warn('⚠️ Também não foi possível carregar do localStorage, usando valores padrão');
-        }
+      if (localConfig.serviceId || localConfig.templateId || localConfig.publicKey) {
+        console.log('📋 Configurações carregadas do localStorage');
+      } else {
+        console.log('📋 Usando configurações padrão (localStorage vazio)');
       }
-
-    } catch (error: any) {
-      console.warn('⚠️ Erro geral ao carregar configurações, usando valores padrão:', error.message || error);
+    } catch (localError) {
+      console.warn('⚠️ Não foi possível acessar localStorage, usando valores padrão');
     }
 
     // Aplicar configurações passadas como parâmetro (têm prioridade)
     if (config) {
       this.config = { ...this.config, ...config };
+      console.log('📋 Configurações personalizadas aplicadas');
     }
 
     // Inicializar EmailJS
     emailjs.init(this.config.publicKey);
-    console.log('🚀 EmailJS inicializado com valores:', {
+    console.log('✅ EmailJS inicializado com sucesso:', {
       serviceId: this.config.serviceId,
       templateId: this.config.templateId,
       destinationEmail: this.config.destinationEmail
@@ -119,7 +97,7 @@ export class EmailJsService {
         client_name: payload.clientData.nome,
         client_cpf: payload.clientData.cpf,
         client_phone: payload.clientData.telefone,
-        closer: payload.fichaData.closer || 'N��o informado',
+        closer: payload.fichaData.closer || 'Não informado',
         liner: payload.fichaData.liner || 'Não informado',
         tipo_venda: payload.fichaData.tipoVenda || 'Não informado',
         message: `Segue em anexo a ficha de negociação de cota para o cliente ${payload.clientData.nome}.`,
