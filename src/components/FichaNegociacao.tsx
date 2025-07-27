@@ -1265,7 +1265,7 @@ const FichaNegociacao = () => {
         );
 
         if (mostrarDetalhes) {
-          alert(`📋 INSTRUÇ��ES PARA ENVIO MANUAL:\n\n` +
+          alert(`📋 INSTRUÇÕES PARA ENVIO MANUAL:\n\n` +
             `1. Os PDFs foram baixados em seu computador\n` +
             `2. Um arquivo de instruções também foi baixado\n` +
             `3. Seu cliente de email padrão deve ter sido aberto\n` +
@@ -1353,6 +1353,89 @@ const FichaNegociacao = () => {
     } catch (error: any) {
       console.error('❌ Erro no teste de notificação:', error);
       alert(`❌ Erro no teste: ${error.message}`);
+    }
+  };
+
+  const gerenciarPDFsSalvos = async () => {
+    try {
+      console.log('📁 Gerenciando PDFs salvos...');
+
+      const pdfs = await SalvamentoService.listarPDFsSalvos();
+      const stats = await SalvamentoService.obterEstatisticas();
+
+      if (pdfs.length === 0) {
+        alert('📁 Nenhum PDF salvo encontrado.\n\nOs PDFs são salvos automaticamente quando você usa o sistema de envio robusto.');
+        return;
+      }
+
+      let mensagem = `📁 PDFS SALVOS (${pdfs.length} itens)\n\n`;
+
+      if (stats) {
+        mensagem += `📊 ESTATÍSTICAS:\n`;
+        mensagem += `• Total: ${stats.total} PDFs\n`;
+        mensagem += `• LocalStorage: ${stats.localStorageCount}\n`;
+        mensagem += `• IndexedDB: ${stats.indexedDBCount}\n`;
+        mensagem += `• Tamanho total: ${Math.round(stats.sizeTotal / 1024)}KB\n\n`;
+      }
+
+      mensagem += `📋 ÚLTIMOS PDFs:\n`;
+      pdfs.slice(0, 5).forEach((pdf, index) => {
+        const data = new Date(pdf.timestamp).toLocaleString('pt-BR');
+        mensagem += `${index + 1}. ${pdf.cliente?.nome || 'Cliente'} - ${data}\n`;
+      });
+
+      if (pdfs.length > 5) {
+        mensagem += `... e mais ${pdfs.length - 5} PDFs\n`;
+      }
+
+      mensagem += `\n🔧 AÇÕES DISPONÍVEIS:\n`;
+      mensagem += `• Limpar PDFs antigos\n`;
+      mensagem += `• Baixar PDF específico\n`;
+      mensagem += `• Ver estatísticas completas`;
+
+      const acao = window.prompt(
+        mensagem + `\n\n⚡ Escolha uma ação:\n` +
+        `1 - Limpar PDFs antigos (>7 dias)\n` +
+        `2 - Baixar último PDF\n` +
+        `3 - Ver estatísticas\n` +
+        `0 - Cancelar\n\n` +
+        `Digite o número:`
+      );
+
+      switch (acao) {
+        case '1':
+          const resultLimpeza = await SalvamentoService.limparPDFsAntigos(7);
+          alert(`🧹 ${resultLimpeza.message}`);
+          break;
+
+        case '2':
+          if (pdfs.length > 0) {
+            const result = await SalvamentoService.baixarPDFSalvo(pdfs[0].id);
+            alert(`📥 ${result.message}`);
+          }
+          break;
+
+        case '3':
+          const statsDetalhadas = await SalvamentoService.obterEstatisticas();
+          if (statsDetalhadas) {
+            alert(`📊 ESTATÍSTICAS DETALHADAS:\n\n` +
+              `Total de PDFs: ${statsDetalhadas.total}\n` +
+              `LocalStorage: ${statsDetalhadas.localStorageCount}\n` +
+              `IndexedDB: ${statsDetalhadas.indexedDBCount}\n` +
+              `Tamanho total: ${Math.round(statsDetalhadas.sizeTotal / 1024)}KB\n` +
+              `Mais recente: ${statsDetalhadas.maisRecente?.cliente?.nome || 'N/A'}\n` +
+              `Mais antigo: ${statsDetalhadas.maisAntigo?.cliente?.nome || 'N/A'}`);
+          }
+          break;
+
+        default:
+          // Cancelado
+          break;
+      }
+
+    } catch (error: any) {
+      console.error('❌ Erro ao gerenciar PDFs:', error);
+      alert(`❌ Erro: ${error.message}`);
     }
   };
 
