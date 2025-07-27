@@ -86,7 +86,7 @@ export class ConfigService {
           .eq('ativo', true);
 
         if (error) {
-          console.error('❌ Erro ao buscar configurações:', error);
+          console.error('❌ Erro ao buscar configurações:', error.message || JSON.stringify(error));
           return result;
         }
 
