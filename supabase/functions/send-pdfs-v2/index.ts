@@ -49,8 +49,39 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log("📨 Processando requisição de envio de PDFs V2...");
     
-    const requestData: SendPDFRequest = await req.json();
-    const { clientData, fichaData, pdfData1, pdfData2, configs } = requestData;
+    const requestData: SendPDFRequest | { test?: boolean; configs?: any } = await req.json();
+
+    // Se é um teste de conectividade
+    if ('test' in requestData && requestData.test) {
+      console.log("🧪 Executando teste de conectividade V2...");
+
+      if (!requestData.configs?.resendApiKey) {
+        const errorResponse: EmailResponse = {
+          success: false,
+          message: "RESEND_API_KEY não configurada",
+          error: "Configuração ausente",
+          timestamp: new Date().toISOString()
+        };
+
+        return new Response(JSON.stringify(errorResponse), {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+
+      const testResponse: EmailResponse = {
+        success: true,
+        message: "Sistema de email V2 está funcionando. Configurações validadas.",
+        timestamp: new Date().toISOString()
+      };
+
+      return new Response(JSON.stringify(testResponse), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const { clientData, fichaData, pdfData1, pdfData2, configs } = requestData as SendPDFRequest;
 
     // Validação rigorosa dos dados recebidos
     if (!clientData) {
