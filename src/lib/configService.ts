@@ -36,7 +36,7 @@ export class ConfigService {
         .single();
 
       if (error) {
-        console.error(`❌ Erro ao buscar configuração ${chave}:`, error);
+        console.error(`❌ Erro ao buscar configuração ${chave}:`, error.message || JSON.stringify(error));
         return null;
       }
 
