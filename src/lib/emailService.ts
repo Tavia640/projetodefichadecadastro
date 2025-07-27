@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { DadosCliente, DadosNegociacao } from './pdfGenerator';
+import { ConfigService } from './configService';
 
 export interface EmailPayload {
   clientData: DadosCliente;
@@ -53,11 +54,43 @@ export class EmailService {
 
       // Validar dados antes do envio
       this.validarPayload(payload);
+<<<<<<< HEAD
 
       // Invocar edge function com timeout
       console.log('🔄 Invocando edge function do Supabase...');
       const response = await supabase.functions.invoke('send-pdfs', {
         body: payload
+=======
+      
+      // Buscar configurações necessárias do Supabase
+      console.log('🔍 Buscando configurações do sistema...');
+      const configs = await ConfigService.getConfigs([
+        'RESEND_API_KEY',
+        'EMAIL_DESTINO',
+        'EMAIL_REMETENTE'
+      ]);
+      
+      if (!configs.RESEND_API_KEY) {
+        throw new Error('Chave API do Resend não configurada no sistema. Entre em contato com o administrador.');
+      }
+      
+      if (!configs.EMAIL_DESTINO) {
+        throw new Error('Email de destino não configurado no sistema. Entre em contato com o administrador.');
+      }
+      
+      console.log('✅ Configurações carregadas com sucesso');
+      
+      // Invocar edge function
+      const response = await supabase.functions.invoke('send-pdfs-v2', {
+        body: {
+          ...payload,
+          configs: {
+            resendApiKey: configs.RESEND_API_KEY,
+            emailDestino: configs.EMAIL_DESTINO,
+            emailRemetente: configs.EMAIL_REMETENTE || 'GAV Resorts <onboarding@resend.dev>'
+          }
+        }
+>>>>>>> origin/main
       });
 
       console.log('📨 Resposta completa da edge function:', {
@@ -96,7 +129,7 @@ export class EmailService {
 
       return {
         success: true,
-        message: 'PDFs enviados com sucesso para admudrive2025@gavresorts.com.br',
+        message: `PDFs enviados com sucesso para ${configs.EMAIL_DESTINO}`,
         messageId: response.data.messageId
       };
 
@@ -106,9 +139,17 @@ export class EmailService {
 
       // Tratamento de erros específicos
       let errorMessage = 'Erro desconhecido no envio de PDFs';
+<<<<<<< HEAD
 
       if (error.message?.includes('RESEND_API_KEY')) {
         errorMessage = 'Chave API do Resend não configurada. Acesse as configurações do projeto Supabase e configure a variável RESEND_API_KEY.';
+=======
+      
+      if (error.message?.includes('Chave API do Resend')) {
+        errorMessage = 'Chave API do Resend não configurada no sistema. Entre em contato com o administrador.';
+      } else if (error.message?.includes('Email de destino')) {
+        errorMessage = 'Email de destino não configurado no sistema. Entre em contato com o administrador.';
+>>>>>>> origin/main
       } else if (error.message?.includes('Failed to fetch')) {
         errorMessage = 'Erro de conexão com o servidor. Verifique sua internet e tente novamente.';
       } else if (error.message?.includes('non-2xx status code')) {

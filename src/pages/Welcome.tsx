@@ -1,6 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+<<<<<<< HEAD
 const gavLogo = 'https://cdn.builder.io/api/v1/image/assets%2Fc8c896b761d24232b80a27a492248c56%2F39e6e168fc74423b8d3b78807d7eef5f?format=webp&width=800';
+=======
+import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
+import gavLogo from '@/assets/gav-logo.png';
+>>>>>>> origin/main
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -25,6 +31,17 @@ const Welcome = () => {
         animation: 'gradient-bg 8s ease infinite, fade-out 1s ease-in-out 5s forwards'
       }}
     >
+      {/* Botão de Configurações */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate('/configuracoes')}
+        className="absolute top-4 right-4 text-white hover:bg-white/10 flex items-center gap-2"
+      >
+        <Settings className="h-4 w-4" />
+        Configurações
+      </Button>
+      
       <img 
         src={gavLogo} 
         alt="Logo GAV Resorts" 
