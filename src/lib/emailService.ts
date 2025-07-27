@@ -93,13 +93,30 @@ export class EmailService {
       // Validar dados antes do envio
       this.validarPayload(payload);
 
-      // Buscar configurações necessárias do Supabase
+      // Buscar configurações (com fallback para configurações diretas)
       console.log('🔍 Buscando configurações do sistema...');
-      const configs = await ConfigService.getConfigs([
-        'RESEND_API_KEY',
-        'EMAIL_DESTINO',
-        'EMAIL_REMETENTE'
-      ]);
+
+      let configs: Record<string, string> = {};
+
+      try {
+        // Tentar buscar do banco primeiro
+        configs = await ConfigService.getConfigs([
+          'RESEND_API_KEY',
+          'EMAIL_DESTINO',
+          'EMAIL_REMETENTE'
+        ]);
+        console.log('✅ Configurações carregadas do banco de dados');
+      } catch (error) {
+        console.warn('⚠️ Erro ao acessar banco, usando configurações diretas:', error);
+
+        // Fallback: usar configurações diretas
+        configs = {
+          RESEND_API_KEY: 're_SmQE7h9x_8gJ7nxVBZiv81R4YWEamyVTs',
+          EMAIL_DESTINO: 'admudrive2025@gavresorts.com.br',
+          EMAIL_REMETENTE: 'GAV Resorts <onboarding@resend.dev>'
+        };
+        console.log('✅ Usando configurações diretas (fallback)');
+      }
 
       if (!configs.RESEND_API_KEY) {
         throw new Error('Chave API do Resend não configurada no sistema. Entre em contato com o administrador.');
@@ -108,8 +125,6 @@ export class EmailService {
       if (!configs.EMAIL_DESTINO) {
         throw new Error('Email de destino não configurado no sistema. Entre em contato com o administrador.');
       }
-
-      console.log('✅ Configurações carregadas com sucesso');
 
       // Invocar edge function
       const response = await supabase.functions.invoke('send-pdfs-v2', {
