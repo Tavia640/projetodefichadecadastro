@@ -172,19 +172,21 @@ export class ConfigService {
           .eq('ativo', true);
 
         if (error) {
-          console.error('❌ Erro ao buscar configurações do Supabase:', {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          });
+          const errorMsg = typeof error === 'string' ? error :
+                          error?.message ||
+                          error?.details ||
+                          JSON.stringify(error) ||
+                          'Erro desconhecido do Supabase';
+
+          console.error('❌ Erro ao buscar configurações do Supabase:', errorMsg);
+          console.error('❌ Objeto de erro completo:', error);
 
           // Se a tabela não existe, lançar erro específico
-          if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          if (error.code === 'PGRST116' || errorMsg.includes('does not exist') || errorMsg.includes('relation') && errorMsg.includes('does not exist')) {
             throw new Error('TABELA_CONFIGURACOES_NAO_EXISTE');
           }
 
-          throw new Error(`Erro do Supabase: ${error.message}`);
+          throw new Error(`Erro do Supabase: ${errorMsg}`);
         }
 
         // Processar resultados e armazenar no cache
