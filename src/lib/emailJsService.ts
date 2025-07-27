@@ -1,6 +1,7 @@
 import emailjs from '@emailjs/browser';
 import { DadosCliente, DadosNegociacao } from './pdfGenerator';
 import { PDFGenerator } from './pdfGenerator';
+import { ConfigService } from './configService';
 
 export interface EmailJsPayload {
   clientData: DadosCliente;
@@ -18,17 +19,44 @@ export interface EmailJsConfig {
 export class EmailJsService {
   private static config: EmailJsConfig = {
     serviceId: "service_ldi1oub",
-    templateId: "template_gavn8gt", 
+    templateId: "template_gavn8gt",
     publicKey: "220ao3TEOhWHfxHtM",
     destinationEmail: "seuemail@exemplo.com",
     fromEmail: "noreply@gavresorts.com"
   };
 
-  static init(config?: Partial<EmailJsConfig>): void {
+  static async init(config?: Partial<EmailJsConfig>): Promise<void> {
+    try {
+      // Tentar carregar configurações do Supabase
+      console.log('🔍 Carregando configurações do EmailJS...');
+      const configs = await ConfigService.getConfigs([
+        'EMAILJS_SERVICE_ID',
+        'EMAILJS_TEMPLATE_ID',
+        'EMAILJS_PUBLIC_KEY',
+        'EMAILJS_DESTINATION_EMAIL',
+        'EMAILJS_FROM_EMAIL'
+      ]);
+
+      // Aplicar configurações do Supabase se disponíveis
+      if (configs.EMAILJS_SERVICE_ID) this.config.serviceId = configs.EMAILJS_SERVICE_ID;
+      if (configs.EMAILJS_TEMPLATE_ID) this.config.templateId = configs.EMAILJS_TEMPLATE_ID;
+      if (configs.EMAILJS_PUBLIC_KEY) this.config.publicKey = configs.EMAILJS_PUBLIC_KEY;
+      if (configs.EMAILJS_DESTINATION_EMAIL) this.config.destinationEmail = configs.EMAILJS_DESTINATION_EMAIL;
+      if (configs.EMAILJS_FROM_EMAIL) this.config.fromEmail = configs.EMAILJS_FROM_EMAIL;
+
+      console.log('✅ Configurações do EmailJS carregadas');
+    } catch (error) {
+      console.warn('⚠️ Falha ao carregar configurações do Supabase, usando valores padrão:', error);
+    }
+
+    // Aplicar configurações passadas como parâmetro (têm prioridade)
     if (config) {
       this.config = { ...this.config, ...config };
     }
+
+    // Inicializar EmailJS
     emailjs.init(this.config.publicKey);
+    console.log('🚀 EmailJS inicializado com sucesso');
   }
 
   static async enviarFichaPorEmail(payload: EmailJsPayload): Promise<{ success: boolean; message: string; messageId?: string }> {
