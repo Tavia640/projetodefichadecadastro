@@ -127,11 +127,8 @@ export class EmailService {
         ]);
         console.log('✅ Configurações carregadas do banco de dados');
       } catch (error: any) {
-        console.warn('⚠️ Erro ao acessar banco, usando configurações diretas:', {
-          message: error?.message || 'Erro desconhecido',
-          type: error?.constructor?.name || 'Unknown',
-          details: error
-        });
+        const errorMsg = error?.message || error?.toString() || 'Erro desconhecido';
+        console.warn('⚠️ Erro ao acessar banco, usando configurações diretas:', errorMsg);
 
         // Fallback: usar configurações diretas
         configs = {
