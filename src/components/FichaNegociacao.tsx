@@ -664,7 +664,7 @@ const FichaNegociacao = () => {
           console.log('✅ Torres mockadas carregadas:', torresMock.length);
         }
 
-        console.log('🎉 Carregamento de dados concluído com sucesso!');
+        console.log('���� Carregamento de dados concluído com sucesso!');
 
       } catch (error: any) {
         console.error('💥 Erro crítico ao carregar dados:', error);
@@ -1155,18 +1155,67 @@ const FichaNegociacao = () => {
       console.warn('⚠️ Tentativa 2 falhou:', resultado.message);
       setMensagemStatus('⚠️ Tentativas de envio falharam. Oferecendo download direto...');
 
-      // FALLBACK: Oferecer download direto
-      const confirmarDownload = window.confirm(
-        `❌ Não foi possível enviar os PDFs por email.\n\n` +
-        `Erro: ${resultado.message}\n\n` +
-        `Deseja fazer o download direto dos PDFs? Você poderá enviá-los manualmente depois.`
-      );
+      // FALLBACK: Oferecer múltiplas alternativas
+      setMensagemStatus('🔄 Tentando métodos alternativos de envio...');
 
-      if (confirmarDownload) {
+      try {
+        // Gerar os blobs dos PDFs para as alternativas
+        const pdfBlob1 = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
+        const pdfBlob2 = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
+
+        // Primeiro baixar os PDFs
         await baixarPDFs();
-        setMensagemStatus('💾 PDFs baixados. Envie-os manualmente para admudrive2025@gavresorts.com.br');
-      } else {
-        setMensagemStatus('❌ Envio cancelado. PDFs não foram enviados nem baixados.');
+
+        // Aguardar um pouco para garantir que os downloads terminaram
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Tentar métodos alternativos
+        const resultadoAlternativo = await EmailAlternativo.enviarComAlternativas({
+          clientData: dadosCliente,
+          fichaData: dadosNegociacao,
+          pdfBlob1,
+          pdfBlob2
+        });
+
+        let mensagemFinal = '🔄 Sistema de envio automático falhou, mas alternativas foram executadas:\n\n';
+        mensagemFinal += resultadoAlternativo.tentativas.join('\n');
+        mensagemFinal += '\n\n📧 Email de destino: admudrive2025@gavresorts.com.br';
+
+        setMensagemStatus(mensagemFinal);
+
+        // Mostrar resultado das alternativas
+        const mostrarDetalhes = window.confirm(
+          `⚠️ Sistema de envio automático falhou, mas várias alternativas foram tentadas:\n\n` +
+          `${resultadoAlternativo.tentativas.join('\n')}\n\n` +
+          `🔍 Deseja ver instruções detalhadas?`
+        );
+
+        if (mostrarDetalhes) {
+          alert(`📋 INSTRUÇÕES PARA ENVIO MANUAL:\n\n` +
+            `1. Os PDFs foram baixados em seu computador\n` +
+            `2. Um arquivo de instruções também foi baixado\n` +
+            `3. Seu cliente de email padrão deve ter sido aberto\n` +
+            `4. Complete o envio anexando os PDFs\n\n` +
+            `📧 Email: admudrive2025@gavresorts.com.br\n` +
+            `📎 Anexar: Os 2 PDFs baixados\n\n` +
+            `Se nada funcionou, envie manualmente com os dados do cliente.`);
+        }
+
+      } catch (alternativoError: any) {
+        console.error('❌ Erro nas alternativas:', alternativoError);
+        setMensagemStatus(`❌ Todas as tentativas falharam: ${alternativoError.message}`);
+
+        // Último recurso: apenas baixar
+        const confirmarDownload = window.confirm(
+          `❌ Todas as tentativas de envio falharam.\n\n` +
+          `Erro: ${alternativoError.message}\n\n` +
+          `Deseja apenas baixar os PDFs para envio manual?`
+        );
+
+        if (confirmarDownload) {
+          await baixarPDFs();
+          setMensagemStatus('💾 PDFs baixados. Envie manualmente para: admudrive2025@gavresorts.com.br');
+        }
       }
 
     } catch (error: any) {
