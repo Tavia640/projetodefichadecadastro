@@ -91,10 +91,11 @@ export class ConfigService {
       };
 
     } catch (error: any) {
-      console.error('❌ Erro crítico no diagnóstico:', error);
+      const errorMsg = error?.message || error?.toString() || 'Erro crítico desconhecido';
+      console.error('❌ Erro crítico no diagnóstico:', errorMsg);
       return {
         success: false,
-        message: `Erro crítico: ${error.message}`,
+        message: `Erro crítico: ${errorMsg}`,
         details: error
       };
     }
