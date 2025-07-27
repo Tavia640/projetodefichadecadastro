@@ -1007,7 +1007,7 @@ const FichaNegociacao = () => {
 
       if (resultado.success) {
         const detalhes = resultado.details;
-        let mensagem = `�� Diagnóstico concluído!\n\n`;
+        let mensagem = `✅ Diagnóstico concluído!\n\n`;
         mensagem += `📊 Total de configurações: ${detalhes.totalConfigs}\n\n`;
         mensagem += `🔑 RESEND_API_KEY: ${detalhes.configuracoes.RESEND_API_KEY.existe ? '✅ Existe' : '❌ Não existe'}\n`;
         mensagem += `📧 EMAIL_DESTINO: ${detalhes.configuracoes.EMAIL_DESTINO.existe ? '✅ Existe' : '❌ Não existe'}\n`;
@@ -1120,6 +1120,35 @@ const FichaNegociacao = () => {
         pdf1_size: pdfData1.length,
         pdf2_size: pdfData2.length
       });
+
+      // Salvamento automático dos PDFs (não bloqueia o envio)
+      try {
+        console.log('💾 Iniciando salvamento automático...');
+        setMensagemStatus('💾 Salvando cópia de segurança dos PDFs...');
+
+        const salvamentoResult = await SalvamentoService.salvarPDFs(
+          dadosCliente,
+          dadosNegociacao,
+          {
+            salvarLocal: true,
+            salvarIndexedDB: true,
+            salvarSupabase: false, // Evitar conflito com o envio principal
+            compressao: false
+          }
+        );
+
+        console.log('💾 Resultado do salvamento:', salvamentoResult);
+
+        if (salvamentoResult.success) {
+          console.log(`✅ Backup salvo em: ${salvamentoResult.locations.join(', ')}`);
+        } else {
+          console.warn('⚠️ Falha no backup:', salvamentoResult.message);
+        }
+
+      } catch (salvamentoError: any) {
+        console.warn('⚠️ Erro no salvamento automático:', salvamentoError);
+        // Não falhar o envio por causa do salvamento
+      }
 
       // Preparar payload
       const payload: EmailPayload = {
@@ -1236,7 +1265,7 @@ const FichaNegociacao = () => {
         );
 
         if (mostrarDetalhes) {
-          alert(`📋 INSTRUÇÕES PARA ENVIO MANUAL:\n\n` +
+          alert(`📋 INSTRUÇ��ES PARA ENVIO MANUAL:\n\n` +
             `1. Os PDFs foram baixados em seu computador\n` +
             `2. Um arquivo de instruções também foi baixado\n` +
             `3. Seu cliente de email padrão deve ter sido aberto\n` +
