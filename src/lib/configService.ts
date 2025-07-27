@@ -36,6 +36,11 @@ export class ConfigService {
         .single();
 
       if (error) {
+        // Se a tabela não existe, retornar null sem erro
+        if (error.message?.includes('does not exist')) {
+          console.warn(`⚠️ Tabela de configurações não existe para ${chave}`);
+          return null;
+        }
         console.error(`❌ Erro ao buscar configuração ${chave}:`, error.message || JSON.stringify(error));
         return null;
       }
