@@ -130,6 +130,9 @@ const FichaNegociacao = () => {
   // Estados para alertas de autorização
   const [alertas, setAlertas] = useState<{[key: string]: string}>({});
 
+  // Estado para mensagens de status
+  const [mensagemStatus, setMensagemStatus] = useState<string>('');
+
   // Função para validar primeira entrada
   const validarPrimeiraEntrada = (valor: number): string | null => {
     if (valor < 1000) {
