@@ -951,6 +951,50 @@ const FichaNegociacao = () => {
     }
   };
 
+  const testarGeracaoPDF = () => {
+    try {
+      console.log('🧪 Testando geração de PDFs...');
+
+      // Dados de teste
+      const dadosTesteCliente = {
+        nome: 'Cliente Teste',
+        cpf: '123.456.789-00',
+        email: 'teste@exemplo.com',
+        telefone: '(11) 99999-9999'
+      };
+
+      const dadosTesteNegociacao = {
+        liner: 'Teste Liner',
+        closer: 'Teste Closer',
+        tipoVenda: 'Semestral',
+        parcelasPagasSala: [],
+        contratos: [],
+        informacoesPagamento: []
+      };
+
+      // Gerar PDFs de teste
+      const pdf1 = PDFGenerator.gerarPDFCadastroClienteBase64(dadosTesteCliente as any);
+      const pdf2 = PDFGenerator.gerarPDFNegociacaoBase64(dadosTesteCliente as any, dadosTesteNegociacao as any);
+
+      console.log('📊 Resultados dos PDFs de teste:', {
+        pdf1_size: pdf1.length,
+        pdf2_size: pdf2.length,
+        pdf1_valid_base64: /^[A-Za-z0-9+/]*={0,2}$/.test(pdf1),
+        pdf2_valid_base64: /^[A-Za-z0-9+/]*={0,2}$/.test(pdf2)
+      });
+
+      if (pdf1.length > 1000 && pdf2.length > 1000) {
+        alert(`✅ Geração de PDFs funcionando!\n\nPDF 1: ${pdf1.length} bytes\nPDF 2: ${pdf2.length} bytes\n\nAmbos os PDFs são válidos.`);
+      } else {
+        alert(`❌ Problema na geração de PDFs!\n\nPDF 1: ${pdf1.length} bytes\nPDF 2: ${pdf2.length} bytes\n\nPDFs muito pequenos.`);
+      }
+
+    } catch (error: any) {
+      console.error('❌ Erro no teste de PDF:', error);
+      alert(`❌ Erro na geração de PDFs: ${error.message}`);
+    }
+  };
+
   const testarEmail = async () => {
     try {
       console.log('🧪 Testando sistema de email...');
