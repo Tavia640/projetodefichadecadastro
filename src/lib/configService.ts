@@ -131,6 +131,7 @@ export class ConfigService {
    */
   static async getConfigs(chaves: string[]): Promise<Record<string, string>> {
     try {
+      console.log('🔍 ConfigService.getConfigs iniciado para:', chaves);
       const result: Record<string, string> = {};
       const chavesParaBuscar: string[] = [];
 
@@ -139,6 +140,7 @@ export class ConfigService {
         const cached = this.getCachedValue(chave);
         if (cached !== null) {
           result[chave] = cached;
+          console.log(`✅ ${chave} encontrada no cache`);
         } else {
           chavesParaBuscar.push(chave);
         }
