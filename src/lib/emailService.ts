@@ -29,10 +29,8 @@ export class EmailService {
         ]);
         console.log('✅ Configurações encontradas no banco');
       } catch (error: any) {
-        console.warn('⚠️ Banco indisponível, usando configurações diretas:', {
-          message: error?.message || 'Erro desconhecido',
-          type: error?.constructor?.name || 'Unknown'
-        });
+        const errorMsg = error?.message || error?.toString() || 'Erro desconhecido';
+        console.warn('⚠️ Banco indisponível, usando configurações diretas:', errorMsg);
 
         // Fallback: usar configurações diretas
         configs = {
