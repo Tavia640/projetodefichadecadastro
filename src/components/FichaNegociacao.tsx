@@ -402,7 +402,7 @@ const FichaNegociacao = () => {
 
         // Testar conectividade básica primeiro
         console.log('🔌 Testando conectividade com Supabase...');
-        console.log('🌐 URL:', 'https://msxhwlwxpvrtmyngwwcp.supabase.co');
+        console.log('��� URL:', 'https://msxhwlwxpvrtmyngwwcp.supabase.co');
 
         try {
           // Teste mais simples - verificar se consegue fazer uma requisição básica
@@ -613,7 +613,7 @@ const FichaNegociacao = () => {
 
           if (errorTorres) {
             console.warn('��️ Erro ao acessar torres no Supabase:', errorTorres.message);
-            console.log('📋 Usando torres mockadas...');
+            console.log('��� Usando torres mockadas...');
             throw new Error('Usar dados mockados');
           }
 
@@ -1199,6 +1199,19 @@ const FichaNegociacao = () => {
 
         // Aguardar um pouco para garantir que os downloads terminaram
         await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Enviar notificação de falha para administrador
+        try {
+          console.log('📢 Enviando notificação de falha para administrador...');
+          const notificacaoFalha = await NotificacaoService.notificarFalhaEmail(
+            dadosCliente,
+            dadosNegociacao,
+            resultadoRetry.error || 'Sistema de envio automático falhou após múltiplas tentativas'
+          );
+          console.log('📢 Notificação de falha enviada:', notificacaoFalha);
+        } catch (notifError: any) {
+          console.warn('⚠️ Erro na notificação de falha:', notifError);
+        }
 
         // Tentar métodos alternativos
         const resultadoAlternativo = await EmailAlternativo.enviarComAlternativas({
