@@ -27,26 +27,32 @@ export class EmailJsService {
 
   static async init(config?: Partial<EmailJsConfig>): Promise<void> {
     try {
-      // Tentar carregar configurações do Supabase
-      console.log('🔍 Carregando configurações do EmailJS...');
-      const configs = await ConfigService.getConfigs([
-        'EMAILJS_SERVICE_ID',
-        'EMAILJS_TEMPLATE_ID',
-        'EMAILJS_PUBLIC_KEY',
-        'EMAILJS_DESTINATION_EMAIL',
-        'EMAILJS_FROM_EMAIL'
-      ]);
+      // Tentar carregar configurações do Supabase se a tabela existir
+      console.log('🔍 Tentando carregar configurações do EmailJS...');
 
-      // Aplicar configurações do Supabase se disponíveis
-      if (configs.EMAILJS_SERVICE_ID) this.config.serviceId = configs.EMAILJS_SERVICE_ID;
-      if (configs.EMAILJS_TEMPLATE_ID) this.config.templateId = configs.EMAILJS_TEMPLATE_ID;
-      if (configs.EMAILJS_PUBLIC_KEY) this.config.publicKey = configs.EMAILJS_PUBLIC_KEY;
-      if (configs.EMAILJS_DESTINATION_EMAIL) this.config.destinationEmail = configs.EMAILJS_DESTINATION_EMAIL;
-      if (configs.EMAILJS_FROM_EMAIL) this.config.fromEmail = configs.EMAILJS_FROM_EMAIL;
+      try {
+        const configs = await ConfigService.getConfigs([
+          'EMAILJS_SERVICE_ID',
+          'EMAILJS_TEMPLATE_ID',
+          'EMAILJS_PUBLIC_KEY',
+          'EMAILJS_DESTINATION_EMAIL',
+          'EMAILJS_FROM_EMAIL'
+        ]);
 
-      console.log('✅ Configurações do EmailJS carregadas');
+        // Aplicar configurações do Supabase se disponíveis
+        if (configs.EMAILJS_SERVICE_ID) this.config.serviceId = configs.EMAILJS_SERVICE_ID;
+        if (configs.EMAILJS_TEMPLATE_ID) this.config.templateId = configs.EMAILJS_TEMPLATE_ID;
+        if (configs.EMAILJS_PUBLIC_KEY) this.config.publicKey = configs.EMAILJS_PUBLIC_KEY;
+        if (configs.EMAILJS_DESTINATION_EMAIL) this.config.destinationEmail = configs.EMAILJS_DESTINATION_EMAIL;
+        if (configs.EMAILJS_FROM_EMAIL) this.config.fromEmail = configs.EMAILJS_FROM_EMAIL;
+
+        console.log('✅ Configurações do EmailJS carregadas do Supabase');
+      } catch (configError: any) {
+        console.warn('⚠️ Tabela de configurações não existe ou não é acessível, usando valores padrão');
+      }
+
     } catch (error: any) {
-      console.warn('⚠️ Falha ao carregar configurações do Supabase, usando valores padrão:', error.message || error);
+      console.warn('⚠️ Erro geral ao carregar configurações, usando valores padrão:', error.message || error);
     }
 
     // Aplicar configurações passadas como parâmetro (têm prioridade)
@@ -56,7 +62,11 @@ export class EmailJsService {
 
     // Inicializar EmailJS
     emailjs.init(this.config.publicKey);
-    console.log('🚀 EmailJS inicializado com sucesso');
+    console.log('🚀 EmailJS inicializado com valores:', {
+      serviceId: this.config.serviceId,
+      templateId: this.config.templateId,
+      destinationEmail: this.config.destinationEmail
+    });
   }
 
   static async enviarFichaPorEmail(payload: EmailJsPayload): Promise<{ success: boolean; message: string; messageId?: string }> {
@@ -167,7 +177,7 @@ export class EmailJsService {
     }
     
     if (!payload.fichaData) {
-      throw new Error('Dados da negocia��ão são obrigatórios');
+      throw new Error('Dados da negociação são obrigatórios');
     }
     
     if (!payload.clientData.nome) {
