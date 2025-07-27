@@ -99,7 +99,7 @@ export class EmailService {
   static async enviarPDFs(payload: EmailPayload): Promise<{ success: boolean; message: string; messageId?: string }> {
     try {
       console.log('🚀 Iniciando envio de PDFs via email...');
-      console.log('📋 Dados do payload:', {
+      console.log('��� Dados do payload:', {
         temClientData: !!payload.clientData,
         temFichaData: !!payload.fichaData,
         nomeCliente: payload.clientData?.nome,
@@ -123,8 +123,12 @@ export class EmailService {
           'EMAIL_REMETENTE'
         ]);
         console.log('✅ Configurações carregadas do banco de dados');
-      } catch (error) {
-        console.warn('⚠️ Erro ao acessar banco, usando configurações diretas:', error);
+      } catch (error: any) {
+        console.warn('⚠️ Erro ao acessar banco, usando configurações diretas:', {
+          message: error?.message || 'Erro desconhecido',
+          type: error?.constructor?.name || 'Unknown',
+          details: error
+        });
 
         // Fallback: usar configurações diretas
         configs = {
