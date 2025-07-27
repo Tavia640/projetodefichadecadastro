@@ -74,7 +74,13 @@ export class EmailJsService {
       console.log('🚀 Iniciando envio de ficha por email via EmailJS...');
 
       // Inicializar configurações
-      await this.init();
+      try {
+        await this.init();
+      } catch (initError: any) {
+        console.warn('⚠️ Erro na inicialização, usando configurações padrão:', initError.message);
+        // Continuar com configurações padrão
+        emailjs.init(this.config.publicKey);
+      }
 
       // Validar dados antes do envio
       this.validarPayload(payload);
