@@ -29,15 +29,16 @@ export class ConfigService {
         .select('*');
 
       if (accessError) {
-        console.error('❌ Erro ao acessar tabela:', accessError);
+        const errorMsg = accessError?.message || accessError?.toString() || 'Erro desconhecido';
+        console.error('❌ Erro ao acessar tabela:', errorMsg);
         return {
           success: false,
-          message: `Erro ao acessar tabela: ${accessError.message}`,
+          message: `Erro ao acessar tabela: ${errorMsg}`,
           details: accessError
         };
       }
 
-      console.log('��� Tabela acessível. Total de configurações:', allConfigs?.length || 0);
+      console.log('✅ Tabela acessível. Total de configurações:', allConfigs?.length || 0);
 
       // Teste 2: Verificar configurações específicas
       const configsNecessarias = ['RESEND_API_KEY', 'EMAIL_DESTINO', 'EMAIL_REMETENTE'];
@@ -110,7 +111,7 @@ export class ConfigService {
         return cached;
       }
 
-      console.log(`🔍 Buscando configura��ão: ${chave}`);
+      console.log(`🔍 Buscando configuração: ${chave}`);
 
       const { data, error } = await supabase
         .from('configuracoes')
