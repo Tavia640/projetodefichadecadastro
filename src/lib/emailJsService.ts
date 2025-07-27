@@ -1,7 +1,6 @@
 import emailjs from '@emailjs/browser';
 import { DadosCliente, DadosNegociacao } from './pdfGenerator';
 import { PDFGenerator } from './pdfGenerator';
-import { ConfigService } from './configService';
 
 export interface EmailJsPayload {
   clientData: DadosCliente;
