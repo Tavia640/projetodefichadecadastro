@@ -93,7 +93,12 @@ export class EmailJsService {
       };
 
       console.log('📧 Enviando email via EmailJS...');
-      
+
+      // Validar configuração antes do envio
+      if (!this.config.serviceId || !this.config.templateId || !this.config.publicKey) {
+        throw new Error('Configuração do EmailJS incompleta. Verifique serviceId, templateId e publicKey.');
+      }
+
       // Enviar email usando EmailJS
       const response = await emailjs.send(
         this.config.serviceId,
