@@ -822,7 +822,7 @@ const FichaNegociacao = () => {
     // Contar quantas entradas já existem para numerar a nova
     const entradasExistentes = informacoesPagamento.filter(info => info.tipo.includes('ª Entrada'));
     const proximoNumero = entradasExistentes.length + 1;
-    const novoTipo = `${proximoNumero}ª Entrada`;
+    const novoTipo = `${proximoNumero}�� Entrada`;
     
     setInformacoesPagamento([...informacoesPagamento, {
       id: Date.now().toString(),
@@ -2268,7 +2268,18 @@ const FichaNegociacao = () => {
                 <path d="M9 12l2 2 4-4"/>
                 <circle cx="12" cy="12" r="10"/>
               </svg>
-              Testar Email
+              📧 Testar Email
+            </Button>
+            <Button
+              onClick={testarNotificacao}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.731 2.269a2.5 2.5 0 0 0-3.536 0l-1.031 1.031a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l1.031-1.031a2.5 2.5 0 0 0 0-3.536z"/>
+                <path d="M14.5 6.5 3 18a1 1 0 0 0 0 1.414l1.414 1.414A1 1 0 0 0 5.828 21L17.5 9.5"/>
+              </svg>
+              📢 Testar WhatsApp
             </Button>
             <Button
               onClick={salvarFicha}
