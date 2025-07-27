@@ -402,7 +402,7 @@ const FichaNegociacao = () => {
 
         // Testar conectividade básica primeiro
         console.log('🔌 Testando conectividade com Supabase...');
-        console.log('��� URL:', 'https://msxhwlwxpvrtmyngwwcp.supabase.co');
+        console.log('🌐 URL:', 'https://msxhwlwxpvrtmyngwwcp.supabase.co');
 
         try {
           // Teste mais simples - verificar se consegue fazer uma requisição básica
@@ -613,7 +613,7 @@ const FichaNegociacao = () => {
 
           if (errorTorres) {
             console.warn('��️ Erro ao acessar torres no Supabase:', errorTorres.message);
-            console.log('��� Usando torres mockadas...');
+            console.log('📋 Usando torres mockadas...');
             throw new Error('Usar dados mockados');
           }
 
@@ -1295,6 +1295,33 @@ const FichaNegociacao = () => {
       }
     } catch (error: any) {
       console.error('❌ Erro no teste:', error);
+      alert(`❌ Erro no teste: ${error.message}`);
+    }
+  };
+
+  const testarNotificacao = async () => {
+    try {
+      console.log('📢 Testando sistema de notificação...');
+
+      // Recuperar dados do cliente
+      const dadosClienteString = localStorage.getItem('dadosCliente');
+      if (!dadosClienteString) {
+        alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
+        return;
+      }
+
+      const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
+
+      const resultado = await NotificacaoService.testarNotificacao(dadosCliente);
+
+      if (resultado.success) {
+        alert(`✅ Teste de notificação executado!\n\n${resultado.message}\n\nVerifique se os aplicativos foram abertos.`);
+      } else {
+        alert(`❌ Teste de notificação falhou:\n\n${resultado.message}`);
+      }
+
+    } catch (error: any) {
+      console.error('❌ Erro no teste de notificação:', error);
       alert(`❌ Erro no teste: ${error.message}`);
     }
   };
