@@ -10,7 +10,6 @@ import { Plus, Trash2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
-import { EmailService } from '@/lib/emailService';
 import { EmailJsService } from '@/lib/emailJsService';
 
 interface ParcelaPagaSala {
