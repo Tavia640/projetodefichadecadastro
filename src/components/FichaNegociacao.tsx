@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
 import { EmailService } from '@/lib/emailService';
+import { ConfigService } from '@/lib/configService';
 
 // Formatação monetária simples para exibição
 const exibirValor = (valor: string): string => {
@@ -608,7 +609,7 @@ const FichaNegociacao = () => {
             .select('*');
 
           if (errorTorres) {
-            console.warn('⚠️ Erro ao acessar torres no Supabase:', errorTorres.message);
+            console.warn('��️ Erro ao acessar torres no Supabase:', errorTorres.message);
             console.log('📋 Usando torres mockadas...');
             throw new Error('Usar dados mockados');
           }
