@@ -998,7 +998,7 @@ const FichaNegociacao = () => {
 
   const diagnosticarSistema = async () => {
     try {
-      console.log('🔍 Iniciando diagnóstico completo do sistema...');
+      console.log('🔍 Iniciando diagn��stico completo do sistema...');
       const resultado = await ConfigService.diagnosticarSistema();
 
       if (resultado.success) {
@@ -2017,7 +2017,41 @@ const FichaNegociacao = () => {
             </div>
           </div>
 
-          {/* Botões de Ação */}
+          {/* Mensagem de status */}
+          {mensagemStatus && (
+            <div className="p-4 border rounded-lg bg-blue-50 border-blue-200">
+              <p className="text-sm text-blue-800">{mensagemStatus}</p>
+            </div>
+          )}
+
+          {/* Botões Principais de Ação */}
+          <div className="flex flex-wrap gap-3 pt-4">
+            <Button
+              onClick={baixarPDFs}
+              variant="default"
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 flex-1 min-w-[220px]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              💾 Baixar PDFs Direto
+            </Button>
+            <Button
+              onClick={enviarPDFsRobusto}
+              variant="default"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 flex-1 min-w-[220px]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22,2 15,22 11,13 2,9 22,2"/>
+              </svg>
+              📧 Enviar por Email (Robusto)
+            </Button>
+          </div>
+
+          {/* Botões de Ação Secundários */}
           <div className="flex justify-center space-x-4 pt-6">
             <Button variant="outline" onClick={limparFicha}>
               Limpar
