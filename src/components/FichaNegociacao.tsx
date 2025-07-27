@@ -10,12 +10,7 @@ import { Plus, Trash2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
-import { EmailService, EmailPayload } from '@/lib/emailService';
-import { ConfigService } from '@/lib/configService';
-import { EmailAlternativo } from '@/lib/emailAlternativo';
-import { RetryService } from '@/lib/retryService';
-import { NotificacaoService } from '@/lib/notificacaoService';
-import { SalvamentoService } from '@/lib/salvamentoService';
+import { EmailSimples } from '@/lib/emailSimples';
 
 // Formatação monetária simples para exibição
 const exibirValor = (valor: string): string => {
