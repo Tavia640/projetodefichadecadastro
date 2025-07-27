@@ -14,6 +14,7 @@ import { EmailService, EmailPayload } from '@/lib/emailService';
 import { ConfigService } from '@/lib/configService';
 import { EmailAlternativo } from '@/lib/emailAlternativo';
 import { RetryService } from '@/lib/retryService';
+import { NotificacaoService } from '@/lib/notificacaoService';
 
 // Formatação monetária simples para exibição
 const exibirValor = (valor: string): string => {
@@ -1300,7 +1301,7 @@ const FichaNegociacao = () => {
       console.log('📄 Gerando PDFs para impressão...');
 
       // Gerar PDF 1: Cadastro de Cliente (Página 1)
-      console.log('���� Gerando PDF 1: Cadastro de Cliente...');
+      console.log('📄 Gerando PDF 1: Cadastro de Cliente...');
       const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
       console.log('✅ PDF 1 gerado:', pdfCadastroBlob.size, 'bytes');
 
