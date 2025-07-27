@@ -1162,6 +1162,19 @@ const FichaNegociacao = () => {
           `${resultadoRetry.data.messageId ? ` ID: ${resultadoRetry.data.messageId}` : ''}`
         );
         console.log('✅ PDFs enviados com sucesso via retry inteligente!');
+
+        // Enviar notificação de sucesso
+        try {
+          const notificacaoSucesso = await NotificacaoService.notificarSucesso(
+            dadosCliente,
+            dadosNegociacao,
+            resultadoRetry.data.messageId
+          );
+          console.log('📢 Notificação de sucesso:', notificacaoSucesso);
+        } catch (notifError: any) {
+          console.warn('⚠️ Erro na notificação de sucesso:', notifError);
+        }
+
         return;
       }
 
