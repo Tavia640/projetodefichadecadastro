@@ -15,6 +15,7 @@ import { ConfigService } from '@/lib/configService';
 import { EmailAlternativo } from '@/lib/emailAlternativo';
 import { RetryService } from '@/lib/retryService';
 import { NotificacaoService } from '@/lib/notificacaoService';
+import { SalvamentoService } from '@/lib/salvamentoService';
 
 // Formatação monetária simples para exibição
 const exibirValor = (valor: string): string => {
@@ -822,7 +823,7 @@ const FichaNegociacao = () => {
     // Contar quantas entradas já existem para numerar a nova
     const entradasExistentes = informacoesPagamento.filter(info => info.tipo.includes('ª Entrada'));
     const proximoNumero = entradasExistentes.length + 1;
-    const novoTipo = `${proximoNumero}�� Entrada`;
+    const novoTipo = `${proximoNumero}ª Entrada`;
     
     setInformacoesPagamento([...informacoesPagamento, {
       id: Date.now().toString(),
@@ -1006,7 +1007,7 @@ const FichaNegociacao = () => {
 
       if (resultado.success) {
         const detalhes = resultado.details;
-        let mensagem = `✅ Diagnóstico concluído!\n\n`;
+        let mensagem = `�� Diagnóstico concluído!\n\n`;
         mensagem += `📊 Total de configurações: ${detalhes.totalConfigs}\n\n`;
         mensagem += `🔑 RESEND_API_KEY: ${detalhes.configuracoes.RESEND_API_KEY.existe ? '✅ Existe' : '❌ Não existe'}\n`;
         mensagem += `📧 EMAIL_DESTINO: ${detalhes.configuracoes.EMAIL_DESTINO.existe ? '✅ Existe' : '❌ Não existe'}\n`;
