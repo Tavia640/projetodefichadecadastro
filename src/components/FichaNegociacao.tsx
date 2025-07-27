@@ -2074,29 +2074,7 @@ const FichaNegociacao = () => {
               </svg>
               📧 Testar Email
             </Button>
-            <Button
-              onClick={testarNotificacao}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21.731 2.269a2.5 2.5 0 0 0-3.536 0l-1.031 1.031a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l1.031-1.031a2.5 2.5 0 0 0 0-3.536z"/>
-                <path d="M14.5 6.5 3 18a1 1 0 0 0 0 1.414l1.414 1.414A1 1 0 0 0 5.828 21L17.5 9.5"/>
-              </svg>
-              📢 Testar WhatsApp
-            </Button>
-            <Button
-              onClick={gerenciarPDFsSalvos}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <path d="m14,2 6,6"/>
-                <polyline points="14,2 14,8 20,8"/>
-              </svg>
-              📁 Gerenciar PDFs Salvos
-            </Button>
+
             <Button
               onClick={salvarFicha}
               className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
