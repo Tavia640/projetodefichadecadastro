@@ -86,6 +86,11 @@ export class ConfigService {
           .eq('ativo', true);
 
         if (error) {
+          // Se a tabela não existe, retornar resultado vazio sem erro
+          if (error.message?.includes('does not exist')) {
+            console.warn('⚠️ Tabela de configurações não existe, retornando valores vazios');
+            return result;
+          }
           console.error('❌ Erro ao buscar configurações:', error.message || JSON.stringify(error));
           return result;
         }
@@ -102,7 +107,7 @@ export class ConfigService {
       return result;
 
     } catch (error: any) {
-      console.error('❌ Erro inesperado ao buscar configurações:', error.message || JSON.stringify(error));
+      console.warn('⚠️ Erro ao buscar configurações (usando valores padrão):', error.message || JSON.stringify(error));
       return {};
     }
   }
