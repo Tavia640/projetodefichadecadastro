@@ -1100,15 +1100,20 @@ const FichaNegociacao = () => {
   const testarEmail = async () => {
     try {
       console.log('🧪 Testando sistema de email...');
-      const resultado = await EmailService.testarConectividade();
+      setMensagemStatus('🧪 Testando envio de email...');
 
-      if (resultado.success) {
-        alert(`✅ Teste bem-sucedido!\n\n${resultado.message}`);
+      const resultado = await EmailSimples.testarSistema();
+
+      if (resultado.sucesso) {
+        setMensagemStatus(`✅ Teste bem-sucedido: ${resultado.mensagem}`);
+        alert(`✅ Teste bem-sucedido!\n\n${resultado.mensagem}\n\nID: ${resultado.detalhes || 'N/A'}`);
       } else {
-        alert(`❌ Teste falhou:\n\n${resultado.message}`);
+        setMensagemStatus(`❌ Teste falhou: ${resultado.mensagem}`);
+        alert(`❌ Teste falhou:\n\n${resultado.mensagem}\n\nDetalhes: ${resultado.detalhes || 'N/A'}`);
       }
     } catch (error: any) {
       console.error('❌ Erro no teste:', error);
+      setMensagemStatus(`❌ Erro no teste: ${error.message}`);
       alert(`❌ Erro no teste: ${error.message}`);
     }
   };
