@@ -129,7 +129,7 @@ export class EmailService {
       console.error('❌ Erro no envio de PDFs:', error);
       console.error('📚 Stack trace completo:', error.stack);
 
-      // Tratamento de erros espec��ficos
+      // Tratamento de erros específicos
       let errorMessage = 'Erro desconhecido no envio de PDFs';
 
       if (error.message?.includes('Chave API do Resend')) {
@@ -152,33 +152,52 @@ export class EmailService {
   }
   
   private static validarPayload(payload: EmailPayload): void {
+    console.log('🔍 Validando payload...');
+
     if (!payload.clientData) {
       throw new Error('Dados do cliente são obrigatórios');
     }
-    
+
     if (!payload.fichaData) {
       throw new Error('Dados da negociação são obrigatórios');
     }
-    
+
     if (!payload.pdfData1 || !payload.pdfData2) {
       throw new Error('PDFs são obrigatórios para o envio');
     }
-    
+
     if (!payload.clientData.nome) {
       throw new Error('Nome do cliente é obrigatório');
     }
-    
+
+    console.log('📊 Informações dos PDFs:', {
+      pdf1_size: payload.pdfData1.length,
+      pdf2_size: payload.pdfData2.length,
+      pdf1_starts_with: payload.pdfData1.substring(0, 20),
+      pdf2_starts_with: payload.pdfData2.substring(0, 20)
+    });
+
     // Validar se os PDFs não estão vazios (devem ter conteúdo base64 válido)
     const minPdfSize = 1000; // Tamanho mínimo esperado para um PDF válido
-    
+
     if (payload.pdfData1.length < minPdfSize) {
-      throw new Error('PDF de cadastro parece estar vazio ou corrompido');
+      throw new Error(`PDF de cadastro muito pequeno: ${payload.pdfData1.length} bytes (mínimo: ${minPdfSize})`);
     }
-    
+
     if (payload.pdfData2.length < minPdfSize) {
-      throw new Error('PDF de negociação parece estar vazio ou corrompido');
+      throw new Error(`PDF de negociação muito pequeno: ${payload.pdfData2.length} bytes (mínimo: ${minPdfSize})`);
     }
-    
+
+    // Validar se é base64 válido
+    const base64Pattern = /^[A-Za-z0-9+/]*={0,2}$/;
+    if (!base64Pattern.test(payload.pdfData1)) {
+      throw new Error('PDF de cadastro não é um base64 válido');
+    }
+
+    if (!base64Pattern.test(payload.pdfData2)) {
+      throw new Error('PDF de negociação não é um base64 válido');
+    }
+
     console.log('✅ Payload validado com sucesso');
   }
 }
