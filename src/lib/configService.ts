@@ -16,6 +16,75 @@ export class ConfigService {
   private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
   /**
+   * Função de diagnóstico para verificar se a tabela e dados existem
+   */
+  static async diagnosticarSistema(): Promise<{ success: boolean; message: string; details?: any }> {
+    try {
+      console.log('🔍 Iniciando diagnóstico do sistema de configurações...');
+
+      // Teste 1: Verificar se consegue acessar a tabela
+      console.log('📋 Teste 1: Verificando acesso à tabela configuracoes...');
+      const { data: allConfigs, error: accessError } = await supabase
+        .from('configuracoes')
+        .select('*');
+
+      if (accessError) {
+        console.error('❌ Erro ao acessar tabela:', accessError);
+        return {
+          success: false,
+          message: `Erro ao acessar tabela: ${accessError.message}`,
+          details: accessError
+        };
+      }
+
+      console.log('✅ Tabela acessível. Total de configurações:', allConfigs?.length || 0);
+
+      // Teste 2: Verificar configurações específicas
+      const configsNecessarias = ['RESEND_API_KEY', 'EMAIL_DESTINO', 'EMAIL_REMETENTE'];
+      const configsEncontradas: Record<string, any> = {};
+
+      for (const config of configsNecessarias) {
+        const encontrada = allConfigs?.find(c => c.chave === config);
+        configsEncontradas[config] = {
+          existe: !!encontrada,
+          ativo: encontrada?.ativo || false,
+          tamanhoValor: encontrada?.valor?.length || 0,
+          valor_preview: encontrada?.valor ? `${encontrada.valor.substring(0, 10)}...` : 'VAZIO'
+        };
+      }
+
+      console.log('📊 Configurações encontradas:', configsEncontradas);
+
+      // Teste 3: Testar getConfig individual
+      console.log('🧪 Teste 3: Testando getConfig...');
+      const resendKey = await this.getConfig('RESEND_API_KEY');
+      console.log('🔑 RESEND_API_KEY resultado:', {
+        encontrada: !!resendKey,
+        tamanho: resendKey?.length || 0,
+        preview: resendKey ? `${resendKey.substring(0, 10)}...` : 'VAZIO'
+      });
+
+      return {
+        success: true,
+        message: 'Diagnóstico concluído com sucesso',
+        details: {
+          totalConfigs: allConfigs?.length || 0,
+          configuracoes: configsEncontradas,
+          resendKeyFunciona: !!resendKey
+        }
+      };
+
+    } catch (error: any) {
+      console.error('❌ Erro crítico no diagnóstico:', error);
+      return {
+        success: false,
+        message: `Erro crítico: ${error.message}`,
+        details: error
+      };
+    }
+  }
+
+  /**
    * Busca uma configuração por chave
    */
   static async getConfig(chave: string): Promise<string | null> {
