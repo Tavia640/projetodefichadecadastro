@@ -679,8 +679,7 @@ const FichaNegociacao = () => {
 
       console.log('📧 Enviando ficha via EmailJS...');
 
-      // Inicializar EmailJS e enviar
-      EmailJsService.init();
+      // Enviar ficha via EmailJS
       const resultado = await EmailJsService.enviarFichaPorEmail({
         clientData: dadosCliente,
         fichaData: dadosNegociacao
