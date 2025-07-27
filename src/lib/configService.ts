@@ -55,8 +55,23 @@ export class ConfigService {
 
       console.log('📊 Configurações encontradas:', configsEncontradas);
 
-      // Teste 3: Testar getConfig individual
-      console.log('🧪 Teste 3: Testando getConfig...');
+      // Teste 3: Testar getConfigs múltiplas
+      console.log('🧪 Teste 3: Testando getConfigs...');
+      try {
+        const configs = await this.getConfigs(['RESEND_API_KEY', 'EMAIL_DESTINO']);
+        console.log('✅ getConfigs funcionou:', Object.keys(configs));
+        configsEncontradas['TESTE_getConfigs'] = { sucesso: true, configs: Object.keys(configs) };
+      } catch (configError: any) {
+        console.error('❌ getConfigs falhou:', configError);
+        configsEncontradas['TESTE_getConfigs'] = {
+          sucesso: false,
+          erro: configError.message,
+          tipo: configError.constructor?.name
+        };
+      }
+
+      // Teste 4: Testar getConfig individual
+      console.log('🧪 Teste 4: Testando getConfig individual...');
       const resendKey = await this.getConfig('RESEND_API_KEY');
       console.log('🔑 RESEND_API_KEY resultado:', {
         encontrada: !!resendKey,
