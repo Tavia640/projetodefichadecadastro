@@ -23,7 +23,7 @@ export class ConfigService {
       console.log('🔍 Iniciando diagnóstico do sistema de configurações...');
 
       // Teste 1: Verificar se consegue acessar a tabela
-      console.log('📋 Teste 1: Verificando acesso �� tabela configuracoes...');
+      console.log('📋 Teste 1: Verificando acesso à tabela configuracoes...');
       const { data: allConfigs, error: accessError } = await supabase
         .from('configuracoes')
         .select('*');
@@ -120,7 +120,12 @@ export class ConfigService {
         .single();
 
       if (error) {
-        console.error(`❌ Erro ao buscar configuração ${chave}:`, error);
+        const errorMsg = typeof error === 'string' ? error :
+                        error?.message ||
+                        error?.details ||
+                        JSON.stringify(error) ||
+                        'Erro desconhecido';
+        console.error(`❌ Erro ao buscar configuração ${chave}:`, errorMsg);
         return null;
       }
 
