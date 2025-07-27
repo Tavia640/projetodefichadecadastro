@@ -209,7 +209,7 @@ const FichaNegociacao = () => {
       }
     }
     
-    // Validar restante da entrada (nível 1 - líder de sala)
+    // Validar restante da entrada (n��vel 1 - líder de sala)
     const restanteEntrada = informacoesPagamento.find(info => info.tipo === 'Restante da Entrada');
     if (restanteEntrada?.qtdParcelas) {
       const qtd = parseInt(restanteEntrada.qtdParcelas);
@@ -1017,6 +1017,175 @@ const FichaNegociacao = () => {
     } catch (error: any) {
       console.error('❌ Erro no diagnóstico:', error);
       alert(`❌ Erro no diagnóstico: ${error.message}`);
+    }
+  };
+
+  // Função para baixar PDFs diretamente
+  const baixarPDFs = async () => {
+    try {
+      console.log('💾 Iniciando download direto dos PDFs...');
+      setMensagemStatus('💾 Gerando PDFs para download...');
+
+      // Recuperar dados do cliente
+      const dadosClienteString = localStorage.getItem('dadosCliente');
+      if (!dadosClienteString) {
+        alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
+        return;
+      }
+
+      const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
+
+      // Preparar dados da negociação
+      const dadosNegociacao: DadosNegociacao = {
+        liner,
+        closer,
+        tipoVenda,
+        parcelasPagasSala,
+        contratos,
+        informacoesPagamento
+      };
+
+      // Gerar PDFs
+      const pdfBlob1 = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
+      const pdfBlob2 = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
+
+      // Criar nomes de arquivo seguros
+      const nomeSeguro = dadosCliente.nome?.replace(/[^a-zA-Z0-9]/g, '_') || 'Cliente';
+      const timestamp = new Date().toISOString().slice(0, 10);
+
+      // Download do PDF 1
+      const url1 = URL.createObjectURL(pdfBlob1);
+      const link1 = document.createElement('a');
+      link1.href = url1;
+      link1.download = `Ficha_Cadastro_${nomeSeguro}_${timestamp}.pdf`;
+      document.body.appendChild(link1);
+      link1.click();
+      document.body.removeChild(link1);
+      URL.revokeObjectURL(url1);
+
+      // Download do PDF 2 (com delay para não conflitar)
+      setTimeout(() => {
+        const url2 = URL.createObjectURL(pdfBlob2);
+        const link2 = document.createElement('a');
+        link2.href = url2;
+        link2.download = `Ficha_Negociacao_${nomeSeguro}_${timestamp}.pdf`;
+        document.body.appendChild(link2);
+        link2.click();
+        document.body.removeChild(link2);
+        URL.revokeObjectURL(url2);
+      }, 500);
+
+      setMensagemStatus(`✅ PDFs baixados com sucesso! Envie-os manualmente para: admudrive2025@gavresorts.com.br`);
+
+    } catch (error: any) {
+      console.error('❌ Erro no download dos PDFs:', error);
+      setMensagemStatus(`❌ Erro no download: ${error.message}`);
+    }
+  };
+
+  // Função para envio robusto com múltiplas tentativas
+  const enviarPDFsRobusto = async () => {
+    try {
+      console.log('🚀 Iniciando envio robusto de PDFs...');
+      setMensagemStatus('📨 Preparando envio de PDFs...');
+
+      // Recuperar dados do cliente
+      const dadosClienteString = localStorage.getItem('dadosCliente');
+      if (!dadosClienteString) {
+        alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
+        return;
+      }
+
+      const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
+
+      // Preparar dados da negociação
+      const dadosNegociacao: DadosNegociacao = {
+        liner,
+        closer,
+        tipoVenda,
+        parcelasPagasSala,
+        contratos,
+        informacoesPagamento
+      };
+
+      // Gerar PDFs
+      const pdfData1 = PDFGenerator.gerarPDFCadastroClienteBase64(dadosCliente);
+      const pdfData2 = PDFGenerator.gerarPDFNegociacaoBase64(dadosCliente, dadosNegociacao);
+
+      console.log('📊 PDFs gerados:', {
+        pdf1_size: pdfData1.length,
+        pdf2_size: pdfData2.length
+      });
+
+      // Preparar payload
+      const payload: EmailPayload = {
+        clientData: dadosCliente,
+        fichaData: dadosNegociacao,
+        pdfData1,
+        pdfData2
+      };
+
+      setMensagemStatus('📧 Tentativa 1: Enviando via sistema principal...');
+
+      // TENTATIVA 1: Sistema principal (Resend via Supabase)
+      let resultado = await EmailService.enviarPDFs(payload);
+
+      if (resultado.success) {
+        setMensagemStatus(`✅ ${resultado.message}${resultado.messageId ? ` (ID: ${resultado.messageId})` : ''}`);
+        console.log('✅ PDFs enviados com sucesso na tentativa 1!');
+        return;
+      }
+
+      console.warn('⚠️ Tentativa 1 falhou:', resultado.message);
+      setMensagemStatus('⚠️ Tentativa 1 falhou. Iniciando tentativa 2...');
+
+      // TENTATIVA 2: Retry com delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setMensagemStatus('📧 Tentativa 2: Reenviando...');
+
+      resultado = await EmailService.enviarPDFs(payload);
+
+      if (resultado.success) {
+        setMensagemStatus(`✅ ${resultado.message} (Sucesso na tentativa 2)`);
+        console.log('✅ PDFs enviados com sucesso na tentativa 2!');
+        return;
+      }
+
+      console.warn('⚠️ Tentativa 2 falhou:', resultado.message);
+      setMensagemStatus('⚠️ Tentativas de envio falharam. Oferecendo download direto...');
+
+      // FALLBACK: Oferecer download direto
+      const confirmarDownload = window.confirm(
+        `❌ Não foi possível enviar os PDFs por email.\n\n` +
+        `Erro: ${resultado.message}\n\n` +
+        `Deseja fazer o download direto dos PDFs? Você poderá enviá-los manualmente depois.`
+      );
+
+      if (confirmarDownload) {
+        await baixarPDFs();
+        setMensagemStatus('💾 PDFs baixados. Envie-os manualmente para admudrive2025@gavresorts.com.br');
+      } else {
+        setMensagemStatus('❌ Envio cancelado. PDFs não foram enviados nem baixados.');
+      }
+
+    } catch (error: any) {
+      console.error('❌ Erro crítico no envio de PDFs:', error);
+      setMensagemStatus(`❌ Erro crítico: ${error.message}`);
+
+      // Oferecer download direto em caso de erro crítico
+      const confirmarDownload = window.confirm(
+        `❌ Erro crítico no sistema de envio.\n\n` +
+        `Erro: ${error.message}\n\n` +
+        `Deseja fazer o download direto dos PDFs?`
+      );
+
+      if (confirmarDownload) {
+        try {
+          await baixarPDFs();
+        } catch (downloadError: any) {
+          setMensagemStatus(`❌ Erro até no download: ${downloadError.message}`);
+        }
+      }
     }
   };
 
