@@ -28,8 +28,11 @@ export class EmailService {
           'EMAIL_REMETENTE'
         ]);
         console.log('✅ Configurações encontradas no banco');
-      } catch (error) {
-        console.warn('⚠️ Banco indisponível, usando configurações diretas');
+      } catch (error: any) {
+        console.warn('⚠️ Banco indisponível, usando configurações diretas:', {
+          message: error?.message || 'Erro desconhecido',
+          type: error?.constructor?.name || 'Unknown'
+        });
 
         // Fallback: usar configurações diretas
         configs = {
@@ -99,7 +102,7 @@ export class EmailService {
   static async enviarPDFs(payload: EmailPayload): Promise<{ success: boolean; message: string; messageId?: string }> {
     try {
       console.log('🚀 Iniciando envio de PDFs via email...');
-      console.log('��� Dados do payload:', {
+      console.log('📋 Dados do payload:', {
         temClientData: !!payload.clientData,
         temFichaData: !!payload.fichaData,
         nomeCliente: payload.clientData?.nome,
