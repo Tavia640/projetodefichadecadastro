@@ -904,14 +904,15 @@ const FichaNegociacao = () => {
       };
       
       console.log('📄 Gerando PDFs...');
-      
-      // Gerar PDFs usando a nova biblioteca
-      const pdfCadastro = PDFGenerator.gerarPDFCadastroCliente(dadosCliente);
-      const pdfNegociacao = PDFGenerator.gerarPDFNegociacao(dadosCliente, dadosNegociacao);
-      
-      // Extrair base64 dos PDFs
-      const pdfData1 = pdfCadastro.startsWith('data:') ? pdfCadastro.split(',')[1] : pdfCadastro;
-      const pdfData2 = pdfNegociacao.startsWith('data:') ? pdfNegociacao.split(',')[1] : pdfNegociacao;
+
+      // Gerar PDFs usando as funções que retornam base64 limpo
+      const pdfData1 = PDFGenerator.gerarPDFCadastroClienteBase64(dadosCliente);
+      const pdfData2 = PDFGenerator.gerarPDFNegociacaoBase64(dadosCliente, dadosNegociacao);
+
+      console.log('📊 Tamanhos dos PDFs:', {
+        pdf1: pdfData1.length,
+        pdf2: pdfData2.length
+      });
       
       console.log('📧 Enviando PDFs por email...');
       
