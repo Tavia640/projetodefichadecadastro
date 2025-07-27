@@ -998,29 +998,7 @@ const FichaNegociacao = () => {
     }
   };
 
-  const diagnosticarSistema = async () => {
-    try {
-      console.log('🔍 Iniciando diagn��stico completo do sistema...');
-      const resultado = await ConfigService.diagnosticarSistema();
 
-      if (resultado.success) {
-        const detalhes = resultado.details;
-        let mensagem = `✅ Diagnóstico concluído!\n\n`;
-        mensagem += `📊 Total de configurações: ${detalhes.totalConfigs}\n\n`;
-        mensagem += `🔑 RESEND_API_KEY: ${detalhes.configuracoes.RESEND_API_KEY.existe ? '✅ Existe' : '❌ Não existe'}\n`;
-        mensagem += `📧 EMAIL_DESTINO: ${detalhes.configuracoes.EMAIL_DESTINO.existe ? '✅ Existe' : '❌ Não existe'}\n`;
-        mensagem += `📤 EMAIL_REMETENTE: ${detalhes.configuracoes.EMAIL_REMETENTE.existe ? '✅ Existe' : '❌ Não existe'}\n\n`;
-        mensagem += `🧪 Função getConfig: ${detalhes.resendKeyFunciona ? '✅ Funcionando' : '❌ Falhou'}`;
-
-        alert(mensagem);
-      } else {
-        alert(`❌ Diagnóstico falhou:\n\n${resultado.message}`);
-      }
-    } catch (error: any) {
-      console.error('❌ Erro no diagnóstico:', error);
-      alert(`❌ Erro no diagnóstico: ${error.message}`);
-    }
-  };
 
   // Função simples para baixar PDFs
   const baixarPDFs = () => {
