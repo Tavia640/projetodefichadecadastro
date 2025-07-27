@@ -217,6 +217,12 @@ export class PDFGenerator {
     return pdf.output('blob');
   }
 
+  // Função para gerar PDF em base64 limpo (para envio por email)
+  static gerarPDFCadastroClienteBase64(dadosCliente: DadosCliente): string {
+    const pdf = this.createPDFCadastroCliente(dadosCliente);
+    return pdf.output('dataurlstring').split(',')[1]; // Remove o prefixo data:application/pdf;base64,
+  }
+
   private static createPDFCadastroCliente(dadosCliente: DadosCliente): jsPDF {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
