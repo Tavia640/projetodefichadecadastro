@@ -1049,11 +1049,10 @@ const FichaNegociacao = () => {
     }
   };
 
-  // Função para envio robusto com múltiplas tentativas
-  const enviarPDFsRobusto = async () => {
+  // Função simples para enviar PDFs por email
+  const enviarPDFsPorEmail = async () => {
     try {
-      console.log('🚀 Iniciando envio robusto de PDFs...');
-      setMensagemStatus('📨 Preparando envio de PDFs...');
+      setMensagemStatus('📨 Enviando PDFs por email...');
 
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
@@ -1063,8 +1062,6 @@ const FichaNegociacao = () => {
       }
 
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
-
-      // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
         closer,
@@ -1074,204 +1071,29 @@ const FichaNegociacao = () => {
         informacoesPagamento
       };
 
-      // Gerar PDFs
-      const pdfData1 = PDFGenerator.gerarPDFCadastroClienteBase64(dadosCliente);
-      const pdfData2 = PDFGenerator.gerarPDFNegociacaoBase64(dadosCliente, dadosNegociacao);
+      // Enviar via sistema simples
+      const resultado = await EmailSimples.enviarPDFs(dadosCliente, dadosNegociacao);
 
-      console.log('📊 PDFs gerados:', {
-        pdf1_size: pdfData1.length,
-        pdf2_size: pdfData2.length
-      });
+      if (resultado.sucesso) {
+        setMensagemStatus(`✅ ${resultado.mensagem}`);
+        alert(`✅ Sucesso!\n\n${resultado.mensagem}\n\nID: ${resultado.detalhes || 'N/A'}`);
+      } else {
+        setMensagemStatus(`❌ ${resultado.mensagem}`);
 
-      // Salvamento automático dos PDFs (não bloqueia o envio)
-      try {
-        console.log('💾 Iniciando salvamento automático...');
-        setMensagemStatus('💾 Salvando cópia de segurança dos PDFs...');
-
-        const salvamentoResult = await SalvamentoService.salvarPDFs(
-          dadosCliente,
-          dadosNegociacao,
-          {
-            salvarLocal: true,
-            salvarIndexedDB: true,
-            salvarSupabase: false, // Evitar conflito com o envio principal
-            compressao: false
-          }
+        // Oferecer download como alternativa
+        const baixarAlternativa = window.confirm(
+          `❌ Falha no envio por email:\n\n${resultado.mensagem}\n\n` +
+          `Deseja baixar os PDFs para envio manual?`
         );
 
-        console.log('💾 Resultado do salvamento:', salvamentoResult);
-
-        if (salvamentoResult.success) {
-          console.log(`✅ Backup salvo em: ${salvamentoResult.locations.join(', ')}`);
-        } else {
-          console.warn('⚠️ Falha no backup:', salvamentoResult.message);
-        }
-
-      } catch (salvamentoError: any) {
-        console.warn('⚠️ Erro no salvamento automático:', salvamentoError);
-        // Não falhar o envio por causa do salvamento
-      }
-
-      // Preparar payload
-      const payload: EmailPayload = {
-        clientData: dadosCliente,
-        fichaData: dadosNegociacao,
-        pdfData1,
-        pdfData2
-      };
-
-      setMensagemStatus('🧠 Iniciando envio inteligente com múltiplas tentativas...');
-
-      // Sistema de retry inteligente
-      const resultadoRetry = await RetryService.retryInteligente(
-        async () => {
-          console.log('📧 Executando tentativa de envio...');
-          setMensagemStatus(`📧 Tentativa de envio em andamento...`);
-
-          const resultado = await EmailService.enviarPDFs(payload);
-
-          if (!resultado.success) {
-            throw new Error(resultado.message);
-          }
-
-          return resultado;
-        },
-        {
-          maxTentativas: 4,
-          delayBase: 2000,
-          multiplicadorBackoff: 1.8,
-          delayMaximo: 12000
-        }
-      );
-
-      // Mostrar logs detalhados das tentativas
-      console.log('📊 Logs do retry:', resultadoRetry.logs);
-
-      if (resultadoRetry.success && resultadoRetry.data) {
-        setMensagemStatus(
-          `✅ ${resultadoRetry.data.message} ` +
-          `(Sucesso na tentativa ${resultadoRetry.tentativasFeitas}/${4})` +
-          `${resultadoRetry.data.messageId ? ` ID: ${resultadoRetry.data.messageId}` : ''}`
-        );
-        console.log('✅ PDFs enviados com sucesso via retry inteligente!');
-
-        // Enviar notificação de sucesso
-        try {
-          const notificacaoSucesso = await NotificacaoService.notificarSucesso(
-            dadosCliente,
-            dadosNegociacao,
-            resultadoRetry.data.messageId
-          );
-          console.log('📢 Notificação de sucesso:', notificacaoSucesso);
-        } catch (notifError: any) {
-          console.warn('⚠️ Erro na notificação de sucesso:', notifError);
-        }
-
-        return;
-      }
-
-      console.warn('⚠️ Sistema de retry inteligente falhou:', resultadoRetry.error);
-      console.warn('📊 Logs das tentativas:', resultadoRetry.logs.join(' | '));
-
-      setMensagemStatus(
-        `⚠️ ${resultadoRetry.tentativasFeitas} tentativas falharam em ${Math.round(resultadoRetry.tempoTotal/1000)}s. ` +
-        `Iniciando métodos alternativos...`
-      );
-
-      // FALLBACK: Oferecer múltiplas alternativas
-      setMensagemStatus('🔄 Tentando métodos alternativos de envio...');
-
-      try {
-        // Gerar os blobs dos PDFs para as alternativas
-        const pdfBlob1 = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
-        const pdfBlob2 = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
-
-        // Primeiro baixar os PDFs
-        await baixarPDFs();
-
-        // Aguardar um pouco para garantir que os downloads terminaram
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Enviar notificação de falha para administrador
-        try {
-          console.log('📢 Enviando notificação de falha para administrador...');
-          const notificacaoFalha = await NotificacaoService.notificarFalhaEmail(
-            dadosCliente,
-            dadosNegociacao,
-            resultadoRetry.error || 'Sistema de envio automático falhou após múltiplas tentativas'
-          );
-          console.log('📢 Notificação de falha enviada:', notificacaoFalha);
-        } catch (notifError: any) {
-          console.warn('⚠️ Erro na notificação de falha:', notifError);
-        }
-
-        // Tentar métodos alternativos
-        const resultadoAlternativo = await EmailAlternativo.enviarComAlternativas({
-          clientData: dadosCliente,
-          fichaData: dadosNegociacao,
-          pdfBlob1,
-          pdfBlob2
-        });
-
-        let mensagemFinal = '🔄 Sistema de envio automático falhou, mas alternativas foram executadas:\n\n';
-        mensagemFinal += resultadoAlternativo.tentativas.join('\n');
-        mensagemFinal += '\n\n📧 Email de destino: admudrive2025@gavresorts.com.br';
-
-        setMensagemStatus(mensagemFinal);
-
-        // Mostrar resultado das alternativas
-        const mostrarDetalhes = window.confirm(
-          `⚠️ Sistema de envio automático falhou, mas várias alternativas foram tentadas:\n\n` +
-          `${resultadoAlternativo.tentativas.join('\n')}\n\n` +
-          `🔍 Deseja ver instruções detalhadas?`
-        );
-
-        if (mostrarDetalhes) {
-          alert(`📋 INSTRUÇÕES PARA ENVIO MANUAL:\n\n` +
-            `1. Os PDFs foram baixados em seu computador\n` +
-            `2. Um arquivo de instruções também foi baixado\n` +
-            `3. Seu cliente de email padrão deve ter sido aberto\n` +
-            `4. Complete o envio anexando os PDFs\n\n` +
-            `📧 Email: admudrive2025@gavresorts.com.br\n` +
-            `📎 Anexar: Os 2 PDFs baixados\n\n` +
-            `Se nada funcionou, envie manualmente com os dados do cliente.`);
-        }
-
-      } catch (alternativoError: any) {
-        console.error('❌ Erro nas alternativas:', alternativoError);
-        setMensagemStatus(`❌ Todas as tentativas falharam: ${alternativoError.message}`);
-
-        // Último recurso: apenas baixar
-        const confirmarDownload = window.confirm(
-          `❌ Todas as tentativas de envio falharam.\n\n` +
-          `Erro: ${alternativoError.message}\n\n` +
-          `Deseja apenas baixar os PDFs para envio manual?`
-        );
-
-        if (confirmarDownload) {
-          await baixarPDFs();
-          setMensagemStatus('💾 PDFs baixados. Envie manualmente para: admudrive2025@gavresorts.com.br');
+        if (baixarAlternativa) {
+          baixarPDFs();
         }
       }
 
     } catch (error: any) {
-      console.error('❌ Erro crítico no envio de PDFs:', error);
-      setMensagemStatus(`❌ Erro crítico: ${error.message}`);
-
-      // Oferecer download direto em caso de erro crítico
-      const confirmarDownload = window.confirm(
-        `❌ Erro crítico no sistema de envio.\n\n` +
-        `Erro: ${error.message}\n\n` +
-        `Deseja fazer o download direto dos PDFs?`
-      );
-
-      if (confirmarDownload) {
-        try {
-          await baixarPDFs();
-        } catch (downloadError: any) {
-          setMensagemStatus(`❌ Erro até no download: ${downloadError.message}`);
-        }
-      }
+      console.error('❌ Erro:', error);
+      setMensagemStatus(`❌ Erro: ${error.message}`);
     }
   };
 
@@ -1293,7 +1115,7 @@ const FichaNegociacao = () => {
 
   const testarNotificacao = async () => {
     try {
-      console.log('📢 Testando sistema de notifica��ão...');
+      console.log('📢 Testando sistema de notificação...');
 
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
@@ -1506,7 +1328,7 @@ const FichaNegociacao = () => {
 
       // Notificar usuário
       setTimeout(() => {
-        alert('✅ Dois PDFs foram abertos para impressão:\n\n1️⃣ Cadastro do Cliente\n2️⃣ Ficha de Negocia��ão\n\nSe a impressão automática não funcionar, use Ctrl+P em cada janela.');
+        alert('✅ Dois PDFs foram abertos para impressão:\n\n1️⃣ Cadastro do Cliente\n2️⃣ Ficha de Negociação\n\nSe a impressão automática não funcionar, use Ctrl+P em cada janela.');
       }, 1000);
 
       console.log('✅ Processo de impressão iniciado! Dois PDFs devem abrir em janelas separadas.');
