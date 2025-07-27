@@ -150,7 +150,7 @@ const FichaNegociacao = () => {
     return 'Precisa de autorização do líder de sala';
   };
 
-  // Função para validar data do primeiro vencimento do sinal
+  // Funç��o para validar data do primeiro vencimento do sinal
   const validarDataVencimentoSinal = (dataVencimento: string): string | null => {
     if (!dataVencimento) return null;
     
@@ -2015,18 +2015,7 @@ const FichaNegociacao = () => {
               </svg>
               Imprimir PDFs
             </Button>
-            <Button
-              onClick={diagnosticarSistema}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9.9 4.24l.7.7a7.5 7.5 0 0 1 0 10.6l-.7.7"/>
-                <path d="m14.1 4.24-.7.7a7.5 7.5 0 0 0 0 10.6l.7.7"/>
-                <path d="M12 12h.01"/>
-              </svg>
-              Diagnóstico
-            </Button>
+
             <Button
               onClick={testarGeracaoPDF}
               variant="outline"
