@@ -101,8 +101,8 @@ export class ConfigService {
 
       return result;
 
-    } catch (error) {
-      console.error('❌ Erro inesperado ao buscar configurações:', error);
+    } catch (error: any) {
+      console.error('❌ Erro inesperado ao buscar configurações:', error.message || JSON.stringify(error));
       return {};
     }
   }
