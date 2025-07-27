@@ -87,7 +87,7 @@ export class PDFGenerator {
       return dataFormatada;
     } catch (error) {
       console.error('❌ Erro ao formatar data:', error);
-      return data; // Retorna original se não conseguir converter
+      return data; // Retorna original se n��o conseguir converter
     }
   }
 
@@ -380,7 +380,7 @@ export class PDFGenerator {
   // Função para gerar PDF de negociação em base64 limpo (para envio por email)
   static gerarPDFNegociacaoBase64(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): string {
     const pdf = this.createPDFNegociacao(dadosCliente, dadosNegociacao);
-    return pdf.output('dataurlstring').split(',')[1]; // Remove o prefixo data:application/pdf;base64,
+    return pdf.output('datauri').split(',')[1]; // Remove o prefixo data:application/pdf;base64,
   }
 
   // PDF 3: Negociação Página 3 (página 3 do formulário original - campos vazios)
