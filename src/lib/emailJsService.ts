@@ -45,8 +45,8 @@ export class EmailJsService {
       if (configs.EMAILJS_FROM_EMAIL) this.config.fromEmail = configs.EMAILJS_FROM_EMAIL;
 
       console.log('✅ Configurações do EmailJS carregadas');
-    } catch (error) {
-      console.warn('⚠️ Falha ao carregar configurações do Supabase, usando valores padrão:', error);
+    } catch (error: any) {
+      console.warn('⚠️ Falha ao carregar configurações do Supabase, usando valores padrão:', error.message || error);
     }
 
     // Aplicar configurações passadas como parâmetro (têm prioridade)
@@ -167,7 +167,7 @@ export class EmailJsService {
     }
     
     if (!payload.fichaData) {
-      throw new Error('Dados da negociação são obrigatórios');
+      throw new Error('Dados da negocia��ão são obrigatórios');
     }
     
     if (!payload.clientData.nome) {
