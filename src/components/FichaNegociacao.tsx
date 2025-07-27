@@ -641,20 +641,32 @@ const FichaNegociacao = () => {
     }
   };
 
-  const imprimirFichas = () => {
+  const enviarPorEmailJS = async () => {
     try {
-      console.log('🖨️ Iniciando processo de impressão...');
-      
+      console.log('📧 Iniciando processo de envio via EmailJS...');
+
+      // Verificar se há alertas críticos (apenas erros, não avisos)
+      const alertasCriticos = Object.values(alertas).filter(alerta =>
+        alerta.includes('ERRO') && !alerta.includes('AVISO')
+      );
+
+      if (alertasCriticos.length > 0) {
+        console.warn('⚠️ Alertas encontrados:', alertasCriticos);
+        if (alertasCriticos.some(alerta => alerta.includes('CRÍTICO'))) {
+          alert('Não é possível enviar devido a erros críticos. Verifique os campos obrigatórios.');
+          return;
+        }
+      }
+
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
         alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
         return;
       }
-      
+
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
-      console.log('📋 Dados do cliente recuperados:', dadosCliente);
-      
+
       // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
@@ -664,24 +676,71 @@ const FichaNegociacao = () => {
         contratos,
         informacoesPagamento
       };
-      
+
+      console.log('📧 Enviando ficha via EmailJS...');
+
+      // Inicializar EmailJS e enviar
+      EmailJsService.init();
+      const resultado = await EmailJsService.enviarFichaPorEmail({
+        clientData: dadosCliente,
+        fichaData: dadosNegociacao
+      });
+
+      if (resultado.success) {
+        console.log('✅ Processo concluído com sucesso!');
+        alert(`✅ Ficha enviada com sucesso por email!\n\n${resultado.message}`);
+      } else {
+        console.error('❌ Falha no envio:', resultado.message);
+        alert(`❌ Erro no envio: ${resultado.message}`);
+      }
+
+    } catch (error: any) {
+      console.error('❌ Erro no processo de envio:', error);
+      alert(`❌ Erro ao enviar a ficha: ${error.message || 'Erro desconhecido'}`);
+    }
+  };
+
+  const imprimirFichas = () => {
+    try {
+      console.log('🖨️ Iniciando processo de impressão...');
+
+      // Recuperar dados do cliente
+      const dadosClienteString = localStorage.getItem('dadosCliente');
+      if (!dadosClienteString) {
+        alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
+        return;
+      }
+
+      const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
+      console.log('📋 Dados do cliente recuperados:', dadosCliente);
+
+      // Preparar dados da negociação
+      const dadosNegociacao: DadosNegociacao = {
+        liner,
+        closer,
+        tipoVenda,
+        parcelasPagasSala,
+        contratos,
+        informacoesPagamento
+      };
+
       console.log('💼 Dados da negociação preparados:', dadosNegociacao);
       console.log('📄 Gerando PDFs para impressão...');
-      
+
       // Gerar PDFs como blob URLs para impressão
       const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
       const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
-      
+
       console.log('🖨️ Abrindo PDFs para impressão...');
-      
+
       // Criar URLs para os blobs
       const urlCadastro = URL.createObjectURL(pdfCadastroBlob);
       const urlNegociacao = URL.createObjectURL(pdfNegociacaoBlob);
-      
+
       // Abrir PDFs em novas janelas para impressão
       const janelaCadastro = window.open(urlCadastro, '_blank');
       const janelaNegociacao = window.open(urlNegociacao, '_blank');
-      
+
       // Aguardar carregamento e imprimir
       setTimeout(() => {
         if (janelaCadastro) {
@@ -690,16 +749,16 @@ const FichaNegociacao = () => {
         if (janelaNegociacao) {
           janelaNegociacao.print();
         }
-        
+
         // Limpar URLs após uso
         setTimeout(() => {
           URL.revokeObjectURL(urlCadastro);
           URL.revokeObjectURL(urlNegociacao);
         }, 5000);
       }, 1500);
-      
+
       console.log('✅ PDFs abertos para impressão!');
-      
+
     } catch (error: any) {
       console.error('❌ Erro na impressão:', error);
       alert(`❌ Erro ao gerar PDFs para impressão: ${error.message || 'Erro desconhecido'}`);
