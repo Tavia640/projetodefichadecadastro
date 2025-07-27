@@ -37,7 +37,7 @@ export class ConfigService {
         };
       }
 
-      console.log('✅ Tabela acessível. Total de configurações:', allConfigs?.length || 0);
+      console.log('��� Tabela acessível. Total de configurações:', allConfigs?.length || 0);
 
       // Teste 2: Verificar configurações específicas
       const configsNecessarias = ['RESEND_API_KEY', 'EMAIL_DESTINO', 'EMAIL_REMETENTE'];
@@ -110,7 +110,7 @@ export class ConfigService {
         return cached;
       }
 
-      console.log(`🔍 Buscando configuração: ${chave}`);
+      console.log(`🔍 Buscando configura��ão: ${chave}`);
 
       const { data, error } = await supabase
         .from('configuracoes')
@@ -140,8 +140,12 @@ export class ConfigService {
       console.log(`✅ Configuração encontrada: ${chave}`);
       return data.valor;
 
-    } catch (error) {
-      console.error(`❌ Erro inesperado ao buscar configuração ${chave}:`, error);
+    } catch (error: any) {
+      const errorMsg = typeof error === 'string' ? error :
+                      error?.message ||
+                      error?.details ||
+                      'Erro desconhecido';
+      console.error(`❌ Erro inesperado ao buscar configuração ${chave}:`, errorMsg);
       return null;
     }
   }
