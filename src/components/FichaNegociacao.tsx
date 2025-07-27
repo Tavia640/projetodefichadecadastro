@@ -939,7 +939,7 @@ const FichaNegociacao = () => {
         if (resultado.message.includes('RESEND_API_KEY')) {
           mensagemDetalhada += '\n\n💡 Solução: Configure a chave API do Resend no painel do Supabase:\n' +
                                '1. Acesse o painel do Supabase\n' +
-                               '2. V�� em Settings > Edge Functions\n' +
+                               '2. Vá em Settings > Edge Functions\n' +
                                '3. Adicione a variável RESEND_API_KEY';
         } else if (resultado.message.includes('conexão')) {
           mensagemDetalhada += '\n\n💡 Tente novamente em alguns segundos.';
@@ -1127,34 +1127,50 @@ const FichaNegociacao = () => {
         pdfData2
       };
 
-      setMensagemStatus('📧 Tentativa 1: Enviando via sistema principal...');
+      setMensagemStatus('🧠 Iniciando envio inteligente com múltiplas tentativas...');
 
-      // TENTATIVA 1: Sistema principal (Resend via Supabase)
-      let resultado = await EmailService.enviarPDFs(payload);
+      // Sistema de retry inteligente
+      const resultadoRetry = await RetryService.retryInteligente(
+        async () => {
+          console.log('📧 Executando tentativa de envio...');
+          setMensagemStatus(`📧 Tentativa de envio em andamento...`);
 
-      if (resultado.success) {
-        setMensagemStatus(`✅ ${resultado.message}${resultado.messageId ? ` (ID: ${resultado.messageId})` : ''}`);
-        console.log('✅ PDFs enviados com sucesso na tentativa 1!');
+          const resultado = await EmailService.enviarPDFs(payload);
+
+          if (!resultado.success) {
+            throw new Error(resultado.message);
+          }
+
+          return resultado;
+        },
+        {
+          maxTentativas: 4,
+          delayBase: 2000,
+          multiplicadorBackoff: 1.8,
+          delayMaximo: 12000
+        }
+      );
+
+      // Mostrar logs detalhados das tentativas
+      console.log('📊 Logs do retry:', resultadoRetry.logs);
+
+      if (resultadoRetry.success && resultadoRetry.data) {
+        setMensagemStatus(
+          `✅ ${resultadoRetry.data.message} ` +
+          `(Sucesso na tentativa ${resultadoRetry.tentativasFeitas}/${4})` +
+          `${resultadoRetry.data.messageId ? ` ID: ${resultadoRetry.data.messageId}` : ''}`
+        );
+        console.log('✅ PDFs enviados com sucesso via retry inteligente!');
         return;
       }
 
-      console.warn('⚠️ Tentativa 1 falhou:', resultado.message);
-      setMensagemStatus('⚠️ Tentativa 1 falhou. Iniciando tentativa 2...');
+      console.warn('⚠️ Sistema de retry inteligente falhou:', resultadoRetry.error);
+      console.warn('📊 Logs das tentativas:', resultadoRetry.logs.join(' | '));
 
-      // TENTATIVA 2: Retry com delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setMensagemStatus('📧 Tentativa 2: Reenviando...');
-
-      resultado = await EmailService.enviarPDFs(payload);
-
-      if (resultado.success) {
-        setMensagemStatus(`✅ ${resultado.message} (Sucesso na tentativa 2)`);
-        console.log('✅ PDFs enviados com sucesso na tentativa 2!');
-        return;
-      }
-
-      console.warn('⚠️ Tentativa 2 falhou:', resultado.message);
-      setMensagemStatus('⚠️ Tentativas de envio falharam. Oferecendo download direto...');
+      setMensagemStatus(
+        `⚠️ ${resultadoRetry.tentativasFeitas} tentativas falharam em ${Math.round(resultadoRetry.tempoTotal/1000)}s. ` +
+        `Iniciando métodos alternativos...`
+      );
 
       // FALLBACK: Oferecer múltiplas alternativas
       setMensagemStatus('🔄 Tentando métodos alternativos de envio...');
@@ -1284,7 +1300,7 @@ const FichaNegociacao = () => {
       console.log('📄 Gerando PDFs para impressão...');
 
       // Gerar PDF 1: Cadastro de Cliente (Página 1)
-      console.log('📄 Gerando PDF 1: Cadastro de Cliente...');
+      console.log('���� Gerando PDF 1: Cadastro de Cliente...');
       const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
       console.log('✅ PDF 1 gerado:', pdfCadastroBlob.size, 'bytes');
 
