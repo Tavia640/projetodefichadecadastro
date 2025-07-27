@@ -183,9 +183,15 @@ export class ConfigService {
 
       return result;
 
-    } catch (error) {
-      console.error('❌ Erro inesperado ao buscar configurações:', error);
-      return {};
+    } catch (error: any) {
+      console.error('❌ Erro inesperado ao buscar configurações:', {
+        message: error?.message || 'Erro desconhecido',
+        stack: error?.stack,
+        error: error
+      });
+
+      // Re-throw o erro para que o EmailService possa capturar e usar fallback
+      throw error;
     }
   }
 
