@@ -21,7 +21,7 @@ export class EmailJsService {
     serviceId: "service_ldi1oub",
     templateId: "template_gavn8gt",
     publicKey: "220ao3TEOhWHfxHtM",
-    destinationEmail: "seuemail@exemplo.com",
+    destinationEmail: "admudrive2025@gavresorts.com.br",
     fromEmail: "noreply@gavresorts.com"
   };
 
@@ -119,7 +119,7 @@ export class EmailJsService {
         client_name: payload.clientData.nome,
         client_cpf: payload.clientData.cpf,
         client_phone: payload.clientData.telefone,
-        closer: payload.fichaData.closer || 'Não informado',
+        closer: payload.fichaData.closer || 'N��o informado',
         liner: payload.fichaData.liner || 'Não informado',
         tipo_venda: payload.fichaData.tipoVenda || 'Não informado',
         message: `Segue em anexo a ficha de negociação de cota para o cliente ${payload.clientData.nome}.`,
