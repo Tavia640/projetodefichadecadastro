@@ -116,15 +116,44 @@ export class EmailJsService {
 
     } catch (error: any) {
       console.error('❌ Erro no envio da ficha:', error);
-      
+
       let errorMessage = 'Erro desconhecido no envio da ficha';
-      
-      if (error.text) {
+
+      // Tratar erros específicos do EmailJS
+      if (error.status) {
+        switch (error.status) {
+          case 400:
+            errorMessage = 'Erro de configuração: Verifique se o serviço e template do EmailJS estão configurados corretamente.';
+            break;
+          case 401:
+            errorMessage = 'Erro de autenticação: Chave pública do EmailJS inválida.';
+            break;
+          case 402:
+            errorMessage = 'Limite de envios excedido: Verifique sua conta EmailJS.';
+            break;
+          case 404:
+            errorMessage = 'Serviço ou template não encontrado: Verifique as configurações do EmailJS.';
+            break;
+          case 413:
+            errorMessage = 'Arquivo muito grande: Os PDFs podem estar muito grandes para envio.';
+            break;
+          case 422:
+            errorMessage = 'Dados inválidos: Verifique se todos os campos obrigatórios estão preenchidos.';
+            break;
+          case 429:
+            errorMessage = 'Muitas tentativas: Aguarde alguns minutos antes de tentar novamente.';
+            break;
+          default:
+            errorMessage = `Erro do EmailJS (${error.status}): ${error.text || 'Erro não especificado'}`;
+        }
+      } else if (error.text) {
         errorMessage = `Erro do EmailJS: ${error.text}`;
       } else if (error.message) {
         errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
       }
-      
+
       return {
         success: false,
         message: errorMessage
