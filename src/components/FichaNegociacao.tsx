@@ -1022,13 +1022,9 @@ const FichaNegociacao = () => {
     }
   };
 
-  // Função para baixar PDFs diretamente
-  const baixarPDFs = async () => {
+  // Função simples para baixar PDFs
+  const baixarPDFs = () => {
     try {
-      console.log('💾 Iniciando download direto dos PDFs...');
-      setMensagemStatus('💾 Gerando PDFs para download...');
-
-      // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
         alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
@@ -1036,8 +1032,6 @@ const FichaNegociacao = () => {
       }
 
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
-
-      // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
         closer,
@@ -1047,41 +1041,11 @@ const FichaNegociacao = () => {
         informacoesPagamento
       };
 
-      // Gerar PDFs
-      const pdfBlob1 = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
-      const pdfBlob2 = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
-
-      // Criar nomes de arquivo seguros
-      const nomeSeguro = dadosCliente.nome?.replace(/[^a-zA-Z0-9]/g, '_') || 'Cliente';
-      const timestamp = new Date().toISOString().slice(0, 10);
-
-      // Download do PDF 1
-      const url1 = URL.createObjectURL(pdfBlob1);
-      const link1 = document.createElement('a');
-      link1.href = url1;
-      link1.download = `Ficha_Cadastro_${nomeSeguro}_${timestamp}.pdf`;
-      document.body.appendChild(link1);
-      link1.click();
-      document.body.removeChild(link1);
-      URL.revokeObjectURL(url1);
-
-      // Download do PDF 2 (com delay para não conflitar)
-      setTimeout(() => {
-        const url2 = URL.createObjectURL(pdfBlob2);
-        const link2 = document.createElement('a');
-        link2.href = url2;
-        link2.download = `Ficha_Negociacao_${nomeSeguro}_${timestamp}.pdf`;
-        document.body.appendChild(link2);
-        link2.click();
-        document.body.removeChild(link2);
-        URL.revokeObjectURL(url2);
-      }, 500);
-
-      setMensagemStatus(`✅ PDFs baixados com sucesso! Envie-os manualmente para: admudrive2025@gavresorts.com.br`);
+      EmailSimples.baixarPDFsLocal(dadosCliente, dadosNegociacao);
+      setMensagemStatus('✅ PDFs baixados! Envie manualmente para: admudrive2025@gavresorts.com.br');
 
     } catch (error: any) {
-      console.error('❌ Erro no download dos PDFs:', error);
-      setMensagemStatus(`❌ Erro no download: ${error.message}`);
+      setMensagemStatus(`❌ Erro: ${error.message}`);
     }
   };
 
@@ -1329,7 +1293,7 @@ const FichaNegociacao = () => {
 
   const testarNotificacao = async () => {
     try {
-      console.log('📢 Testando sistema de notificação...');
+      console.log('📢 Testando sistema de notifica��ão...');
 
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
@@ -1542,7 +1506,7 @@ const FichaNegociacao = () => {
 
       // Notificar usuário
       setTimeout(() => {
-        alert('✅ Dois PDFs foram abertos para impressão:\n\n1️⃣ Cadastro do Cliente\n2️⃣ Ficha de Negociação\n\nSe a impressão automática não funcionar, use Ctrl+P em cada janela.');
+        alert('✅ Dois PDFs foram abertos para impressão:\n\n1️⃣ Cadastro do Cliente\n2️⃣ Ficha de Negocia��ão\n\nSe a impressão automática não funcionar, use Ctrl+P em cada janela.');
       }, 1000);
 
       console.log('✅ Processo de impressão iniciado! Dois PDFs devem abrir em janelas separadas.');
