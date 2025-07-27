@@ -15,8 +15,39 @@ export class EmailService {
     try {
       console.log('🔍 Testando conectividade do sistema de email...');
 
-      const response = await supabase.functions.invoke('send-pdfs', {
-        body: { test: true }
+      // Buscar configurações necessárias
+      console.log('🔍 Buscando configurações para teste...');
+      const configs = await ConfigService.getConfigs([
+        'RESEND_API_KEY',
+        'EMAIL_DESTINO',
+        'EMAIL_REMETENTE'
+      ]);
+
+      if (!configs.RESEND_API_KEY) {
+        return {
+          success: false,
+          message: 'Chave API do Resend não configurada no sistema. Configure nas Configurações.'
+        };
+      }
+
+      if (!configs.EMAIL_DESTINO) {
+        return {
+          success: false,
+          message: 'Email de destino não configurado no sistema. Configure nas Configurações.'
+        };
+      }
+
+      console.log('✅ Configurações encontradas, testando edge function...');
+
+      const response = await supabase.functions.invoke('send-pdfs-v2', {
+        body: {
+          test: true,
+          configs: {
+            resendApiKey: configs.RESEND_API_KEY,
+            emailDestino: configs.EMAIL_DESTINO,
+            emailRemetente: configs.EMAIL_REMETENTE || 'GAV Resorts <onboarding@resend.dev>'
+          }
+        }
       });
 
       console.log('📡 Resultado do teste:', response);
@@ -25,6 +56,13 @@ export class EmailService {
         return {
           success: false,
           message: `Erro de conectividade: ${response.error.message}`
+        };
+      }
+
+      if (response.data && !response.data.success) {
+        return {
+          success: false,
+          message: response.data.message || 'Erro desconhecido no teste'
         };
       }
 
