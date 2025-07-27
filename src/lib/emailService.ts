@@ -15,13 +15,30 @@ export class EmailService {
     try {
       console.log('🔍 Testando conectividade do sistema de email...');
 
-      // Buscar configurações necessárias
+      // Buscar configurações (com fallback)
       console.log('🔍 Buscando configurações para teste...');
-      const configs = await ConfigService.getConfigs([
-        'RESEND_API_KEY',
-        'EMAIL_DESTINO',
-        'EMAIL_REMETENTE'
-      ]);
+
+      let configs: Record<string, string> = {};
+
+      try {
+        // Tentar buscar do banco primeiro
+        configs = await ConfigService.getConfigs([
+          'RESEND_API_KEY',
+          'EMAIL_DESTINO',
+          'EMAIL_REMETENTE'
+        ]);
+        console.log('✅ Configurações encontradas no banco');
+      } catch (error) {
+        console.warn('⚠️ Banco indisponível, usando configurações diretas');
+
+        // Fallback: usar configurações diretas
+        configs = {
+          RESEND_API_KEY: 're_SmQE7h9x_8gJ7nxVBZiv81R4YWEamyVTs',
+          EMAIL_DESTINO: 'admudrive2025@gavresorts.com.br',
+          EMAIL_REMETENTE: 'GAV Resorts <onboarding@resend.dev>'
+        };
+        console.log('✅ Usando configurações diretas para teste');
+      }
 
       if (!configs.RESEND_API_KEY) {
         return {
