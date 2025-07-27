@@ -571,13 +571,13 @@ const FichaNegociacao = () => {
 
   const salvarFicha = async () => {
     try {
-      console.log('🚀 Iniciando processo de salvamento e envio...');
-      
+      console.log('🚀 Iniciando processo de salvamento e envio via EmailJS...');
+
       // Verificar se há alertas críticos (apenas erros, não avisos)
-      const alertasCriticos = Object.values(alertas).filter(alerta => 
+      const alertasCriticos = Object.values(alertas).filter(alerta =>
         alerta.includes('ERRO') && !alerta.includes('AVISO')
       );
-      
+
       if (alertasCriticos.length > 0) {
         console.warn('⚠️ Alertas encontrados:', alertasCriticos);
         // Mostrar alerta mas permitir continuar se for apenas aviso
@@ -586,16 +586,16 @@ const FichaNegociacao = () => {
           return;
         }
       }
-      
+
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
         alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
         return;
       }
-      
+
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
-      
+
       // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
@@ -605,35 +605,23 @@ const FichaNegociacao = () => {
         contratos,
         informacoesPagamento
       };
-      
-      console.log('📄 Gerando PDFs...');
-      
-      // Gerar PDFs usando a nova biblioteca
-      const pdfCadastro = PDFGenerator.gerarPDFCadastroCliente(dadosCliente);
-      const pdfNegociacao = PDFGenerator.gerarPDFNegociacao(dadosCliente, dadosNegociacao);
-      
-      // Extrair base64 dos PDFs
-      const pdfData1 = pdfCadastro.startsWith('data:') ? pdfCadastro.split(',')[1] : pdfCadastro;
-      const pdfData2 = pdfNegociacao.startsWith('data:') ? pdfNegociacao.split(',')[1] : pdfNegociacao;
-      
-      console.log('📧 Enviando PDFs por email...');
-      
-      // Enviar PDFs usando o novo serviço
-      const resultado = await EmailService.enviarPDFs({
+
+      console.log('📧 Enviando ficha via EmailJS...');
+
+      // Enviar ficha via EmailJS (substitui o antigo sistema Resend)
+      const resultado = await EmailJsService.enviarFichaPorEmail({
         clientData: dadosCliente,
-        fichaData: dadosNegociacao,
-        pdfData1,
-        pdfData2
+        fichaData: dadosNegociacao
       });
-      
+
       if (resultado.success) {
         console.log('✅ Processo concluído com sucesso!');
-        alert(`✅ Ficha salva e PDFs enviados com sucesso!\n\n${resultado.message}`);
+        alert(`✅ Ficha salva e enviada com sucesso!\n\n${resultado.message}`);
       } else {
         console.error('❌ Falha no envio:', resultado.message);
-        alert(`❌ Erro no envio: ${resultado.message}\n\nOs PDFs foram gerados mas não puderam ser enviados.`);
+        alert(`❌ Erro no envio: ${resultado.message}`);
       }
-      
+
     } catch (error: any) {
       console.error('❌ Erro no processo de salvamento:', error);
       alert(`❌ Erro ao processar a ficha: ${error.message || 'Erro desconhecido'}`);
