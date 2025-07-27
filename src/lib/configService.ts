@@ -23,7 +23,7 @@ export class ConfigService {
       console.log('🔍 Iniciando diagnóstico do sistema de configurações...');
 
       // Teste 1: Verificar se consegue acessar a tabela
-      console.log('📋 Teste 1: Verificando acesso à tabela configuracoes...');
+      console.log('📋 Teste 1: Verificando acesso �� tabela configuracoes...');
       const { data: allConfigs, error: accessError } = await supabase
         .from('configuracoes')
         .select('*');
@@ -201,14 +201,18 @@ export class ConfigService {
       return result;
 
     } catch (error: any) {
-      console.error('❌ Erro inesperado ao buscar configurações:', {
-        message: error?.message || 'Erro desconhecido',
-        stack: error?.stack,
-        error: error
-      });
+      const errorMsg = typeof error === 'string' ? error :
+                      error?.message ||
+                      error?.details ||
+                      error?.hint ||
+                      'Erro desconhecido';
+
+      console.error('❌ Erro inesperado ao buscar configurações:', errorMsg);
+      console.error('❌ Stack trace:', error?.stack);
+      console.error('❌ Objeto completo:', error);
 
       // Re-throw o erro para que o EmailService possa capturar e usar fallback
-      throw error;
+      throw new Error(errorMsg);
     }
   }
 
