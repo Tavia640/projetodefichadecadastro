@@ -13,6 +13,7 @@ import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator'
 import { EmailService, EmailPayload } from '@/lib/emailService';
 import { ConfigService } from '@/lib/configService';
 import { EmailAlternativo } from '@/lib/emailAlternativo';
+import { RetryService } from '@/lib/retryService';
 
 // Formatação monetária simples para exibição
 const exibirValor = (valor: string): string => {
@@ -664,7 +665,7 @@ const FichaNegociacao = () => {
           console.log('✅ Torres mockadas carregadas:', torresMock.length);
         }
 
-        console.log('���� Carregamento de dados concluído com sucesso!');
+        console.log('🎉 Carregamento de dados concluído com sucesso!');
 
       } catch (error: any) {
         console.error('💥 Erro crítico ao carregar dados:', error);
@@ -938,7 +939,7 @@ const FichaNegociacao = () => {
         if (resultado.message.includes('RESEND_API_KEY')) {
           mensagemDetalhada += '\n\n💡 Solução: Configure a chave API do Resend no painel do Supabase:\n' +
                                '1. Acesse o painel do Supabase\n' +
-                               '2. Vá em Settings > Edge Functions\n' +
+                               '2. V�� em Settings > Edge Functions\n' +
                                '3. Adicione a variável RESEND_API_KEY';
         } else if (resultado.message.includes('conexão')) {
           mensagemDetalhada += '\n\n💡 Tente novamente em alguns segundos.';
