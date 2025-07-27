@@ -62,10 +62,13 @@ export class EmailJsService {
   static async enviarFichaPorEmail(payload: EmailJsPayload): Promise<{ success: boolean; message: string; messageId?: string }> {
     try {
       console.log('🚀 Iniciando envio de ficha por email via EmailJS...');
-      
+
+      // Inicializar configurações
+      await this.init();
+
       // Validar dados antes do envio
       this.validarPayload(payload);
-      
+
       // Gerar PDFs como data URI
       console.log('📄 Gerando PDFs...');
       const pdfCadastro = PDFGenerator.gerarPDFCadastroCliente(payload.clientData);
