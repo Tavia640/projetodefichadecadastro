@@ -1939,35 +1939,45 @@ const FichaNegociacao = () => {
             </div>
           )}
 
-          {/* Botões Principais de Ação */}
-          <div className="flex flex-wrap gap-3 pt-4">
-            <Button
-              onClick={baixarPDFs}
-              variant="default"
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 flex-1 min-w-[220px]"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7,10 12,15 17,10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              💾 Baixar PDFs Direto
-            </Button>
-            <Button
-              onClick={enviarPDFsRobusto}
-              variant="default"
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 flex-1 min-w-[220px]"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22,2 15,22 11,13 2,9 22,2"/>
-              </svg>
-              📧 Enviar por Email (Robusto)
-            </Button>
+          {/* Sistema Simples de Envio */}
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-lg border">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+              📧 Sistema Simplificado de Envio de PDFs
+            </h3>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                onClick={enviarPDFsPorEmail}
+                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 flex-1 h-12"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                📧 Enviar por Email
+              </Button>
+
+              <Button
+                onClick={baixarPDFs}
+                variant="outline"
+                className="flex items-center justify-center gap-2 flex-1 h-12 border-2 border-green-500 text-green-700 hover:bg-green-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7,10 12,15 17,10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                💾 Baixar PDFs
+              </Button>
+            </div>
+
+            <p className="text-sm text-gray-600 text-center mt-3">
+              ✅ Sistema novo e simplificado - Funciona de forma confiável
+            </p>
           </div>
 
-          {/* Botões de Ação Secundários */}
-          <div className="flex justify-center space-x-4 pt-6">
+          {/* Botões de Teste */}
+          <div className="flex justify-center space-x-4 pt-4">
             <Button variant="outline" onClick={limparFicha}>
               Limpar
             </Button>
