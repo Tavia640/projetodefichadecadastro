@@ -48,7 +48,28 @@ export class EmailJsService {
 
         console.log('✅ Configurações do EmailJS carregadas do Supabase');
       } catch (configError: any) {
-        console.warn('⚠️ Tabela de configurações não existe ou não é acessível, usando valores padrão');
+        console.warn('⚠️ Tabela de configurações não existe ou não é acessível, tentando localStorage...');
+
+        // Tentar carregar do localStorage como fallback
+        try {
+          const localConfig = {
+            serviceId: localStorage.getItem('EMAILJS_SERVICE_ID'),
+            templateId: localStorage.getItem('EMAILJS_TEMPLATE_ID'),
+            publicKey: localStorage.getItem('EMAILJS_PUBLIC_KEY'),
+            destinationEmail: localStorage.getItem('EMAILJS_DESTINATION_EMAIL'),
+            fromEmail: localStorage.getItem('EMAILJS_FROM_EMAIL')
+          };
+
+          if (localConfig.serviceId) this.config.serviceId = localConfig.serviceId;
+          if (localConfig.templateId) this.config.templateId = localConfig.templateId;
+          if (localConfig.publicKey) this.config.publicKey = localConfig.publicKey;
+          if (localConfig.destinationEmail) this.config.destinationEmail = localConfig.destinationEmail;
+          if (localConfig.fromEmail) this.config.fromEmail = localConfig.fromEmail;
+
+          console.log('📋 Configurações carregadas do localStorage');
+        } catch (localError) {
+          console.warn('⚠️ Também não foi possível carregar do localStorage, usando valores padrão');
+        }
       }
 
     } catch (error: any) {
