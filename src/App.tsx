@@ -44,7 +44,7 @@ const App = () => (
           {/* Redirecionar raiz baseado no login */}
           <Route path="/" element={
             AuthService.isLogado()
-              ? <Navigate to={AuthService.isAdmin() ? '/dashboard-admin' : '/area-consultor'} replace />
+              ? <Navigate to={AuthService.isAdmin() ? '/dashboard-admin' : '/cadastro-cliente'} replace />
               : <Navigate to="/login" replace />
           } />
 
