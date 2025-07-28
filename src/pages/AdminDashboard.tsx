@@ -317,6 +317,13 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal de Visualização */}
+      <FichaVisualizationModal
+        ficha={fichaVisualizacao}
+        open={modalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };
