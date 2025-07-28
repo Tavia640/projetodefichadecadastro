@@ -424,8 +424,8 @@ export class PDFGeneratorOfficial {
     });
     nextLine(1.5);
 
-    // Dados da tabela - estrutura fixa com tipos pré-definidos
-    const tiposParcelaFixos = ['( ) Entrada', '( ) Sinal', '( ) Saldo'];
+    // Dados da tabela - estrutura fixa com tipos pré-definidos (Entrada não editável)
+    const tiposParcelaFixos = ['Entrada', '( ) Sinal', '( ) Saldo'];
     const parcelasPagasSala = dadosNegociacao.parcelasPagasSala || [];
 
     tiposParcelaFixos.forEach(tipoFixo => {
