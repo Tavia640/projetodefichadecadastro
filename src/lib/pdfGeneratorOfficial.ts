@@ -302,11 +302,22 @@ export class PDFGeneratorOfficial {
       console.log('📊 Dados da negociação:', dadosNegociacao);
 
       // Verificar se os dados essenciais existem
-      if (!dadosCliente) {
-        throw new Error('Dados do cliente não fornecidos');
+      if (!dadosCliente || typeof dadosCliente !== 'object') {
+        throw new Error('Dados do cliente não fornecidos ou inválidos');
       }
-      if (!dadosNegociacao) {
-        throw new Error('Dados da negociação não fornecidos');
+      if (!dadosNegociacao || typeof dadosNegociacao !== 'object') {
+        throw new Error('Dados da negociação não fornecidos ou inválidos');
+      }
+
+      // Garantir que arrays essenciais existam
+      if (!Array.isArray(dadosNegociacao.parcelasPagasSala)) {
+        dadosNegociacao.parcelasPagasSala = [];
+      }
+      if (!Array.isArray(dadosNegociacao.contratos)) {
+        dadosNegociacao.contratos = [];
+      }
+      if (!Array.isArray(dadosNegociacao.informacoesPagamento)) {
+        dadosNegociacao.informacoesPagamento = [];
       }
 
     const pdf = new jsPDF('p', 'mm', 'a4');
