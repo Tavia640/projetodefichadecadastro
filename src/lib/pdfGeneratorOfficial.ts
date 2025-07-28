@@ -299,7 +299,7 @@ export class PDFGeneratorOfficial {
     try {
       console.log('🔍 Iniciando geração PDF Negociação...');
       console.log('📊 Dados do cliente:', dadosCliente);
-      console.log('📊 Dados da negociaç��o:', dadosNegociacao);
+      console.log('📊 Dados da negociação:', dadosNegociacao);
 
       // Verificar se os dados essenciais existem
       if (!dadosCliente) {
@@ -522,7 +522,13 @@ export class PDFGeneratorOfficial {
           info?.qtdParcelas || '',
           info?.valorParcela ? `R$ ${info.valorParcela}` : '',
           info?.formaPagamento || '',
-          info?.primeiroVencimento ? new Date(info.primeiroVencimento).toLocaleDateString('pt-BR') : ''
+          info?.primeiroVencimento ? (() => {
+            try {
+              return new Date(info.primeiroVencimento).toLocaleDateString('pt-BR');
+            } catch {
+              return info.primeiroVencimento.toString();
+            }
+          })() : ''
         ];
 
         pagamentoValues.forEach((valor, i) => {
