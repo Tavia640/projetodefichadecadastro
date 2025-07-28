@@ -188,12 +188,14 @@ export class FichaStorageService {
 
   static getEstatisticas() {
     const fichas = this.getFichas();
-    
+
     return {
       total: fichas.length,
       pendentes: fichas.filter(f => f.status === 'pendente').length,
       visualizadas: fichas.filter(f => f.status === 'visualizada').length,
       impressas: fichas.filter(f => f.status === 'impressa').length,
+      emAndamento: fichas.filter(f => f.status === 'em_andamento').length,
+      concluidas: fichas.filter(f => f.status === 'concluida').length,
       ultimaFicha: fichas.length > 0 ? fichas[0].timestamp : null
     };
   }
