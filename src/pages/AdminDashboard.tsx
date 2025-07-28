@@ -47,45 +47,15 @@ const AdminDashboard = () => {
   };
 
   const handleVisualizarFicha = (ficha: FichaCompleta) => {
-    // Criar modal ou página com detalhes da ficha
-    const detalhes = `
-=== DADOS DO CLIENTE ===
-Nome: ${ficha.dadosCliente.nome}
-CPF: ${ficha.dadosCliente.cpf}
-RG: ${ficha.dadosCliente.rg}
-Telefone: ${ficha.dadosCliente.telefone}
-Email: ${ficha.dadosCliente.email}
-Endereço: ${ficha.dadosCliente.endereco}
-
-=== DADOS DA NEGOCIAÇÃO ===
-Consultor: ${ficha.nomeConsultor}
-Liner: ${ficha.dadosNegociacao.liner}
-Closer: ${ficha.dadosNegociacao.closer}
-Tipo de Venda: ${ficha.dadosNegociacao.tipoVenda}
-
-=== CONTRATOS ===
-${ficha.dadosNegociacao.contratos.map((contrato, i) => `
-Contrato ${i + 1}:
-- Empreendimento: ${contrato.empreendimento}
-- Torre: ${contrato.torre}
-- Apartamento: ${contrato.apartamento}
-- Cota: ${contrato.cota}
-- Valor: R$ ${contrato.valor}
-`).join('')}
-
-=== INFORMAÇÕES DE PAGAMENTO ===
-${ficha.dadosNegociacao.informacoesPagamento.map(info => `
-${info.tipo}: R$ ${info.total} (${info.qtdParcelas}x de R$ ${info.valorParcela})
-Forma: ${info.formaPagamento}
-Vencimento: ${info.primeiroVencimento}
-`).join('')}
-    `;
-
-    // Mostrar em um alert por enquanto (pode ser melhorado com modal)
-    alert(detalhes);
-
+    setFichaVisualizacao(ficha);
+    setModalOpen(true);
     FichaStorageService.atualizarStatus(ficha.id, 'visualizada');
     carregarFichas();
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setFichaVisualizacao(null);
   };
 
   const handleImprimirFicha = (ficha: FichaCompleta) => {
