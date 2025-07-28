@@ -10,7 +10,8 @@ import { Plus, Trash2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
-import { EmailService } from '@/lib/emailService';
+import { FichaService } from '@/lib/fichaService';
+import { AuthService } from '@/lib/authService';
 
 interface ParcelaPagaSala {
   id: string;
@@ -360,6 +361,9 @@ const FichaNegociacao = () => {
         if (errorEmpreendimentos) throw errorEmpreendimentos;
         setEmpreendimentos(empreendimentosData || []);
 
+        // Cachear empreendimentos no localStorage para uso no PDF
+        localStorage.setItem('empreendimentos_cache', JSON.stringify(empreendimentosData || []));
+
         // Carregar categorias de preço das vendas normais com todos os campos (apenas registros mais recentes)
         const { data: tiposVendaNormal, error: errorTiposVenda } = await supabase
           .from('tipos_venda_normal')
@@ -569,33 +573,37 @@ const FichaNegociacao = () => {
     ]);
   };
 
-  const salvarFicha = async () => {
+  const enviarFicha = async () => {
     try {
-      console.log('🚀 Iniciando processo de salvamento e envio...');
-      
       // Verificar se há alertas críticos (apenas erros, não avisos)
-      const alertasCriticos = Object.values(alertas).filter(alerta => 
+      const alertasCriticos = Object.values(alertas).filter(alerta =>
         alerta.includes('ERRO') && !alerta.includes('AVISO')
       );
-      
+
       if (alertasCriticos.length > 0) {
         console.warn('⚠️ Alertas encontrados:', alertasCriticos);
-        // Mostrar alerta mas permitir continuar se for apenas aviso
         if (alertasCriticos.some(alerta => alerta.includes('CRÍTICO'))) {
-          alert('Não é possível salvar devido a erros críticos. Verifique os campos obrigatórios.');
+          alert('Não é possível enviar devido a erros críticos. Verifique os campos obrigatórios.');
           return;
         }
       }
-      
+
+      // Verificar se o usuário está logado como consultor
+      const usuario = AuthService.getUsuarioLogado();
+      if (!usuario || usuario.tipo !== 'consultor') {
+        alert('Apenas consultores podem enviar fichas.');
+        return;
+      }
+
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
         alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
         return;
       }
-      
+
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
-      
+
       // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
@@ -605,55 +613,36 @@ const FichaNegociacao = () => {
         contratos,
         informacoesPagamento
       };
-      
-      console.log('📄 Gerando PDFs...');
-      
-      // Gerar PDFs usando a nova biblioteca
-      const pdfCadastro = PDFGenerator.gerarPDFCadastroCliente(dadosCliente);
-      const pdfNegociacao = PDFGenerator.gerarPDFNegociacao(dadosCliente, dadosNegociacao);
-      
-      // Extrair base64 dos PDFs
-      const pdfData1 = pdfCadastro.startsWith('data:') ? pdfCadastro.split(',')[1] : pdfCadastro;
-      const pdfData2 = pdfNegociacao.startsWith('data:') ? pdfNegociacao.split(',')[1] : pdfNegociacao;
-      
-      console.log('📧 Enviando PDFs por email...');
-      
-      // Enviar PDFs usando o novo serviço
-      const resultado = await EmailService.enviarPDFs({
-        clientData: dadosCliente,
-        fichaData: dadosNegociacao,
-        pdfData1,
-        pdfData2
-      });
-      
-      if (resultado.success) {
-        console.log('✅ Processo concluído com sucesso!');
-        alert(`✅ Ficha salva e PDFs enviados com sucesso!\n\n${resultado.message}`);
-      } else {
-        console.error('❌ Falha no envio:', resultado.message);
-        alert(`❌ Erro no envio: ${resultado.message}\n\nOs PDFs foram gerados mas não puderam ser enviados.`);
-      }
-      
+
+      // Enviar ficha para os administradores
+      const fichaId = FichaService.enviarFicha(dadosCliente, dadosNegociacao, usuario.nome);
+
+      alert('✅ Ficha enviada com sucesso para os administradores!');
+      console.log('✅ Ficha enviada com ID:', fichaId);
+
+      // Limpar formulário após envio
+      limparFicha();
+
     } catch (error: any) {
-      console.error('❌ Erro no processo de salvamento:', error);
-      alert(`❌ Erro ao processar a ficha: ${error.message || 'Erro desconhecido'}`);
+      console.error('❌ Erro ao enviar ficha:', error);
+      alert(`❌ Erro ao enviar ficha: ${error.message || 'Erro desconhecido'}`);
     }
   };
 
   const imprimirFichas = () => {
     try {
       console.log('🖨️ Iniciando processo de impressão...');
-      
+
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
         alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
         return;
       }
-      
+
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
       console.log('📋 Dados do cliente recuperados:', dadosCliente);
-      
+
       // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
@@ -663,42 +652,59 @@ const FichaNegociacao = () => {
         contratos,
         informacoesPagamento
       };
-      
+
       console.log('💼 Dados da negociação preparados:', dadosNegociacao);
       console.log('📄 Gerando PDFs para impressão...');
-      
+
       // Gerar PDFs como blob URLs para impressão
+      console.log('📋 Gerando PDF de cadastro...');
       const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
+      console.log('✅ PDF de cadastro gerado, tamanho:', pdfCadastroBlob.size);
+
+      console.log('💼 Gerando PDF de negociação...');
       const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
-      
-      console.log('🖨️ Abrindo PDFs para impressão...');
-      
+      console.log('✅ PDF de negociação gerado, tamanho:', pdfNegociacaoBlob.size);
+
+      console.log('🖨️ Abrindo PDFs para visualização...');
+
       // Criar URLs para os blobs
       const urlCadastro = URL.createObjectURL(pdfCadastroBlob);
       const urlNegociacao = URL.createObjectURL(pdfNegociacaoBlob);
-      
-      // Abrir PDFs em novas janelas para impressão
-      const janelaCadastro = window.open(urlCadastro, '_blank');
-      const janelaNegociacao = window.open(urlNegociacao, '_blank');
-      
+
+      console.log('🔗 URLs criadas:', { urlCadastro, urlNegociacao });
+
+      // Abrir PDFs em novas janelas
+      const janelaCadastro = window.open(urlCadastro, '_blank', 'width=800,height=600');
+      const janelaNegociacao = window.open(urlNegociacao, '_blank', 'width=800,height=600');
+
+      if (!janelaCadastro || !janelaNegociacao) {
+        console.warn('⚠️ Algumas janelas podem ter sido bloqueadas pelo navegador');
+        alert('Algumas janelas podem ter sido bloqueadas. Verifique as configurações do navegador e permita pop-ups.');
+        return;
+      }
+
       // Aguardar carregamento e imprimir
       setTimeout(() => {
-        if (janelaCadastro) {
+        console.log('🖨️ Enviando comando de impressão...');
+
+        if (janelaCadastro && !janelaCadastro.closed) {
           janelaCadastro.print();
         }
-        if (janelaNegociacao) {
+        if (janelaNegociacao && !janelaNegociacao.closed) {
           janelaNegociacao.print();
         }
-        
+
         // Limpar URLs após uso
         setTimeout(() => {
           URL.revokeObjectURL(urlCadastro);
           URL.revokeObjectURL(urlNegociacao);
-        }, 5000);
-      }, 1500);
-      
+          console.log('🧹 URLs limpas');
+        }, 8000);
+      }, 2000);
+
       console.log('✅ PDFs abertos para impressão!');
-      
+      alert('PDFs abertos para impressão! Verifique se ambos os documentos foram carregados.');
+
     } catch (error: any) {
       console.error('❌ Erro na impressão:', error);
       alert(`❌ Erro ao gerar PDFs para impressão: ${error.message || 'Erro desconhecido'}`);
@@ -1407,8 +1413,8 @@ const FichaNegociacao = () => {
               </svg>
               Imprimir PDFs
             </Button>
-            <Button 
-              onClick={salvarFicha}
+            <Button
+              onClick={enviarFicha}
               className="flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1418,7 +1424,7 @@ const FichaNegociacao = () => {
                 <line x1="16" y1="17" x2="8" y2="17"/>
                 <polyline points="10,9 9,9 8,9"/>
               </svg>
-              Salvar e Enviar PDFs
+              Enviar para Administradores
             </Button>
           </div>
         </CardContent>

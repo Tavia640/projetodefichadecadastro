@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
+import { LogOut } from 'lucide-react';
+import { AuthService } from '@/lib/authService';
 
 const formSchema = z.object({
   nome: z.string().min(2, 'Nome é obrigatório'),
@@ -23,6 +24,14 @@ const formSchema = z.object({
   profissao: z.string().min(2, 'Profissão é obrigatória'),
   dataNascimento: z.string().min(10, 'Data de nascimento é obrigatória'),
   estadoCivil: z.string().min(1, 'Estado civil é obrigatório'),
+  // Campos de endereço
+  endereco: z.string().min(5, 'Endereço é obrigatório'),
+  numeroResidencia: z.string().min(1, 'Número da residência é obrigatório'),
+  bairro: z.string().min(2, 'Bairro é obrigatório'),
+  cidade: z.string().min(2, 'Cidade é obrigatória'),
+  estado: z.string().min(2, 'Estado é obrigatório'),
+  cep: z.string().min(8, 'CEP é obrigatório'),
+  complemento: z.string().optional(),
   // Campos do cônjuge (opcionais)
   nomeConjuge: z.string().optional(),
   cpfConjuge: z.string().optional(),
@@ -53,6 +62,13 @@ const CadastroCliente = () => {
       profissao: '',
       dataNascimento: '',
       estadoCivil: '',
+      endereco: '',
+      numeroResidencia: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
+      cep: '',
+      complemento: '',
     },
   });
 
@@ -76,7 +92,7 @@ const CadastroCliente = () => {
     { value: 'uniao_estavel', label: 'União Estável' },
     { value: 'desquitado', label: 'Desquitado' },
     { value: 'separado', label: 'Separado' },
-    { value: 'viuvo', label: 'Viúvo' },
+    { value: 'viuvo', label: 'Vi��vo' },
   ];
 
   return (
@@ -84,13 +100,16 @@ const CadastroCliente = () => {
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/')}
+            <Button
+              variant="ghost"
+              onClick={() => {
+                AuthService.logout();
+                navigate('/login');
+              }}
               className="flex items-center gap-2"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
+              <LogOut className="h-4 w-4" />
+              Sair
             </Button>
             <CardTitle className="text-2xl font-bold">
               Cadastro do Cliente
@@ -258,6 +277,117 @@ const CadastroCliente = () => {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Dados de Endereço */}
+              <div className="space-y-4 border-t pt-6">
+                <h3 className="text-lg font-semibold">Endereço</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="endereco"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Endereço</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Rua, Avenida, etc." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="numeroResidencia"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Número</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="123" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="bairro"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bairro</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="complemento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Complemento</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Apto, Bloco, etc. (opcional)" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="cidade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="estado"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="SP, RJ, MG, etc." />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="cep"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CEP</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="00000-000" />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
