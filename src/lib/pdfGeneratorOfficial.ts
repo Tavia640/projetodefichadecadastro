@@ -291,6 +291,21 @@ export class PDFGeneratorOfficial {
       nextLine();
     });
 
+    // CAMPO DE ASSINATURA DO CLIENTE
+    nextLine(3);
+    const assinaturaY = currentY;
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('ASSINATURA DO CLIENTE:', margin, assinaturaY);
+
+    // Linha para assinatura
+    pdf.line(margin + 50, assinaturaY + 15, pageWidth - margin, assinaturaY + 15);
+
+    nextLine(3);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.text('Data: ___/___/______', margin, currentY);
+
       console.log('✅ PDF de Cadastro gerado com sucesso');
       const blob = pdf.output('blob');
       console.log('📦 Blob de Cadastro criado:', blob.size, 'bytes');
