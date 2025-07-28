@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { FichaStorageService, FichaCompleta } from '@/lib/fichaStorageService';
 import { SessionService } from '@/lib/sessionService';
 import { PDFGenerator } from '@/lib/pdfGenerator';
+import FichaVisualizationModal from '@/components/FichaVisualizationModal';
 import { Printer, Eye, Clock, User, FileText, LogOut, RefreshCw } from 'lucide-react';
 
 const AdminDashboard = () => {
