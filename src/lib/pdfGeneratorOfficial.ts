@@ -459,7 +459,17 @@ export class PDFGeneratorOfficial {
     nextLine();
 
     const contratoHeaders = ['Contrato', 'Empreendimento', 'Torre/Bloco', 'Apt.', 'Cota', 'Vista da UH.', 'PCD', 'Valor'];
-    const contratoWidths = [22, 33, 22, 15, 15, 20, 15, 28];
+    const totalContratoWidth = pageWidth - 2 * margin;
+    const contratoWidths = [
+      totalContratoWidth * 0.14,
+      totalContratoWidth * 0.21,
+      totalContratoWidth * 0.14,
+      totalContratoWidth * 0.09,
+      totalContratoWidth * 0.09,
+      totalContratoWidth * 0.12,
+      totalContratoWidth * 0.09,
+      totalContratoWidth * 0.12
+    ];
 
     // Cabeçalho contratos
     xPos2 = margin;
