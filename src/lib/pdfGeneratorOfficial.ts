@@ -34,21 +34,21 @@ export class PDFGeneratorOfficial {
       pdf.rect(x, y, w, h);
     };
 
-    // CABEÇALHO
-    pdf.setFontSize(10);
+    // CABEÇALHO - Layout mais próximo ao original
+    pdf.setFontSize(9);
     pdf.text('FORMULÁRIO', margin, currentY);
-    pdf.text('Código:FOR.02.01.002', pageWidth - 60, currentY);
+    pdf.text('Código: FOR.02.01.002', pageWidth - 65, currentY);
     nextLine();
-    
-    pdf.setFontSize(14);
+
+    pdf.setFontSize(16);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Ficha de Cadastro de Cliente', pageWidth/2, currentY, { align: 'center' });
+    pdf.text('FICHA DE CADASTRO DE CLIENTE', pageWidth/2, currentY, { align: 'center' });
     pdf.setFont('helvetica', 'normal');
-    
-    pdf.setFontSize(10);
-    pdf.text('Rev.: 24/07/2025-Ver.02', pageWidth - 60, currentY);
+
+    pdf.setFontSize(9);
+    pdf.text('Rev.: 24/07/2025 - Ver.02', pageWidth - 65, currentY);
     nextLine();
-    pdf.text('Página: 1 de 2', pageWidth - 30, currentY);
+    pdf.text('Página: 1 de 2', pageWidth - 35, currentY);
     nextLine(2);
 
     // Linha divisória
@@ -291,7 +291,7 @@ export class PDFGeneratorOfficial {
   }
 
   static gerarPDFNegociacaoOficial(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): Blob {
-    console.log('��� Iniciando geração PDF Negociação...');
+    console.log('🔍 Iniciando geração PDF Negociação...');
     console.log('📊 Dados do cliente:', dadosCliente);
     console.log('📊 Dados da negociação:', dadosNegociacao);
 
