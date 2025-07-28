@@ -30,7 +30,7 @@ const Login = () => {
       if (tipo === 'admin') {
         navigate('/dashboard-admin');
       } else {
-        navigate('/area-consultor');
+        navigate('/cadastro-cliente');
       }
     } catch (error) {
       toast.error('Erro ao fazer login. Tente novamente.');
