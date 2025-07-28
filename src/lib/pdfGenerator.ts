@@ -126,17 +126,20 @@ export class PDFGenerator {
     fontSize: number = 8,
     bold: boolean = false
   ) {
+    pdf.setLineWidth(0.3);
     pdf.rect(x, y, width, height);
     pdf.setFontSize(fontSize);
     pdf.setFont("helvetica", bold ? "bold" : "normal");
-    
-    // Quebrar texto se for muito longo
-    const lines = pdf.splitTextToSize(text, width - 2);
-    const lineHeight = fontSize * 0.35;
-    const startY = y + 3 + (fontSize * 0.3);
-    
-    for (let i = 0; i < lines.length && i < Math.floor(height / lineHeight); i++) {
-      pdf.text(lines[i], x + 1, startY + (i * lineHeight));
+
+    if (text) {
+      // Quebrar texto se for muito longo
+      const lines = pdf.splitTextToSize(text, width - 3);
+      const lineHeight = fontSize * 0.4;
+      const startY = y + 3 + (fontSize * 0.4);
+
+      for (let i = 0; i < lines.length && i < Math.floor(height / lineHeight); i++) {
+        pdf.text(lines[i], x + 2, startY + (i * lineHeight));
+      }
     }
   }
 
@@ -269,7 +272,7 @@ export class PDFGenerator {
       // Logradouro e Nº
       this.createTableCell(pdf, 'Logradouro:', 15, yPos, 30, rowHeight);
       this.createTableCell(pdf, dadosCliente.endereco || '', 45, yPos, 120, rowHeight);
-      this.createTableCell(pdf, 'Nº:', 165, yPos, 15, rowHeight);
+      this.createTableCell(pdf, 'N��:', 165, yPos, 15, rowHeight);
       this.createTableCell(pdf, dadosCliente.numeroResidencia || '', 180, yPos, 15, rowHeight);
       yPos += rowHeight;
       
