@@ -1087,9 +1087,9 @@ const FichaNegociacao = () => {
                               newContratos[index].valor = categoria.vir_cota.toString();
                               
                                // Preencher automaticamente as informações de pagamento
-                               const dados = calcularDadosCategoria(contrato.empreendimento, value);
+                               const dados = calcularDadosCategoria(contrato.empreendimentoId, value);
                                if (dados) {
-                                 preencherInformacoesPagamento(dados, contrato.empreendimento);
+                                 preencherInformacoesPagamento(dados, contrato.empreendimentoId);
                                }
                             }
                             setContratos(newContratos);
