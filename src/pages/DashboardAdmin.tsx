@@ -75,37 +75,56 @@ const DashboardAdmin = () => {
   const handleImprimirFicha = (ficha: Ficha) => {
     try {
       console.log('🖨️ Iniciando impressão da ficha...');
-      
+      console.log('📋 Dados do cliente:', ficha.dadosCliente);
+      console.log('💼 Dados da negociação:', ficha.dadosNegociacao);
+
       // Gerar PDFs como blob URLs para impressão
+      console.log('📄 Gerando PDF de cadastro...');
       const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(ficha.dadosCliente);
+      console.log('✅ PDF de cadastro gerado');
+
+      console.log('📄 Gerando PDF de negociação...');
       const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(ficha.dadosCliente, ficha.dadosNegociacao);
-      
+      console.log('✅ PDF de negociação gerado');
+
       // Criar URLs para os blobs
       const urlCadastro = URL.createObjectURL(pdfCadastroBlob);
       const urlNegociacao = URL.createObjectURL(pdfNegociacaoBlob);
-      
-      // Abrir PDFs em novas janelas para impressão
+
+      console.log('🔗 URLs criadas:', { urlCadastro, urlNegociacao });
+
+      // Abrir PDFs em novas janelas
+      console.log('🖥️ Abrindo janelas para visualização...');
       const janelaCadastro = window.open(urlCadastro, '_blank');
       const janelaNegociacao = window.open(urlNegociacao, '_blank');
-      
+
+      if (!janelaCadastro || !janelaNegociacao) {
+        console.warn('⚠️ Algumas janelas podem ter sido bloqueadas pelo navegador');
+        toast.error('Algumas janelas podem ter sido bloqueadas. Verifique as configurações do navegador.');
+        return;
+      }
+
       // Aguardar carregamento e imprimir
       setTimeout(() => {
-        if (janelaCadastro) {
+        console.log('🖨️ Enviando comando de impressão...');
+
+        if (janelaCadastro && !janelaCadastro.closed) {
           janelaCadastro.print();
         }
-        if (janelaNegociacao) {
+        if (janelaNegociacao && !janelaNegociacao.closed) {
           janelaNegociacao.print();
         }
-        
+
         // Limpar URLs após uso
         setTimeout(() => {
           URL.revokeObjectURL(urlCadastro);
           URL.revokeObjectURL(urlNegociacao);
+          console.log('🧹 URLs limpas');
         }, 5000);
-      }, 1500);
-      
-      toast.success('PDFs abertos para impressão!');
-      
+      }, 2000);
+
+      toast.success('PDFs abertos para impressão! Verifique se ambos os documentos foram carregados.');
+
     } catch (error: any) {
       console.error('❌ Erro na impressão:', error);
       toast.error(`Erro ao gerar PDFs para impressão: ${error.message || 'Erro desconhecido'}`);
