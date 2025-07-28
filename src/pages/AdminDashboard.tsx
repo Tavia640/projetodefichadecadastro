@@ -189,7 +189,17 @@ const AdminDashboard = () => {
 
     } catch (error: any) {
       console.error('❌ Erro na impressão:', error);
-      alert(`❌ Erro ao gerar PDFs para impressão: ${error.message || 'Erro desconhecido'}`);
+      console.error('📊 Stack trace:', error.stack);
+      console.error('📋 Dados da ficha no erro:', ficha);
+
+      let mensagemErro = 'Erro desconhecido';
+      if (error.message) {
+        mensagemErro = error.message;
+      } else if (typeof error === 'string') {
+        mensagemErro = error;
+      }
+
+      alert(`❌ Erro ao gerar PDFs para impressão:\n\n${mensagemErro}\n\nVerifique o console para mais detalhes.`);
     }
   };
 
