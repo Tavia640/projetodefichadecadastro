@@ -28,6 +28,7 @@ interface Contrato {
   id: string;
   tipoContrato: string;
   empreendimento: string;
+  empreendimentoId?: string;
   torre: string;
   apartamento: string;
   cota: string;
@@ -673,7 +674,7 @@ const FichaNegociacao = () => {
 
       if (resultado.success) {
         console.log('✅ Processo concluído com sucesso!');
-        alert(`✅ Ficha enviada com sucesso por email!\n\n${resultado.message}`);
+        alert(`��� Ficha enviada com sucesso por email!\n\n${resultado.message}`);
       } else {
         console.error('❌ Falha no envio:', resultado.message);
         alert(`❌ Erro no envio: ${resultado.message}`);
