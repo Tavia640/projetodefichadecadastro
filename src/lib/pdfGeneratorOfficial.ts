@@ -78,7 +78,7 @@ export class PDFGeneratorOfficial {
     pdf.setFont('helvetica', 'bold');
     pdf.text('Nome:', margin + 2, currentY + 6);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(dadosCliente.nome || '', margin + 20, currentY + 6);
+    pdf.text(safeString(dadosCliente.nome), margin + 20, currentY + 6);
     nextLine(1.7);
 
     // CPF
@@ -86,7 +86,7 @@ export class PDFGeneratorOfficial {
     pdf.setFont('helvetica', 'bold');
     pdf.text('CPF:', margin + 2, currentY + 6);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(dadosCliente.cpf || '', margin + 20, currentY + 6);
+    pdf.text(safeString(dadosCliente.cpf), margin + 20, currentY + 6);
     nextLine(1.7);
 
     // RG, Órgão, UF
@@ -104,9 +104,9 @@ export class PDFGeneratorOfficial {
     pdf.text('UF:', margin + rgWidth + orgaoWidth + 2, currentY + 6);
 
     pdf.setFont('helvetica', 'normal');
-    pdf.text(dadosCliente.rg || '', margin + 15, currentY + 6);
-    pdf.text(dadosCliente.orgaoEmissor || '', margin + rgWidth + 25, currentY + 6);
-    pdf.text(dadosCliente.estadoEmissor || '', margin + rgWidth + orgaoWidth + 15, currentY + 6);
+    pdf.text(safeString(dadosCliente.rg), margin + 15, currentY + 6);
+    pdf.text(safeString(dadosCliente.orgaoEmissor), margin + rgWidth + 25, currentY + 6);
+    pdf.text(safeString(dadosCliente.estadoEmissor), margin + rgWidth + orgaoWidth + 15, currentY + 6);
     nextLine(1.7);
 
     // Profissão
@@ -114,7 +114,7 @@ export class PDFGeneratorOfficial {
     pdf.setFont('helvetica', 'bold');
     pdf.text('Profissão:', margin + 2, currentY + 6);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(dadosCliente.profissao || '', margin + 30, currentY + 6);
+    pdf.text(safeString(dadosCliente.profissao), margin + 30, currentY + 6);
     nextLine(1.7);
 
     // Estado Civil
@@ -122,7 +122,7 @@ export class PDFGeneratorOfficial {
     pdf.setFont('helvetica', 'bold');
     pdf.text('Estado Civil:', margin + 2, currentY + 6);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(dadosCliente.estadoCivil || '', margin + 35, currentY + 6);
+    pdf.text(safeString(dadosCliente.estadoCivil), margin + 35, currentY + 6);
     nextLine(1.7);
 
     // E-mail
@@ -130,7 +130,7 @@ export class PDFGeneratorOfficial {
     pdf.setFont('helvetica', 'bold');
     pdf.text('E-mail:', margin + 2, currentY + 6);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(dadosCliente.email || '', margin + 25, currentY + 6);
+    pdf.text(safeString(dadosCliente.email), margin + 25, currentY + 6);
     nextLine(1.7);
 
     // Telefone
@@ -138,7 +138,7 @@ export class PDFGeneratorOfficial {
     pdf.setFont('helvetica', 'bold');
     pdf.text('Telefone:', margin + 2, currentY + 6);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(dadosCliente.telefone || '', margin + 30, currentY + 6);
+    pdf.text(safeString(dadosCliente.telefone), margin + 30, currentY + 6);
     nextLine(2);
 
     // DADOS DO CÔNJUGE
@@ -171,7 +171,7 @@ export class PDFGeneratorOfficial {
     
     pdf.setFont('helvetica', 'bold');
     pdf.text('RG:', margin + 2, currentY + 6);
-    pdf.text('ÓRGÃO:', margin + rgWidth + 2, currentY + 6);
+    pdf.text('��RGÃO:', margin + rgWidth + 2, currentY + 6);
     pdf.text('UF:', margin + rgWidth + orgaoWidth + 2, currentY + 6);
 
     pdf.setFont('helvetica', 'normal');
