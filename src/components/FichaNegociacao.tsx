@@ -10,7 +10,7 @@ import { Plus, Trash2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
-import { EmailSimples } from '@/lib/emailSimples';
+import AuthService from '@/lib/auth';
 
 // Formatação monetária simples para exibição
 const exibirValor = (valor: string): string => {
@@ -150,7 +150,7 @@ const FichaNegociacao = () => {
     return 'Precisa de autorização do líder de sala';
   };
 
-  // Funç��o para validar data do primeiro vencimento do sinal
+  // Função para validar data do primeiro vencimento do sinal
   const validarDataVencimentoSinal = (dataVencimento: string): string | null => {
     if (!dataVencimento) return null;
     
@@ -428,7 +428,7 @@ const FichaNegociacao = () => {
 
           console.log('✅ Conectividade OK! Dados de teste:', testData);
         } catch (networkError: any) {
-          console.error('🚫 Erro de rede ou conectividade:', networkError);
+          console.error('�� Erro de rede ou conectividade:', networkError);
 
           if (networkError.message === 'TABELA_NAO_EXISTE') {
             throw networkError;
