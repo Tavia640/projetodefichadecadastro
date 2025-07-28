@@ -398,10 +398,10 @@ export class PDFGeneratorOfficial {
 
     // TABELA DE PARCELAS PAGAS EM SALA
     const tableY = currentY;
-    const colWidths = [40, 35, 25, 40, 40];
+    const colWidths = [35, 30, 25, 35, 35];
     const headers = [
       'Tipo de Parcela Paga em Sala',
-      'Valor Total Pago em Sala', 
+      'Valor Total Pago em Sala',
       'Quantidade de cotas',
       'Valor distribuído para cada Unidade',
       'Forma de Pagamento'
@@ -456,7 +456,7 @@ export class PDFGeneratorOfficial {
     nextLine();
 
     const contratoHeaders = ['Contrato', 'Empreendimento', 'Torre/Bloco', 'Apt.', 'Cota', 'Vista da UH.', 'PCD', 'Valor'];
-    const contratoWidths = [20, 35, 25, 15, 15, 20, 15, 25];
+    const contratoWidths = [22, 33, 22, 15, 15, 20, 15, 28];
 
     // Cabeçalho contratos
     xPos2 = margin;
@@ -482,7 +482,7 @@ export class PDFGeneratorOfficial {
       contratos.forEach((contrato, index) => {
         xPos2 = margin;
         const contratoValues = [
-          '( ) Físico ( ) Digital',
+          '( ) Físico (X) Digital',
           safeString(contrato?.empreendimento),
           safeString(contrato?.torre),
           safeString(contrato?.apartamento),
@@ -510,7 +510,7 @@ export class PDFGeneratorOfficial {
     nextLine(2);
 
     const pagamentoHeaders = ['Tipo', 'Total', 'Qtd. Parcelas', 'Valor Parcela', 'Forma de Pag.', '1º Vencimento'];
-    const pagamentoWidths = [30, 25, 25, 25, 25, 30];
+    const pagamentoWidths = [28, 23, 22, 23, 23, 31];
 
     // Cabeçalho pagamentos
     xPos2 = margin;
