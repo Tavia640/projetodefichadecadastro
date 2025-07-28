@@ -104,34 +104,34 @@ export class PDFGeneratorOfficial {
 
     // Profissão
     drawBox(margin, currentY, tableWidth, rowHeight);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('Profissão:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.profissao || '', margin + 25, currentY + 5);
-    nextLine(1.5);
+    pdf.text('Profissão:', margin + 2, currentY + 6);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.profissao || '', margin + 30, currentY + 6);
+    nextLine(1.7);
 
     // Estado Civil
     drawBox(margin, currentY, tableWidth, rowHeight);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('Estado Civil:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.estadoCivil || '', margin + 30, currentY + 5);
-    nextLine(1.5);
+    pdf.text('Estado Civil:', margin + 2, currentY + 6);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.estadoCivil || '', margin + 35, currentY + 6);
+    nextLine(1.7);
 
     // E-mail
     drawBox(margin, currentY, tableWidth, rowHeight);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('E-mail:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.email || '', margin + 20, currentY + 5);
-    nextLine(1.5);
+    pdf.text('E-mail:', margin + 2, currentY + 6);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.email || '', margin + 25, currentY + 6);
+    nextLine(1.7);
 
     // Telefone
     drawBox(margin, currentY, tableWidth, rowHeight);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('Telefone:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.telefone || '', margin + 25, currentY + 5);
+    pdf.text('Telefone:', margin + 2, currentY + 6);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.telefone || '', margin + 30, currentY + 6);
     nextLine(2);
 
     // DADOS DO CÔNJUGE
