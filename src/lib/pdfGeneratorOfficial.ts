@@ -204,7 +204,8 @@ export class PDFGeneratorOfficial {
     pdf.text('Nº:', margin + logradouroWidth + 2, currentY + 5);
     
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.logradouro || '', margin + 25, currentY + 5);
+    const enderecoCompleto = dadosCliente.logradouro || '';
+    pdf.text(enderecoCompleto, margin + 25, currentY + 5);
     pdf.text(dadosCliente.numero || '', margin + logradouroWidth + 10, currentY + 5);
     nextLine(1.5);
 
