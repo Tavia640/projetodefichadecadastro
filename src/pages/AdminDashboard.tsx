@@ -59,6 +59,48 @@ const AdminDashboard = () => {
     setFichaVisualizacao(null);
   };
 
+  const handlePegarParaFazer = (ficha: FichaCompleta) => {
+    if (!session) return;
+
+    const sucesso = FichaStorageService.pegarFichaParaFazer(ficha.id, session.nome);
+    if (sucesso) {
+      carregarFichas();
+      alert(`✅ Ficha atribuída com sucesso! Você agora é responsável pelo atendimento de ${ficha.dadosCliente.nome}.`);
+    } else {
+      alert('❌ Não foi possível pegar esta ficha. Ela pode já estar sendo atendida por outro administrador.');
+    }
+  };
+
+  const handleEncerrarAtendimento = (ficha: FichaCompleta) => {
+    if (!session) return;
+
+    const confirmar = window.confirm(`Tem certeza que deseja encerrar o atendimento da ficha de ${ficha.dadosCliente.nome}?`);
+    if (!confirmar) return;
+
+    const sucesso = FichaStorageService.encerrarAtendimento(ficha.id, session.nome);
+    if (sucesso) {
+      carregarFichas();
+      alert(`✅ Atendimento encerrado com sucesso!`);
+    } else {
+      alert('❌ Não foi possível encerrar o atendimento. Verifique se você é o responsável por esta ficha.');
+    }
+  };
+
+  const handleLiberarFicha = (ficha: FichaCompleta) => {
+    if (!session) return;
+
+    const confirmar = window.confirm(`Tem certeza que deseja liberar a ficha de ${ficha.dadosCliente.nome}? Ela voltará para a lista de fichas pendentes.`);
+    if (!confirmar) return;
+
+    const sucesso = FichaStorageService.liberarFicha(ficha.id, session.nome);
+    if (sucesso) {
+      carregarFichas();
+      alert(`✅ Ficha liberada com sucesso!`);
+    } else {
+      alert('❌ Não foi possível liberar a ficha.');
+    }
+  };
+
   const handleImprimirFicha = (ficha: FichaCompleta) => {
     try {
       console.log('🖨️ Gerando PDFs oficiais para impressão...');
