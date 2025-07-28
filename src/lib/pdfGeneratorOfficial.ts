@@ -183,11 +183,11 @@ export class PDFGeneratorOfficial {
 
     camposConjuge.forEach(campo => {
       drawBox(margin, currentY, tableWidth, rowHeight);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(campo.label, margin + 2, currentY + 5);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(campo.valor || '', margin + 25, currentY + 5);
-      nextLine(1.5);
+      pdf.text(campo.label, margin + 2, currentY + 6);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(campo.valor || '', margin + 30, currentY + 6);
+      nextLine(1.7);
     });
 
     nextLine();
