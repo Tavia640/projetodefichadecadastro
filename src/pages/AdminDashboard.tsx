@@ -513,9 +513,17 @@ const AdminDashboard = () => {
                           </>
                         )}
 
-                        {(ficha.status === 'em_andamento' && ficha.adminResponsavel !== session?.nome) && (
+                        {ficha.status === 'em_andamento' && ficha.adminResponsavel && session?.nome &&
+                         ficha.adminResponsavel !== session.nome && (
                           <div className="text-xs text-gray-500 italic">
                             Em atendimento por {ficha.adminResponsavel}
+                          </div>
+                        )}
+
+                        {/* Mostrar status mais detalhado para debug */}
+                        {ficha.status === 'em_andamento' && (!ficha.adminResponsavel || !session?.nome) && (
+                          <div className="text-xs text-red-500">
+                            Erro: Dados de admin incompletos
                           </div>
                         )}
 
