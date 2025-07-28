@@ -560,6 +560,7 @@ const FichaNegociacao = () => {
       id: '1',
       tipoContrato: '',
       empreendimento: '',
+      empreendimentoId: '',
       torre: '',
       apartamento: '',
       cota: '',
