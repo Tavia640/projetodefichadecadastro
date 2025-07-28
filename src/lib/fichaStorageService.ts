@@ -99,6 +99,93 @@ export class FichaStorageService {
     return this.getFichas().filter(ficha => ficha.status === 'pendente');
   }
 
+  static pegarFichaParaFazer(id: string, nomeAdmin: string): boolean {
+    try {
+      const fichas = this.getFichas();
+      const index = fichas.findIndex(ficha => ficha.id === id);
+
+      if (index === -1) return false;
+
+      // Verificar se a ficha está disponível para ser pega
+      if (fichas[index].status !== 'pendente') {
+        return false;
+      }
+
+      fichas[index].status = 'em_andamento';
+      fichas[index].adminResponsavel = nomeAdmin;
+      fichas[index].timestampInicio = Date.now();
+
+      localStorage.setItem(this.FICHAS_KEY, JSON.stringify(fichas));
+
+      console.log(`✅ Ficha ${id} atribuída para ${nomeAdmin}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao atribuir ficha:', error);
+      return false;
+    }
+  }
+
+  static encerrarAtendimento(id: string, nomeAdmin: string): boolean {
+    try {
+      const fichas = this.getFichas();
+      const index = fichas.findIndex(ficha => ficha.id === id);
+
+      if (index === -1) return false;
+
+      // Verificar se o admin é o responsável pela ficha
+      if (fichas[index].adminResponsavel !== nomeAdmin) {
+        console.warn(`⚠️ Admin ${nomeAdmin} não é responsável pela ficha ${id}`);
+        return false;
+      }
+
+      // Verificar se a ficha está em andamento
+      if (fichas[index].status !== 'em_andamento') {
+        return false;
+      }
+
+      fichas[index].status = 'concluida';
+      fichas[index].timestampConclusao = Date.now();
+
+      localStorage.setItem(this.FICHAS_KEY, JSON.stringify(fichas));
+
+      console.log(`✅ Atendimento da ficha ${id} encerrado por ${nomeAdmin}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao encerrar atendimento:', error);
+      return false;
+    }
+  }
+
+  static liberarFicha(id: string, nomeAdmin: string): boolean {
+    try {
+      const fichas = this.getFichas();
+      const index = fichas.findIndex(ficha => ficha.id === id);
+
+      if (index === -1) return false;
+
+      // Verificar se o admin é o responsável pela ficha
+      if (fichas[index].adminResponsavel !== nomeAdmin) {
+        return false;
+      }
+
+      fichas[index].status = 'pendente';
+      fichas[index].adminResponsavel = undefined;
+      fichas[index].timestampInicio = undefined;
+
+      localStorage.setItem(this.FICHAS_KEY, JSON.stringify(fichas));
+
+      console.log(`✅ Ficha ${id} liberada por ${nomeAdmin}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao liberar ficha:', error);
+      return false;
+    }
+  }
+
+  static getFichasDoAdmin(nomeAdmin: string): FichaCompleta[] {
+    return this.getFichas().filter(ficha => ficha.adminResponsavel === nomeAdmin);
+  }
+
   static getEstatisticas() {
     const fichas = this.getFichas();
     
