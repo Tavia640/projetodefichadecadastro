@@ -61,9 +61,9 @@ export class PDFGeneratorOfficial {
     pdf.text('DADOS DO CLIENTE:', margin, currentY);
     nextLine(2);
 
-    // Criar tabela para dados do cliente
+    // Criar tabela para dados do cliente - estilo mais próximo ao original
     const tableWidth = pageWidth - 2 * margin;
-    const rowHeight = 8;
+    const rowHeight = 10;
     
     // Nome
     drawBox(margin, currentY, tableWidth, rowHeight);
