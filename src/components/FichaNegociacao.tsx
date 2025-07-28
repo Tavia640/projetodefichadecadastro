@@ -1080,8 +1080,8 @@ const FichaNegociacao = () => {
                             const newContratos = [...contratos];
                             newContratos[index].categoriaPreco = value;
                             // Auto-preencher valor baseado na categoria selecionada
-                            const categoria = categoriasPreco.find(cat => 
-                              cat.categoria_preco === value && cat.empreendimento_id === contrato.empreendimento
+                            const categoria = categoriasPreco.find(cat =>
+                              cat.categoria_preco === value && cat.empreendimento_id === contrato.empreendimentoId
                             );
                             if (categoria) {
                               newContratos[index].valor = categoria.vir_cota.toString();
