@@ -76,11 +76,11 @@ export class PDFGeneratorOfficial {
 
     // CPF
     drawBox(margin, currentY, tableWidth, rowHeight);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('CPF:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.cpf || '', margin + 15, currentY + 5);
-    nextLine(1.5);
+    pdf.text('CPF:', margin + 2, currentY + 6);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.cpf || '', margin + 20, currentY + 6);
+    nextLine(1.7);
 
     // RG, Órgão, UF
     const rgWidth = tableWidth * 0.5;
