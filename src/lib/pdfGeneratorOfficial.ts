@@ -4,12 +4,13 @@ import { DadosCliente, DadosNegociacao } from './pdfGenerator';
 export class PDFGeneratorOfficial {
   
   static gerarPDFCadastroOficial(dadosCliente: DadosCliente): Blob {
-    console.log('🔍 Iniciando geração PDF Cadastro...');
-    console.log('📊 Dados do cliente:', dadosCliente);
+    try {
+      console.log('🔍 Iniciando geração PDF Cadastro...');
+      console.log('📊 Dados do cliente:', dadosCliente);
 
-    if (!dadosCliente) {
-      throw new Error('Dados do cliente não fornecidos para PDF de cadastro');
-    }
+      if (!dadosCliente) {
+        throw new Error('Dados do cliente não fornecidos para PDF de cadastro');
+      }
 
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.width;
@@ -284,17 +285,21 @@ export class PDFGeneratorOfficial {
       nextLine();
     });
 
-    console.log('✅ PDF de Cadastro gerado com sucesso');
-    const blob = pdf.output('blob');
-    console.log('📦 Blob de Cadastro criado:', blob.size, 'bytes');
-    return blob;
+      console.log('✅ PDF de Cadastro gerado com sucesso');
+      const blob = pdf.output('blob');
+      console.log('📦 Blob de Cadastro criado:', blob.size, 'bytes');
+      return blob;
+    } catch (error: any) {
+      console.error('❌ Erro na geração do PDF de Cadastro:', error);
+      throw new Error(`Falha na geração do PDF de Cadastro: ${error.message}`);
+    }
   }
 
   static gerarPDFNegociacaoOficial(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): Blob {
     try {
       console.log('🔍 Iniciando geração PDF Negociação...');
       console.log('📊 Dados do cliente:', dadosCliente);
-      console.log('📊 Dados da negociação:', dadosNegociacao);
+      console.log('📊 Dados da negociaç��o:', dadosNegociacao);
 
       // Verificar se os dados essenciais existem
       if (!dadosCliente) {
