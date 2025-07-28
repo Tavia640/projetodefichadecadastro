@@ -1268,8 +1268,8 @@ const FichaNegociacao = () => {
                        <td className="border border-border p-3">
                          {(() => {
                            // Encontrar o primeiro contrato com empreendimento e categoria preenchidos para validação
-                           const contratoAtivo = contratos.find(c => c.empreendimento && c.categoriaPreco);
-                           const dados = contratoAtivo ? calcularDadosCategoria(contratoAtivo.empreendimento, contratoAtivo.categoriaPreco) : null;
+                           const contratoAtivo = contratos.find(c => c.empreendimentoId && c.categoriaPreco);
+                           const dados = contratoAtivo ? calcularDadosCategoria(contratoAtivo.empreendimentoId, contratoAtivo.categoriaPreco) : null;
                            let maxParcelas = dados ? (info.tipo === 'Sinal' ? dados.maxParcelasSinal : dados.maxParcelasSaldo) : null;
                            
                            // Limitaç��o específica para Restante da Entrada: máximo 5 parcelas
