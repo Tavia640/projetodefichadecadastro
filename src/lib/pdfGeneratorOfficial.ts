@@ -390,24 +390,34 @@ export class PDFGeneratorOfficial {
 
     // Dados da tabela - com tratamento de dados seguro
     const parcelasPagasSala = dadosNegociacao.parcelasPagasSala || [];
-    parcelasPagasSala.forEach(parcela => {
+    if (parcelasPagasSala.length === 0) {
+      // Se não há parcelas, criar uma linha vazia
       xPos2 = margin;
-      const valores = [
-        parcela.tipo,
-        `R$ ${parcela.valorTotal}`,
-        parcela.quantidadeCotas,
-        `R$ ${parcela.valorDistribuido}`,
-        (parcela.formasPagamento || []).join(', ')
-      ];
-      
-      valores.forEach((valor, i) => {
-        drawBox(xPos2, currentY, colWidths[i], 6);
-        pdf.setFontSize(8);
-        pdf.text(valor || '', xPos2 + 1, currentY + 4);
-        xPos2 += colWidths[i];
+      colWidths.forEach((width, i) => {
+        drawBox(xPos2, currentY, width, 6);
+        xPos2 += width;
       });
       nextLine();
-    });
+    } else {
+      parcelasPagasSala.forEach(parcela => {
+        xPos2 = margin;
+        const valores = [
+          parcela?.tipo || '',
+          parcela?.valorTotal ? `R$ ${parcela.valorTotal}` : '',
+          parcela?.quantidadeCotas || '',
+          parcela?.valorDistribuido ? `R$ ${parcela.valorDistribuido}` : '',
+          (parcela?.formasPagamento || []).join(', ')
+        ];
+
+        valores.forEach((valor, i) => {
+          drawBox(xPos2, currentY, colWidths[i], 6);
+          pdf.setFontSize(8);
+          pdf.text(valor || '', xPos2 + 1, currentY + 4);
+          xPos2 += colWidths[i];
+        });
+        nextLine();
+      });
+    }
 
     nextLine(2);
 
