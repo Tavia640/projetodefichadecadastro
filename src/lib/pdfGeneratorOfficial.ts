@@ -522,47 +522,39 @@ export class PDFGeneratorOfficial {
     });
     nextLine(1.5);
 
-    // Dados dos pagamentos - com tratamento de dados seguro
+    // Dados dos pagamentos - estrutura fixa sem segunda entrada
+    const tiposPagamentoFixos = ['Entrada', 'Entrada Restante', 'Sinal', 'Saldo'];
     const informacoesPagamento = dadosNegociacao.informacoesPagamento || [];
-    const pagamentosValidos = informacoesPagamento.filter(info =>
-      info && info.total && parseFloat(info.total.toString() || '0') > 0
-    );
 
-    if (pagamentosValidos.length === 0) {
-      // Se não há pagamentos, criar uma linha vazia
+    tiposPagamentoFixos.forEach(tipoFixo => {
+      const infoPagamento = informacoesPagamento.find(info =>
+        info && info.tipo && info.tipo.toLowerCase().includes(tipoFixo.toLowerCase())
+      );
+
       xPos2 = margin;
-      pagamentoWidths.forEach((width, i) => {
-        drawBox(xPos2, currentY, width, 6);
-        xPos2 += width;
+      const pagamentoValues = [
+        tipoFixo,
+        infoPagamento?.total ? `R$ ${safeString(infoPagamento.total)}` : '',
+        safeString(infoPagamento?.qtdParcelas),
+        infoPagamento?.valorParcela ? `R$ ${safeString(infoPagamento.valorParcela)}` : '',
+        safeString(infoPagamento?.formaPagamento),
+        infoPagamento?.primeiroVencimento ? (() => {
+          try {
+            return new Date(infoPagamento.primeiroVencimento).toLocaleDateString('pt-BR');
+          } catch {
+            return safeString(infoPagamento.primeiroVencimento);
+          }
+        })() : ''
+      ];
+
+      pagamentoValues.forEach((valor, i) => {
+        drawBox(xPos2, currentY, pagamentoWidths[i], 6);
+        pdf.setFontSize(8);
+        pdf.text(valor || '', xPos2 + 1, currentY + 4);
+        xPos2 += pagamentoWidths[i];
       });
       nextLine();
-    } else {
-      pagamentosValidos.forEach(info => {
-        xPos2 = margin;
-        const pagamentoValues = [
-          safeString(info?.tipo),
-          info?.total ? `R$ ${safeString(info.total)}` : '',
-          safeString(info?.qtdParcelas),
-          info?.valorParcela ? `R$ ${safeString(info.valorParcela)}` : '',
-          safeString(info?.formaPagamento),
-          info?.primeiroVencimento ? (() => {
-            try {
-              return new Date(info.primeiroVencimento).toLocaleDateString('pt-BR');
-            } catch {
-              return safeString(info.primeiroVencimento);
-            }
-          })() : ''
-        ];
-
-        pagamentoValues.forEach((valor, i) => {
-          drawBox(xPos2, currentY, pagamentoWidths[i], 6);
-          pdf.setFontSize(8);
-          pdf.text(valor || '', xPos2 + 1, currentY + 4);
-          xPos2 += pagamentoWidths[i];
-        });
-        nextLine();
-      });
-    }
+    });
 
       console.log('✅ PDF de Negociação gerado com sucesso');
       const blob = pdf.output('blob');
