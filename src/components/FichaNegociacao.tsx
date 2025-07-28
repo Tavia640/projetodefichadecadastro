@@ -1104,7 +1104,7 @@ const FichaNegociacao = () => {
                             } />
                           </SelectTrigger>
                           <SelectContent className="bg-background z-50">
-                            {getCategoriasPorEmpreendimento(contrato.empreendimento).map((categoria) => (
+                            {getCategoriasPorEmpreendimento(contrato.empreendimentoId).map((categoria) => (
                               <SelectItem key={categoria.categoria_preco} value={categoria.categoria_preco}>
                                 {categoria.categoria_preco} - R$ {categoria.vir_cota.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                               </SelectItem>
