@@ -361,6 +361,9 @@ const FichaNegociacao = () => {
         if (errorEmpreendimentos) throw errorEmpreendimentos;
         setEmpreendimentos(empreendimentosData || []);
 
+        // Cachear empreendimentos no localStorage para uso no PDF
+        localStorage.setItem('empreendimentos_cache', JSON.stringify(empreendimentosData || []));
+
         // Carregar categorias de preço das vendas normais com todos os campos (apenas registros mais recentes)
         const { data: tiposVendaNormal, error: errorTiposVenda } = await supabase
           .from('tipos_venda_normal')
