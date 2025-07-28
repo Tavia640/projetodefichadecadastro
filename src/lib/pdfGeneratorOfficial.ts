@@ -4,6 +4,13 @@ import { DadosCliente, DadosNegociacao } from './pdfGenerator';
 export class PDFGeneratorOfficial {
   
   static gerarPDFCadastroOficial(dadosCliente: DadosCliente): Blob {
+    console.log('🔍 Iniciando geração PDF Cadastro...');
+    console.log('📊 Dados do cliente:', dadosCliente);
+
+    if (!dadosCliente) {
+      throw new Error('Dados do cliente não fornecidos para PDF de cadastro');
+    }
+
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.width;
     const pageHeight = pdf.internal.pageSize.height;
