@@ -6,7 +6,10 @@ export interface FichaCompleta {
   dadosNegociacao: DadosNegociacao;
   nomeConsultor: string;
   timestamp: number;
-  status: 'pendente' | 'visualizada' | 'impressa';
+  status: 'pendente' | 'visualizada' | 'impressa' | 'em_andamento' | 'concluida';
+  adminResponsavel?: string; // Nome do admin que pegou para fazer
+  timestampInicio?: number; // Quando foi iniciado o atendimento
+  timestampConclusao?: number; // Quando foi concluído
 }
 
 export class FichaStorageService {
