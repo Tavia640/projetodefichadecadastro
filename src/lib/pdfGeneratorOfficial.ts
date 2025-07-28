@@ -425,10 +425,10 @@ export class PDFGeneratorOfficial {
       parcelasPagasSala.forEach(parcela => {
         xPos2 = margin;
         const valores = [
-          parcela?.tipo || '',
-          parcela?.valorTotal ? `R$ ${parcela.valorTotal}` : '',
-          parcela?.quantidadeCotas || '',
-          parcela?.valorDistribuido ? `R$ ${parcela.valorDistribuido}` : '',
+          safeString(parcela?.tipo),
+          parcela?.valorTotal ? `R$ ${safeString(parcela.valorTotal)}` : '',
+          safeString(parcela?.quantidadeCotas),
+          parcela?.valorDistribuido ? `R$ ${safeString(parcela.valorDistribuido)}` : '',
           (parcela?.formasPagamento || []).join(', ')
         ];
 
@@ -477,13 +477,13 @@ export class PDFGeneratorOfficial {
         xPos2 = margin;
         const contratoValues = [
           '( ) Físico ( ) Digital',
-          contrato?.empreendimento || '',
-          contrato?.torre || '',
-          contrato?.apartamento || '',
-          contrato?.cota || '',
+          safeString(contrato?.empreendimento),
+          safeString(contrato?.torre),
+          safeString(contrato?.apartamento),
+          safeString(contrato?.cota),
           '( ) Sim ( ) Não',
           '( ) Sim ( ) Não',
-          contrato?.valor ? `R$ ${contrato.valor}` : ''
+          contrato?.valor ? `R$ ${safeString(contrato.valor)}` : ''
         ];
 
         contratoValues.forEach((valor, i) => {
@@ -534,16 +534,16 @@ export class PDFGeneratorOfficial {
       pagamentosValidos.forEach(info => {
         xPos2 = margin;
         const pagamentoValues = [
-          info?.tipo || '',
-          info?.total ? `R$ ${info.total}` : '',
-          info?.qtdParcelas || '',
-          info?.valorParcela ? `R$ ${info.valorParcela}` : '',
-          info?.formaPagamento || '',
+          safeString(info?.tipo),
+          info?.total ? `R$ ${safeString(info.total)}` : '',
+          safeString(info?.qtdParcelas),
+          info?.valorParcela ? `R$ ${safeString(info.valorParcela)}` : '',
+          safeString(info?.formaPagamento),
           info?.primeiroVencimento ? (() => {
             try {
               return new Date(info.primeiroVencimento).toLocaleDateString('pt-BR');
             } catch {
-              return info.primeiroVencimento.toString();
+              return safeString(info.primeiroVencimento);
             }
           })() : ''
         ];
