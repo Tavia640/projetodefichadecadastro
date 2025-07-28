@@ -13,6 +13,7 @@ import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator'
 import { EmailJsService } from '@/lib/emailJsService';
 import { FichaStorageService } from '@/lib/fichaStorageService';
 import { SessionService } from '@/lib/sessionService';
+import SessionHeader from '@/components/SessionHeader';
 
 interface ParcelaPagaSala {
   id: string;
@@ -584,7 +585,7 @@ const FichaNegociacao = () => {
         console.warn('⚠️ Alertas encontrados:', alertasCriticos);
         // Mostrar alerta mas permitir continuar se for apenas aviso
         if (alertasCriticos.some(alerta => alerta.includes('CRÍTICO'))) {
-          alert('Não é poss��vel salvar devido a erros críticos. Verifique os campos obrigatórios.');
+          alert('Não é possível salvar devido a erros críticos. Verifique os campos obrigatórios.');
           return;
         }
       }
