@@ -103,7 +103,16 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-purple-500" />
                     <span className="font-medium">Endereço:</span>
-                    <span>{ficha.dadosCliente.endereco}</span>
+                    <span>
+                      {[
+                        ficha.dadosCliente.logradouro,
+                        ficha.dadosCliente.numero,
+                        ficha.dadosCliente.bairro,
+                        ficha.dadosCliente.cidade,
+                        ficha.dadosCliente.estado,
+                        ficha.dadosCliente.cep
+                      ].filter(Boolean).join(', ')}
+                    </span>
                   </div>
                 </div>
               </div>
