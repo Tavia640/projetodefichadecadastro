@@ -407,8 +407,9 @@ export class PDFGeneratorOfficial {
     });
     nextLine(1.5);
 
-    // Dados dos contratos
-    dadosNegociacao.contratos.forEach((contrato, index) => {
+    // Dados dos contratos - com tratamento de dados seguro
+    const contratos = dadosNegociacao.contratos || [];
+    contratos.forEach((contrato, index) => {
       xPos2 = margin;
       const contratoValues = [
         '( ) Físico ( ) Digital',
