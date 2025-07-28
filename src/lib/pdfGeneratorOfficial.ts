@@ -267,10 +267,10 @@ export class PDFGeneratorOfficial {
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
     pdf.text('SALA DE VENDAS:', margin, currentY);
-    
-    // Checkbox BEEBACK
+
+    // Checkbox BEEBACK (NÃO marcado por padrão)
     pdf.rect(margin + 90, currentY - 3, 3, 3);
-    pdf.text('X', margin + 91, currentY - 1); // Marcado por padrão
+    // Remover o X automático - deixar desmarcado
     pdf.text('BEEBACK', margin + 95, currentY);
     nextLine(2);
 
@@ -382,19 +382,27 @@ export class PDFGeneratorOfficial {
     pdf.text('SALA DE VENDAS: ', margin, currentY);
     nextLine(2);
 
-    // TIPO DE VENDA - Checkboxes
+    // TIPO DE VENDA - Checkboxes com marcação correta
     const tiposVenda = ['PADRÃO', 'SEMESTRAL', 'ANUAL', 'À VISTA', 'ATÉ 36x', 'LINEAR'];
     let xPos = margin;
-    
+
     tiposVenda.forEach(tipo => {
       pdf.rect(xPos, currentY - 3, 3, 3);
-      if (dadosNegociacao.tipoVenda?.toUpperCase() === tipo) {
+      // Marcar o tipo de venda selecionado
+      const tipoSelecionado = dadosNegociacao.tipoVenda?.toUpperCase();
+      if (tipoSelecionado && (tipo === tipoSelecionado ||
+          (tipo === 'SEMESTRAL' && tipoSelecionado === 'SEMESTRAL') ||
+          (tipo === 'ANUAL' && tipoSelecionado === 'ANUAL') ||
+          (tipo === 'À VISTA' && tipoSelecionado === 'A_VISTA') ||
+          (tipo === 'ATÉ 36x' && tipoSelecionado === 'ATE_36X') ||
+          (tipo === 'LINEAR' && tipoSelecionado === 'LINEAR') ||
+          (tipo === 'PADRÃO' && tipoSelecionado === 'PADRAO'))) {
         pdf.text('X', xPos + 0.5, currentY - 1);
       }
       pdf.text(tipo, xPos + 5, currentY);
-      xPos += 30;
+      xPos += 28; // Reduzido para evitar sobreposição
     });
-    nextLine(3);
+    nextLine(2);
 
     // TABELA DE PARCELAS PAGAS EM SALA
     const tableY = currentY;
