@@ -12,6 +12,12 @@ export class PDFGeneratorOfficial {
         throw new Error('Dados do cliente não fornecidos para PDF de cadastro');
       }
 
+      // Função auxiliar para converter valores para string de forma segura
+      const safeString = (value: any): string => {
+        if (value === null || value === undefined) return '';
+        return String(value);
+      };
+
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.width;
     const pageHeight = pdf.internal.pageSize.height;
