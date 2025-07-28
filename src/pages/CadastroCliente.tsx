@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
+import SessionHeader from '@/components/SessionHeader';
 
 const formSchema = z.object({
   nome: z.string().min(2, 'Nome é obrigatório'),
