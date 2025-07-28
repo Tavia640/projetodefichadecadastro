@@ -1027,10 +1027,17 @@ const FichaNegociacao = () => {
     }
   };
 
-  // Função simples para enviar PDFs por email
-  const enviarPDFsPorEmail = async () => {
+  // Função para enviar ficha para administradores
+  const enviarFichaParaAdmins = () => {
     try {
-      setMensagemStatus('📨 Enviando PDFs por email...');
+      setMensagemStatus('📨 Enviando ficha para administradores...');
+
+      // Verificar se é consultor
+      const usuario = AuthService.getUsuarioLogado();
+      if (!usuario || usuario.tipo !== 'consultor') {
+        alert('Apenas consultores podem enviar fichas.');
+        return;
+      }
 
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
@@ -1049,29 +1056,33 @@ const FichaNegociacao = () => {
         informacoesPagamento
       };
 
-      // Enviar via sistema simples
-      const resultado = await EmailSimples.enviarPDFs(dadosCliente, dadosNegociacao);
-
-      if (resultado.sucesso) {
-        setMensagemStatus(`✅ ${resultado.mensagem}`);
-        alert(`✅ Sucesso!\n\n${resultado.mensagem}\n\nID: ${resultado.detalhes || 'N/A'}`);
-      } else {
-        setMensagemStatus(`❌ ${resultado.mensagem}`);
-
-        // Oferecer download como alternativa
-        const baixarAlternativa = window.confirm(
-          `❌ Falha no envio por email:\n\n${resultado.mensagem}\n\n` +
-          `Deseja baixar os PDFs para envio manual?`
-        );
-
-        if (baixarAlternativa) {
-          baixarPDFs();
-        }
+      // Validar dados obrigatórios
+      if (!dadosCliente.nome) {
+        alert('Nome do cliente é obrigatório.');
+        return;
       }
+
+      if (!tipoVenda) {
+        alert('Tipo de venda é obrigatório.');
+        return;
+      }
+
+      // Enviar ficha para os administradores
+      const fichaId = AuthService.enviarFicha(dadosCliente, dadosNegociacao);
+
+      setMensagemStatus('✅ Ficha enviada com sucesso para os administradores!');
+
+      alert(`✅ Ficha enviada com sucesso!\n\nID da Ficha: ${fichaId}\n\nOs administradores foram notificados e poderão aceitar sua ficha.\n\nVocê pode acompanhar o status no seu dashboard.`);
+
+      // Redirecionar para o dashboard após 2 segundos
+      setTimeout(() => {
+        navigate('/dashboard-consultor');
+      }, 2000);
 
     } catch (error: any) {
       console.error('❌ Erro:', error);
       setMensagemStatus(`❌ Erro: ${error.message}`);
+      alert(`❌ Erro ao enviar ficha: ${error.message}`);
     }
   };
 
@@ -1105,7 +1116,7 @@ const FichaNegociacao = () => {
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
-        alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
+        alert('Dados do cliente n��o encontrados. Volte ao cadastro do cliente.');
         return;
       }
 
