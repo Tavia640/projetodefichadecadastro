@@ -350,7 +350,7 @@ const AdminDashboard = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {fichas.map((ficha, index) => (
+                {getFichasFiltradas().map((ficha, index) => (
                   <div key={ficha.id} className="border rounded-lg p-4 hover:bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
