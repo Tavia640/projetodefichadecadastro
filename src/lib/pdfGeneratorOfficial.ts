@@ -194,16 +194,16 @@ export class PDFGeneratorOfficial {
       pdf.text(campo.label, margin + 2, currentY + 6);
       pdf.setFont('helvetica', 'normal');
       pdf.text(campo.valor || '', margin + 30, currentY + 6);
-      nextLine(1.7);
+      nextLine(1.4);
     });
 
-    nextLine();
+    nextLine(0.5);
 
     // ENDEREÇO
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
     pdf.text('ENDEREÇO:', margin, currentY);
-    nextLine(2);
+    nextLine(1.5);
 
     // Logradouro e Número
     const logradouroWidth = tableWidth * 0.7;
