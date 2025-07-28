@@ -160,7 +160,7 @@ const FichaNegociacao = () => {
 
   // Função para auditoria de valores
   const realizarAuditoriaValores = (): { valida: boolean; detalhes: string } => {
-    const contratoAtivo = contratos.find(c => c.empreendimento && c.valor);
+    const contratoAtivo = contratos.find(c => c.empreendimentoId && c.valor);
     if (!contratoAtivo) {
       return { valida: false, detalhes: 'Nenhum contrato válido encontrado' };
     }
