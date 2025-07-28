@@ -63,72 +63,81 @@ export interface DadosNegociacao {
 }
 
 export class PDFGenerator {
+  // Função auxiliar para buscar nome do empreendimento
+  private static getNomeEmpreendimento(empreendimentoId: string): string {
+    try {
+      const empreendimentosData = localStorage.getItem('empreendimentos_cache');
+      if (empreendimentosData) {
+        const empreendimentos = JSON.parse(empreendimentosData);
+        const emp = empreendimentos.find((e: any) => e.id === empreendimentoId);
+        return emp ? emp.nome : empreendimentoId;
+      }
+    } catch (error) {
+      console.warn('Erro ao buscar nome do empreendimento:', error);
+    }
+    return empreendimentoId;
+  }
+
   // Função para criar cabeçalho padronizado
   private static createHeader(pdf: jsPDF, titulo: string, pagina: string) {
-    // Logo GAV
+    // Bordas do cabeçalho
+    pdf.setLineWidth(0.5);
+    
+    // Logo GAV (caixa esquerda)
+    pdf.rect(15, 15, 40, 20);
     pdf.setFillColor(41, 128, 185);
-    pdf.rect(15, 15, 40, 15, 'F');
+    pdf.rect(15, 15, 40, 20, 'F');
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(16);
     pdf.setFont("helvetica", "bold");
     pdf.text("GAV", 30, 25);
     pdf.setFontSize(8);
-    pdf.text("RESORTS", 27, 28);
-
+    pdf.text("RESORTS", 27, 30);
+    
     // Reset cor do texto
     pdf.setTextColor(0, 0, 0);
-
-    // Título central
-    pdf.setFontSize(14);
-    pdf.setFont("helvetica", "bold");
-    pdf.text(titulo, 105, 20, { align: 'center' });
-
-    // Info lateral direita
-    pdf.rect(150, 15, 45, 15);
+    
+    // Caixa central com título
+    pdf.rect(55, 15, 95, 20);
     pdf.setFontSize(8);
     pdf.setFont("helvetica", "normal");
-    pdf.text("FORMULÁRIO", 170, 18, { align: 'center' });
-    pdf.text("Código:FOR.02.01.002", 152, 22);
-    pdf.text("Rev.: 24/07/2025-Ver.02", 152, 25);
+    pdf.text("FORMULÁRIO", 102, 20, { align: 'center' });
+    pdf.setFontSize(14);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(titulo, 102, 28, { align: 'center' });
+    
+    // Caixa direita com informações
+    pdf.rect(150, 15, 45, 20);
+    pdf.setFontSize(8);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("Código:FOR.02.01.002", 152, 20);
+    pdf.text("Rev.: 24/07/2025-Ver.02", 152, 24);
     pdf.text(pagina, 152, 28);
   }
 
-  // Função para criar campos de formulário
-  private static createFormField(
+  // Função para criar tabela com bordas
+  private static createTableCell(
     pdf: jsPDF,
-    label: string,
-    value: string,
+    text: string,
     x: number,
     y: number,
     width: number,
-    height: number = 6
+    height: number,
+    fontSize: number = 8,
+    bold: boolean = false
   ) {
-    // Campo
     pdf.rect(x, y, width, height);
+    pdf.setFontSize(fontSize);
+    pdf.setFont("helvetica", bold ? "bold" : "normal");
     
-    // Label
-    pdf.setFontSize(8);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(label + ":", x + 1, y - 1);
+    // Quebrar texto se for muito longo
+    const lines = pdf.splitTextToSize(text, width - 2);
+    const lineHeight = fontSize * 0.35;
+    const startY = y + 3 + (fontSize * 0.3);
     
-    // Valor
-    if (value) {
-      pdf.setFontSize(9);
-      pdf.text(value, x + 1, y + 4);
+    for (let i = 0; i < lines.length && i < Math.floor(height / lineHeight); i++) {
+      pdf.text(lines[i], x + 1, startY + (i * lineHeight));
     }
-  }
-
-  // Função para criar seção com título
-  private static createSection(pdf: jsPDF, titulo: string, x: number, y: number, width: number) {
-    pdf.setFillColor(240, 240, 240);
-    pdf.rect(x, y, width, 6, 'F');
-    pdf.rect(x, y, width, 6);
-    
-    pdf.setFontSize(10);
-    pdf.setFont("helvetica", "bold");
-    pdf.text(titulo, x + 2, y + 4);
-    
-    return y + 8;
   }
 
   // Página 1: Cadastro de Cliente
@@ -152,92 +161,136 @@ export class PDFGenerator {
       let yPos = 45;
       
       // DADOS DO CLIENTE
-      yPos = this.createSection(pdf, 'DADOS DO CLIENTE:', 15, yPos, 180);
+      pdf.setFillColor(230, 230, 230);
+      pdf.rect(15, yPos, 180, 8, 'F');
+      pdf.rect(15, yPos, 180, 8);
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text('DADOS DO CLIENTE:', 17, yPos + 5);
+      yPos += 8;
+      
+      // Tabela dos dados do cliente
+      const rowHeight = 8;
       
       // Nome
-      this.createFormField(pdf, 'Nome', dadosCliente.nome || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'Nome:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.nome || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // CPF
-      this.createFormField(pdf, 'CPF', dadosCliente.cpf || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'CPF:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.cpf || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // RG, ÓRGÃO, UF
-      this.createFormField(pdf, 'RG', dadosCliente.rg || '', 15, yPos, 100, 8);
-      this.createFormField(pdf, 'ÓRGÃO', dadosCliente.orgaoEmissor || '', 120, yPos, 40, 8);
-      this.createFormField(pdf, 'UF', dadosCliente.estadoEmissor || '', 165, yPos, 30, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'RG:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.rg || '', 45, yPos, 90, rowHeight);
+      this.createTableCell(pdf, 'ÓRGÃO:', 135, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.orgaoEmissor || '', 165, yPos, 20, rowHeight);
+      this.createTableCell(pdf, 'UF:', 185, yPos, 10, rowHeight);
+      yPos += rowHeight;
       
       // Profissão
-      this.createFormField(pdf, 'Profissão', dadosCliente.profissao || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'Profissão:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.profissao || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // Estado Civil
-      this.createFormField(pdf, 'Estado Civil', dadosCliente.estadoCivil || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'Estado Civil:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.estadoCivil || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // E-mail
-      this.createFormField(pdf, 'E-mail', dadosCliente.email || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'E-mail:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.email || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // Telefone
-      this.createFormField(pdf, 'Telefone', dadosCliente.telefone || '', 15, yPos, 180, 8);
-      yPos += 18;
+      this.createTableCell(pdf, 'Telefone:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.telefone || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight + 5;
       
       // DADOS DO CÔNJUGE
-      yPos = this.createSection(pdf, 'DADOS DO CÔNJUGE:', 15, yPos, 180);
+      pdf.setFillColor(230, 230, 230);
+      pdf.rect(15, yPos, 180, 8, 'F');
+      pdf.rect(15, yPos, 180, 8);
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text('DADOS DO CÔNJUGE:', 17, yPos + 5);
+      yPos += 8;
       
       // Nome cônjuge
-      this.createFormField(pdf, 'Nome', dadosCliente.nomeConjuge || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'Nome:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.nomeConjuge || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // CPF cônjuge
-      this.createFormField(pdf, 'CPF', dadosCliente.cpfConjuge || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'CPF:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.cpfConjuge || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // RG, ÓRGÃO, UF cônjuge
-      this.createFormField(pdf, 'RG', dadosCliente.rgConjuge || '', 15, yPos, 100, 8);
-      this.createFormField(pdf, 'ÓRGÃO', dadosCliente.orgaoEmissorConjuge || '', 120, yPos, 40, 8);
-      this.createFormField(pdf, 'UF', dadosCliente.estadoEmissorConjuge || '', 165, yPos, 30, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'RG:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.rgConjuge || '', 45, yPos, 90, rowHeight);
+      this.createTableCell(pdf, 'ÓRGÃO:', 135, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.orgaoEmissorConjuge || '', 165, yPos, 20, rowHeight);
+      this.createTableCell(pdf, 'UF:', 185, yPos, 10, rowHeight);
+      yPos += rowHeight;
       
       // Profissão cônjuge
-      this.createFormField(pdf, 'Profissão', dadosCliente.profissaoConjuge || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'Profissão:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.profissaoConjuge || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // Estado Civil cônjuge
-      this.createFormField(pdf, 'Estado Civil', dadosCliente.estadoCivilConjuge || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'Estado Civil:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.estadoCivilConjuge || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // E-mail cônjuge
-      this.createFormField(pdf, 'E-mail', dadosCliente.emailConjuge || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'E-mail:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.emailConjuge || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // Telefone cônjuge
-      this.createFormField(pdf, 'Telefone', dadosCliente.telefoneConjuge || '', 15, yPos, 180, 8);
-      yPos += 18;
+      this.createTableCell(pdf, 'Telefone:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.telefoneConjuge || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight + 5;
       
       // ENDEREÇO
-      yPos = this.createSection(pdf, 'ENDEREÇO:', 15, yPos, 180);
+      pdf.setFillColor(230, 230, 230);
+      pdf.rect(15, yPos, 180, 8, 'F');
+      pdf.rect(15, yPos, 180, 8);
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text('ENDEREÇO:', 17, yPos + 5);
+      yPos += 8;
       
       // Logradouro e Nº
-      this.createFormField(pdf, 'Logradouro', dadosCliente.endereco || '', 15, yPos, 130, 8);
-      this.createFormField(pdf, 'Nº', dadosCliente.numeroResidencia || '', 150, yPos, 45, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'Logradouro:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.endereco || '', 45, yPos, 120, rowHeight);
+      this.createTableCell(pdf, 'Nº:', 165, yPos, 15, rowHeight);
+      this.createTableCell(pdf, dadosCliente.numeroResidencia || '', 180, yPos, 15, rowHeight);
+      yPos += rowHeight;
       
       // Bairro
-      this.createFormField(pdf, 'Bairro', dadosCliente.bairro || '', 15, yPos, 180, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'Bairro:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.bairro || '', 45, yPos, 150, rowHeight);
+      yPos += rowHeight;
       
       // Complemento e CEP
-      this.createFormField(pdf, 'Complemento', dadosCliente.complemento || '', 15, yPos, 100, 8);
-      this.createFormField(pdf, 'CEP', dadosCliente.cep || '', 120, yPos, 75, 8);
-      yPos += 12;
+      this.createTableCell(pdf, 'Complemento:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.complemento || '', 45, yPos, 90, rowHeight);
+      this.createTableCell(pdf, 'CEP:', 135, yPos, 20, rowHeight);
+      this.createTableCell(pdf, dadosCliente.cep || '', 155, yPos, 40, rowHeight);
+      yPos += rowHeight;
       
       // Cidade e UF
-      this.createFormField(pdf, 'Cidade', dadosCliente.cidade || '', 15, yPos, 130, 8);
-      this.createFormField(pdf, 'UF', dadosCliente.estado || '', 150, yPos, 45, 8);
-      yPos += 20;
+      this.createTableCell(pdf, 'Cidade:', 15, yPos, 30, rowHeight);
+      this.createTableCell(pdf, dadosCliente.cidade || '', 45, yPos, 120, rowHeight);
+      this.createTableCell(pdf, 'UF:', 165, yPos, 15, rowHeight);
+      this.createTableCell(pdf, dadosCliente.estado || '', 180, yPos, 15, rowHeight);
+      yPos += rowHeight + 10;
       
       // SALA DE VENDAS
       pdf.setFontSize(9);
@@ -245,41 +298,44 @@ export class PDFGenerator {
       pdf.text('SALA DE VENDAS:', 15, yPos);
       
       // Checkbox BEEBACK
-      pdf.rect(130, yPos - 4, 3, 3);
-      pdf.text('☑', 131, yPos - 1);
-      pdf.text('BEEBACK', 140, yPos);
+      pdf.rect(160, yPos - 4, 4, 4);
+      pdf.text('☑', 161, yPos - 1);
+      pdf.text('BEEBACK', 170, yPos);
       yPos += 12;
       
-      // LINER
-      pdf.text('LINER: ________________________________________________________________________________', 15, yPos);
+      // Linhas para preenchimento manual
+      const lineLength = 170;
+      
+      pdf.text('LINER:', 15, yPos);
+      pdf.line(35, yPos, 35 + lineLength, yPos);
       yPos += 8;
       
-      // EMPRESA (Liner)
-      pdf.text('EMPRESA (Liner): _______________________________________________________________________', 15, yPos);
+      pdf.text('EMPRESA (Liner):', 15, yPos);
+      pdf.line(55, yPos, 55 + lineLength - 20, yPos);
       yPos += 8;
       
-      // CLOSER
-      pdf.text('CLOSER: _______________________________________________________________________________', 15, yPos);
+      pdf.text('CLOSER:', 15, yPos);
+      pdf.line(40, yPos, 40 + lineLength, yPos);
       yPos += 8;
       
-      // EMPRESA (Closer)
-      pdf.text('EMPRESA (Closer): ______________________________________________________________________', 15, yPos);
+      pdf.text('EMPRESA (Closer):', 15, yPos);
+      pdf.line(60, yPos, 60 + lineLength - 25, yPos);
       yPos += 8;
       
-      // PEP
-      pdf.text('PEP:__________________________________________________________________________________', 15, yPos);
+      pdf.text('PEP:', 15, yPos);
+      pdf.line(30, yPos, 30 + lineLength, yPos);
       yPos += 8;
       
-      // EMPRESA (PEP)
-      pdf.text('EMPRESA (PEP): ________________________________________________________________________', 15, yPos);
+      pdf.text('EMPRESA (PEP):', 15, yPos);
+      pdf.line(55, yPos, 55 + lineLength - 20, yPos);
       yPos += 8;
       
-      // LIDER DE SALA
-      pdf.text('LIDER DE SALA: ________________________________________________________________________', 15, yPos);
+      pdf.text('LIDER DE SALA:', 15, yPos);
+      pdf.line(50, yPos, 50 + lineLength - 15, yPos);
       yPos += 8;
       
-      // SUB LIDER DE SALA
-      pdf.text('SUB LIDER DE SALA: ____________________________________________________________________', 15, yPos);
+      pdf.text('SUB LIDER DE SALA:', 15, yPos);
+      pdf.line(65, yPos, 65 + lineLength - 30, yPos);
       
       return pdf;
       
@@ -329,7 +385,7 @@ export class PDFGenerator {
       // SALA DE VENDAS
       pdf.setFont("helvetica", "bold");
       pdf.text('SALA DE VENDAS:', 15, yPos);
-      pdf.line(50, yPos, 195, yPos);
+      pdf.line(55, yPos, 195, yPos);
       yPos += 12;
       
       // Tipos de venda (checkboxes)
@@ -352,12 +408,40 @@ export class PDFGenerator {
         }
         pdf.text(')', xPos + 3, yPos);
         pdf.text(tipo.label, xPos + 7, yPos);
-        xPos += tipo.label.length * 2 + 15;
+        xPos += tipo.label.length * 2.5 + 15;
       });
       yPos += 15;
       
       // Tabela: Tipo de Parcela Paga em Sala
-      this.createTableNegociacao(pdf, yPos, dadosNegociacao);
+      this.createParcelasPagasTable(pdf, yPos, dadosNegociacao);
+      yPos += 40;
+      
+      // Primeira tabela de contratos
+      this.createContratosTable(pdf, yPos, dadosNegociacao, 0);
+      yPos += 50;
+      
+      // Texto explicativo
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "normal");
+      pdf.text('O financeiro descrito abaixo é referente a cada unidade separadamente.', 15, yPos);
+      yPos += 10;
+      
+      // Primeira tabela financeira
+      this.createFinanceiroTable(pdf, yPos, dadosNegociacao);
+      yPos += 50;
+      
+      // Segunda tabela de contratos
+      this.createContratosTable(pdf, yPos, dadosNegociacao, 4);
+      yPos += 50;
+      
+      // Texto explicativo novamente
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "normal");
+      pdf.text('O financeiro descrito abaixo é referente a cada unidade separadamente.', 15, yPos);
+      yPos += 10;
+      
+      // Segunda tabela financeira
+      this.createFinanceiroTable(pdf, yPos, dadosNegociacao);
       
       return pdf;
       
@@ -367,219 +451,126 @@ export class PDFGenerator {
     }
   }
 
-  private static createTableNegociacao(pdf: jsPDF, yPos: number, dadosNegociacao: DadosNegociacao) {
-    // Cabeçalho da tabela de parcelas
-    pdf.setFillColor(200, 200, 200);
-    pdf.setFontSize(8);
-    pdf.setFont("helvetica", "bold");
+  private static createParcelasPagasTable(pdf: jsPDF, yPos: number, dadosNegociacao: DadosNegociacao) {
+    // Cabeçalho da tabela
+    const headers = ['Tipo de Parcela Paga\nem Sala', 'Valor Total Pago em\nSala', 'Quantidade de\ncotas', 'Valor distribuído para\ncada Unidade', 'Forma de Pagamento'];
+    const widths = [45, 35, 30, 40, 40];
     
-    // Primeira linha do cabeçalho
-    pdf.rect(15, yPos, 180, 8, 'F');
-    pdf.rect(15, yPos, 180, 8);
+    // Cabeçalho
+    let xPos = 15;
+    pdf.setFillColor(230, 230, 230);
+    headers.forEach((header, index) => {
+      pdf.rect(xPos, yPos, widths[index], 12, 'F');
+      pdf.rect(xPos, yPos, widths[index], 12);
+      this.createTableCell(pdf, header, xPos, yPos, widths[index], 12, 8, true);
+      xPos += widths[index];
+    });
     
-    // Colunas
-    const col1 = 40; // Tipo de Parcela Paga em Sala
-    const col2 = 35; // Valor Total Pago em Sala  
-    const col3 = 30; // Quantidade de cotas
-    const col4 = 40; // Valor distribuído para cada Unidade
-    const col5 = 35; // Forma de Pagamento
+    yPos += 12;
     
-    // Linhas divisórias verticais
-    pdf.line(15 + col1, yPos, 15 + col1, yPos + 8);
-    pdf.line(15 + col1 + col2, yPos, 15 + col1 + col2, yPos + 8);
-    pdf.line(15 + col1 + col2 + col3, yPos, 15 + col1 + col2 + col3, yPos + 8);
-    pdf.line(15 + col1 + col2 + col3 + col4, yPos, 15 + col1 + col2 + col3 + col4, yPos + 8);
-    
-    // Textos do cabeçalho
-    pdf.text('Tipo de Parcela Paga', 17, yPos + 3);
-    pdf.text('em Sala', 17, yPos + 6);
-    
-    pdf.text('Valor Total Pago em', 15 + col1 + 2, yPos + 3);
-    pdf.text('Sala', 15 + col1 + 2, yPos + 6);
-    
-    pdf.text('Quantidade de', 15 + col1 + col2 + 2, yPos + 3);
-    pdf.text('cotas', 15 + col1 + col2 + 2, yPos + 6);
-    
-    pdf.text('Valor distribuído para', 15 + col1 + col2 + col3 + 2, yPos + 3);
-    pdf.text('cada Unidade', 15 + col1 + col2 + col3 + 2, yPos + 6);
-    
-    pdf.text('Forma de Pagamento', 15 + col1 + col2 + col3 + col4 + 2, yPos + 3);
-    
-    yPos += 8;
-    
-    // Linhas de dados (3 linhas com checkboxes)
+    // Linhas de dados
     const opcoes = ['( ) Entrada', '( ) Sinal', '( ) Saldo'];
     
     for (let i = 0; i < 3; i++) {
-      pdf.setFont("helvetica", "normal");
-      pdf.rect(15, yPos, 180, 8);
-      
-      // Linhas divisórias verticais
-      pdf.line(15 + col1, yPos, 15 + col1, yPos + 8);
-      pdf.line(15 + col1 + col2, yPos, 15 + col1 + col2, yPos + 8);
-      pdf.line(15 + col1 + col2 + col3, yPos, 15 + col1 + col2 + col3, yPos + 8);
-      pdf.line(15 + col1 + col2 + col3 + col4, yPos, 15 + col1 + col2 + col3 + col4, yPos + 8);
+      xPos = 15;
       
       // Primeira coluna com checkboxes
-      pdf.text(opcoes[i], 17, yPos + 5);
+      this.createTableCell(pdf, opcoes[i], xPos, yPos, widths[0], 8);
+      xPos += widths[0];
       
       // Dados das parcelas se existirem
       const parcela = dadosNegociacao.parcelasPagasSala[i];
-      if (parcela) {
-        pdf.text(parcela.valorTotal || '', 15 + col1 + 2, yPos + 5);
-        pdf.text(parcela.quantidadeCotas || '', 15 + col1 + col2 + 2, yPos + 5);
-        pdf.text(parcela.valorDistribuido || '', 15 + col1 + col2 + col3 + 2, yPos + 5);
-        pdf.text(parcela.formasPagamento[0] || '', 15 + col1 + col2 + col3 + col4 + 2, yPos + 5);
-      }
+      
+      this.createTableCell(pdf, parcela?.valorTotal || '', xPos, yPos, widths[1], 8);
+      xPos += widths[1];
+      
+      this.createTableCell(pdf, parcela?.quantidadeCotas || '', xPos, yPos, widths[2], 8);
+      xPos += widths[2];
+      
+      this.createTableCell(pdf, parcela?.valorDistribuido || '', xPos, yPos, widths[3], 8);
+      xPos += widths[3];
+      
+      this.createTableCell(pdf, parcela?.formasPagamento?.[0] || '', xPos, yPos, widths[4], 8);
       
       yPos += 8;
     }
-    
-    yPos += 10;
-    
-    // Tabela de Contratos
-    this.createContractTable(pdf, yPos, dadosNegociacao);
   }
 
-  private static createContractTable(pdf: jsPDF, yPos: number, dadosNegociacao: DadosNegociacao) {
+  private static createContratosTable(pdf: jsPDF, yPos: number, dadosNegociacao: DadosNegociacao, startIndex: number) {
     // Cabeçalho da tabela de contratos
-    pdf.setFillColor(200, 200, 200);
-    pdf.setFontSize(8);
-    pdf.setFont("helvetica", "bold");
-    
-    pdf.rect(15, yPos, 180, 8, 'F');
-    pdf.rect(15, yPos, 180, 8);
-    
-    // Definir larguras das colunas
-    const colWidths = [20, 35, 25, 15, 15, 25, 15, 30];
-    let xPos = 15;
-    
     const headers = ['Contrato', 'Empreendimento', 'Torre/Bloco', 'Apt.', 'Cota', 'Vista da UH.', 'PCD', 'Valor'];
+    const widths = [22, 35, 25, 15, 15, 25, 15, 38];
     
-    // Linhas divisórias e textos
+    // Cabeçalho
+    let xPos = 15;
+    pdf.setFillColor(230, 230, 230);
     headers.forEach((header, index) => {
-      if (index > 0) {
-        pdf.line(xPos, yPos, xPos, yPos + 8);
-      }
-      pdf.text(header, xPos + 2, yPos + 5);
-      xPos += colWidths[index];
+      pdf.rect(xPos, yPos, widths[index], 8, 'F');
+      pdf.rect(xPos, yPos, widths[index], 8);
+      this.createTableCell(pdf, header, xPos, yPos, widths[index], 8, 8, true);
+      xPos += widths[index];
     });
     
     yPos += 8;
     
     // 4 linhas de contratos
     for (let i = 0; i < 4; i++) {
-      pdf.setFont("helvetica", "normal");
-      pdf.rect(15, yPos, 180, 10);
-      
       xPos = 15;
+      const contratoIndex = startIndex + i;
       
-      // Primeira coluna com checkboxes
-      pdf.text('( ) Físico', xPos + 2, yPos + 4);
-      pdf.text('( ) Digital', xPos + 2, yPos + 8);
-      xPos += colWidths[0];
+      // Contrato (Físico/Digital)
+      this.createTableCell(pdf, '( ) Físico\n( ) Digital', xPos, yPos, widths[0], 10);
+      xPos += widths[0];
       
-      // Linha divisória
-      pdf.line(xPos, yPos, xPos, yPos + 10);
-      
-      // Empreendimento - buscar nome do empreendimento pelo ID
-      const contrato = dadosNegociacao.contratos[i];
+      // Empreendimento
+      const contrato = dadosNegociacao.contratos[contratoIndex];
+      let nomeEmpreendimento = '';
       if (contrato) {
-        // Se empreendimento for um ID, buscar o nome no localStorage dos empreendimentos
-        let nomeEmpreendimento = contrato.empreendimento || '';
-
-        // Tentar buscar dados dos empreendimentos do localStorage
-        try {
-          const empreendimentosData = localStorage.getItem('empreendimentos_cache');
-          if (empreendimentosData) {
-            const empreendimentos = JSON.parse(empreendimentosData);
-            const emp = empreendimentos.find((e: any) => e.id === contrato.empreendimento);
-            if (emp) {
-              nomeEmpreendimento = emp.nome;
-            }
-          }
-        } catch (error) {
-          console.warn('Erro ao buscar nome do empreendimento:', error);
-        }
-
-        pdf.text(nomeEmpreendimento, xPos + 2, yPos + 6);
+        nomeEmpreendimento = this.getNomeEmpreendimento(contrato.empreendimento);
       }
-      xPos += colWidths[1];
+      this.createTableCell(pdf, nomeEmpreendimento, xPos, yPos, widths[1], 10);
+      xPos += widths[1];
       
       // Torre/Bloco
-      pdf.line(xPos, yPos, xPos, yPos + 10);
-      if (contrato) {
-        pdf.text(contrato.torre || '', xPos + 2, yPos + 6);
-      }
-      xPos += colWidths[2];
+      this.createTableCell(pdf, contrato?.torre || '', xPos, yPos, widths[2], 10);
+      xPos += widths[2];
       
       // Apt.
-      pdf.line(xPos, yPos, xPos, yPos + 10);
-      if (contrato) {
-        pdf.text(contrato.apartamento || '', xPos + 2, yPos + 6);
-      }
-      xPos += colWidths[3];
+      this.createTableCell(pdf, contrato?.apartamento || '', xPos, yPos, widths[3], 10);
+      xPos += widths[3];
       
       // Cota
-      pdf.line(xPos, yPos, xPos, yPos + 10);
-      if (contrato) {
-        pdf.text(contrato.cota || '', xPos + 2, yPos + 6);
-      }
-      xPos += colWidths[4];
+      this.createTableCell(pdf, contrato?.cota || '', xPos, yPos, widths[4], 10);
+      xPos += widths[4];
       
       // Vista da UH
-      pdf.line(xPos, yPos, xPos, yPos + 10);
-      pdf.text('( ) Sim', xPos + 2, yPos + 4);
-      pdf.text('( ) Não', xPos + 2, yPos + 8);
-      xPos += colWidths[5];
+      this.createTableCell(pdf, '( ) Sim\n( ) Não', xPos, yPos, widths[5], 10);
+      xPos += widths[5];
       
       // PCD
-      pdf.line(xPos, yPos, xPos, yPos + 10);
-      pdf.text('( ) Sim', xPos + 2, yPos + 4);
-      pdf.text('( ) Não', xPos + 2, yPos + 8);
-      xPos += colWidths[6];
+      this.createTableCell(pdf, '( ) Sim\n( ) Não', xPos, yPos, widths[6], 10);
+      xPos += widths[6];
       
       // Valor
-      pdf.line(xPos, yPos, xPos, yPos + 10);
-      if (contrato) {
-        pdf.text(contrato.valor || '', xPos + 2, yPos + 6);
-      }
+      this.createTableCell(pdf, contrato?.valor || '', xPos, yPos, widths[7], 10);
       
       yPos += 10;
     }
-    
-    yPos += 5;
-    
-    // Texto explicativo
-    pdf.setFontSize(8);
-    pdf.setFont("helvetica", "normal");
-    pdf.text('O financeiro descrito abaixo é referente a cada unidade separadamente.', 15, yPos);
-    yPos += 10;
-    
-    // Tabela de informações financeiras
-    this.createPaymentTable(pdf, yPos, dadosNegociacao);
   }
 
-  private static createPaymentTable(pdf: jsPDF, yPos: number, dadosNegociacao: DadosNegociacao) {
-    // Cabeçalho da tabela de pagamentos
-    pdf.setFillColor(200, 200, 200);
-    pdf.setFontSize(8);
-    pdf.setFont("helvetica", "bold");
+  private static createFinanceiroTable(pdf: jsPDF, yPos: number, dadosNegociacao: DadosNegociacao) {
+    // Cabeçalho da tabela financeira
+    const headers = ['Tipo', 'Total', 'Qtd. Parcelas', 'Valor Parcela', 'Forma de\nPag.', '1º Vencimento'];
+    const widths = [25, 25, 25, 25, 25, 35];
     
-    pdf.rect(15, yPos, 180, 8, 'F');
-    pdf.rect(15, yPos, 180, 8);
-    
-    const colWidths = [30, 30, 25, 25, 35, 35];
+    // Cabeçalho
     let xPos = 15;
-    
-    const headers = ['Tipo', 'Total', 'Qtd. Parcelas', 'Valor Parcela', 'Forma de Pag.', '1º Vencimento'];
-    
+    pdf.setFillColor(230, 230, 230);
     headers.forEach((header, index) => {
-      if (index > 0) {
-        pdf.line(xPos, yPos, xPos, yPos + 8);
-      }
-      pdf.text(header, xPos + 2, yPos + 5);
-      xPos += colWidths[index];
+      pdf.rect(xPos, yPos, widths[index], 8, 'F');
+      pdf.rect(xPos, yPos, widths[index], 8);
+      this.createTableCell(pdf, header, xPos, yPos, widths[index], 8, 8, true);
+      xPos += widths[index];
     });
     
     yPos += 8;
@@ -587,24 +578,12 @@ export class PDFGenerator {
     // 5 linhas fixas de pagamento
     const tiposPagamento = ['Entrada', 'Entrada', 'Entrada Restante', 'Sinal', 'Saldo'];
     
-    tiposPagamento.forEach((tipo, index) => {
-      pdf.setFont("helvetica", "normal");
-      pdf.rect(15, yPos, 180, 8);
-      
+    tiposPagamento.forEach((tipo) => {
       xPos = 15;
       
-      // Linhas divisórias verticais
-      colWidths.forEach((width, colIndex) => {
-        if (colIndex > 0) {
-          pdf.line(xPos, yPos, xPos, yPos + 8);
-        }
-        xPos += width;
-      });
-      
-      // Dados
-      xPos = 15;
-      pdf.text(tipo, xPos + 2, yPos + 5);
-      xPos += colWidths[0];
+      // Tipo
+      this.createTableCell(pdf, tipo, xPos, yPos, widths[0], 8);
+      xPos += widths[0];
       
       // Buscar dados correspondentes
       const infoPagamento = dadosNegociacao.informacoesPagamento.find(info => 
@@ -612,23 +591,26 @@ export class PDFGenerator {
         (tipo === 'Entrada Restante' && info.tipo.includes('Restante'))
       );
       
-      if (infoPagamento) {
-        pdf.text(infoPagamento.total || '', xPos + 2, yPos + 5);
-        xPos += colWidths[1];
-        
-        pdf.text(infoPagamento.qtdParcelas || '', xPos + 2, yPos + 5);
-        xPos += colWidths[2];
-        
-        pdf.text(infoPagamento.valorParcela || '', xPos + 2, yPos + 5);
-        xPos += colWidths[3];
-        
-        pdf.text(infoPagamento.formaPagamento || '', xPos + 2, yPos + 5);
-        xPos += colWidths[4];
-        
-        const dataVenc = infoPagamento.primeiroVencimento ? 
-          new Date(infoPagamento.primeiroVencimento).toLocaleDateString('pt-BR') : '';
-        pdf.text(dataVenc, xPos + 2, yPos + 5);
-      }
+      // Total
+      this.createTableCell(pdf, infoPagamento?.total || '', xPos, yPos, widths[1], 8);
+      xPos += widths[1];
+      
+      // Qtd. Parcelas
+      this.createTableCell(pdf, infoPagamento?.qtdParcelas || '', xPos, yPos, widths[2], 8);
+      xPos += widths[2];
+      
+      // Valor Parcela
+      this.createTableCell(pdf, infoPagamento?.valorParcela || '', xPos, yPos, widths[3], 8);
+      xPos += widths[3];
+      
+      // Forma de Pag.
+      this.createTableCell(pdf, infoPagamento?.formaPagamento || '', xPos, yPos, widths[4], 8);
+      xPos += widths[4];
+      
+      // 1º Vencimento
+      const dataVenc = infoPagamento?.primeiroVencimento ? 
+        new Date(infoPagamento.primeiroVencimento).toLocaleDateString('pt-BR') : '';
+      this.createTableCell(pdf, dataVenc, xPos, yPos, widths[5], 8);
       
       yPos += 8;
     });
