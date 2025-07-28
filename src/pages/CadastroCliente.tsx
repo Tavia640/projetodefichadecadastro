@@ -64,6 +64,13 @@ const CadastroCliente = () => {
       profissao: '',
       dataNascimento: '',
       estadoCivil: '',
+      logradouro: '',
+      numero: '',
+      bairro: '',
+      complemento: '',
+      cep: '',
+      cidade: '',
+      estado: '',
     },
   });
 
