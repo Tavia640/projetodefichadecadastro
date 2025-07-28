@@ -573,7 +573,7 @@ const FichaNegociacao = () => {
 
   const salvarFicha = async () => {
     try {
-      console.log('🚀 Iniciando processo de salvamento e envio via EmailJS...');
+      console.log('🚀 Iniciando processo de salvamento...');
 
       // Verificar se há alertas críticos (apenas erros, não avisos)
       const alertasCriticos = Object.values(alertas).filter(alerta =>
@@ -608,21 +608,17 @@ const FichaNegociacao = () => {
         informacoesPagamento
       };
 
-      console.log('📧 Enviando ficha via EmailJS...');
+      // Obter nome do consultor da sessão
+      const session = SessionService.getSession();
+      const nomeConsultor = session?.nome || 'Consultor não identificado';
 
-      // Enviar ficha via EmailJS (substitui o antigo sistema Resend)
-      const resultado = await EmailJsService.enviarFichaPorEmail({
-        clientData: dadosCliente,
-        fichaData: dadosNegociacao
-      });
+      console.log('💾 Salvando ficha para administração...');
 
-      if (resultado.success) {
-        console.log('✅ Processo concluído com sucesso!');
-        alert(`✅ Ficha salva e enviada com sucesso!\n\n${resultado.message}`);
-      } else {
-        console.error('❌ Falha no envio:', resultado.message);
-        alert(`❌ Erro no envio: ${resultado.message}`);
-      }
+      // Salvar ficha para os administradores
+      const fichaId = FichaStorageService.salvarFicha(dadosCliente, dadosNegociacao, nomeConsultor);
+
+      console.log('✅ Processo concluído com sucesso!');
+      alert(`✅ Ficha salva com sucesso!\n\nID da Ficha: ${fichaId}\n\nA ficha foi enviada para a administração e estará disponível para impressão.`);
 
     } catch (error: any) {
       console.error('❌ Erro no processo de salvamento:', error);
