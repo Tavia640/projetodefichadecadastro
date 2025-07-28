@@ -10,7 +10,8 @@ import { Plus, Trash2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
-import { EmailService } from '@/lib/emailService';
+import { FichaService } from '@/lib/fichaService';
+import { AuthService } from '@/lib/authService';
 
 interface ParcelaPagaSala {
   id: string;
@@ -569,33 +570,37 @@ const FichaNegociacao = () => {
     ]);
   };
 
-  const salvarFicha = async () => {
+  const enviarFicha = async () => {
     try {
-      console.log('🚀 Iniciando processo de salvamento e envio...');
-      
       // Verificar se há alertas críticos (apenas erros, não avisos)
-      const alertasCriticos = Object.values(alertas).filter(alerta => 
+      const alertasCriticos = Object.values(alertas).filter(alerta =>
         alerta.includes('ERRO') && !alerta.includes('AVISO')
       );
-      
+
       if (alertasCriticos.length > 0) {
         console.warn('⚠️ Alertas encontrados:', alertasCriticos);
-        // Mostrar alerta mas permitir continuar se for apenas aviso
         if (alertasCriticos.some(alerta => alerta.includes('CRÍTICO'))) {
-          alert('Não é possível salvar devido a erros críticos. Verifique os campos obrigatórios.');
+          alert('Não é possível enviar devido a erros críticos. Verifique os campos obrigatórios.');
           return;
         }
       }
-      
+
+      // Verificar se o usuário está logado como consultor
+      const usuario = AuthService.getUsuarioLogado();
+      if (!usuario || usuario.tipo !== 'consultor') {
+        alert('Apenas consultores podem enviar fichas.');
+        return;
+      }
+
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
         alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
         return;
       }
-      
+
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
-      
+
       // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
@@ -605,38 +610,19 @@ const FichaNegociacao = () => {
         contratos,
         informacoesPagamento
       };
-      
-      console.log('📄 Gerando PDFs...');
-      
-      // Gerar PDFs usando a nova biblioteca
-      const pdfCadastro = PDFGenerator.gerarPDFCadastroCliente(dadosCliente);
-      const pdfNegociacao = PDFGenerator.gerarPDFNegociacao(dadosCliente, dadosNegociacao);
-      
-      // Extrair base64 dos PDFs
-      const pdfData1 = pdfCadastro.startsWith('data:') ? pdfCadastro.split(',')[1] : pdfCadastro;
-      const pdfData2 = pdfNegociacao.startsWith('data:') ? pdfNegociacao.split(',')[1] : pdfNegociacao;
-      
-      console.log('📧 Enviando PDFs por email...');
-      
-      // Enviar PDFs usando o novo serviço
-      const resultado = await EmailService.enviarPDFs({
-        clientData: dadosCliente,
-        fichaData: dadosNegociacao,
-        pdfData1,
-        pdfData2
-      });
-      
-      if (resultado.success) {
-        console.log('✅ Processo concluído com sucesso!');
-        alert(`✅ Ficha salva e PDFs enviados com sucesso!\n\n${resultado.message}`);
-      } else {
-        console.error('❌ Falha no envio:', resultado.message);
-        alert(`❌ Erro no envio: ${resultado.message}\n\nOs PDFs foram gerados mas não puderam ser enviados.`);
-      }
-      
+
+      // Enviar ficha para os administradores
+      const fichaId = FichaService.enviarFicha(dadosCliente, dadosNegociacao, usuario.nome);
+
+      alert('✅ Ficha enviada com sucesso para os administradores!');
+      console.log('✅ Ficha enviada com ID:', fichaId);
+
+      // Limpar formulário após envio
+      limparFicha();
+
     } catch (error: any) {
-      console.error('❌ Erro no processo de salvamento:', error);
-      alert(`❌ Erro ao processar a ficha: ${error.message || 'Erro desconhecido'}`);
+      console.error('❌ Erro ao enviar ficha:', error);
+      alert(`❌ Erro ao enviar ficha: ${error.message || 'Erro desconhecido'}`);
     }
   };
 
@@ -1407,8 +1393,8 @@ const FichaNegociacao = () => {
               </svg>
               Imprimir PDFs
             </Button>
-            <Button 
-              onClick={salvarFicha}
+            <Button
+              onClick={enviarFicha}
               className="flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1418,7 +1404,7 @@ const FichaNegociacao = () => {
                 <line x1="16" y1="17" x2="8" y2="17"/>
                 <polyline points="10,9 9,9 8,9"/>
               </svg>
-              Salvar e Enviar PDFs
+              Enviar para Administradores
             </Button>
           </div>
         </CardContent>
