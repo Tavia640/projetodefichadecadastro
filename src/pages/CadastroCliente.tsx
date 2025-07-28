@@ -28,7 +28,7 @@ const formSchema = z.object({
   // Campos de endereço
   logradouro: z.string().min(2, 'Logradouro é obrigatório'),
   numero: z.string().min(1, 'Número é obrigatório'),
-  bairro: z.string().min(2, 'Bairro é obrigatório'),
+  bairro: z.string().min(2, 'Bairro �� obrigatório'),
   complemento: z.string().optional(),
   cep: z.string().min(8, 'CEP é obrigatório'),
   cidade: z.string().min(2, 'Cidade é obrigatória'),
@@ -278,6 +278,152 @@ const CadastroCliente = () => {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Seção de Endereço */}
+              <div className="space-y-4 border-t pt-6">
+                <h3 className="text-lg font-semibold">Endereço</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="logradouro"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Logradouro</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Rua, Avenida, etc." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="numero"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Número</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Nº" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="bairro"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bairro</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="cep"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CEP</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="00000-000" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="complemento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Complemento</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Apartamento, casa, etc. (opcional)" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="cidade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="estado"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>UF</FormLabel>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o estado" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="AC">AC</SelectItem>
+                              <SelectItem value="AL">AL</SelectItem>
+                              <SelectItem value="AP">AP</SelectItem>
+                              <SelectItem value="AM">AM</SelectItem>
+                              <SelectItem value="BA">BA</SelectItem>
+                              <SelectItem value="CE">CE</SelectItem>
+                              <SelectItem value="DF">DF</SelectItem>
+                              <SelectItem value="ES">ES</SelectItem>
+                              <SelectItem value="GO">GO</SelectItem>
+                              <SelectItem value="MA">MA</SelectItem>
+                              <SelectItem value="MT">MT</SelectItem>
+                              <SelectItem value="MS">MS</SelectItem>
+                              <SelectItem value="MG">MG</SelectItem>
+                              <SelectItem value="PA">PA</SelectItem>
+                              <SelectItem value="PB">PB</SelectItem>
+                              <SelectItem value="PR">PR</SelectItem>
+                              <SelectItem value="PE">PE</SelectItem>
+                              <SelectItem value="PI">PI</SelectItem>
+                              <SelectItem value="RJ">RJ</SelectItem>
+                              <SelectItem value="RN">RN</SelectItem>
+                              <SelectItem value="RS">RS</SelectItem>
+                              <SelectItem value="RO">RO</SelectItem>
+                              <SelectItem value="RR">RR</SelectItem>
+                              <SelectItem value="SC">SC</SelectItem>
+                              <SelectItem value="SP">SP</SelectItem>
+                              <SelectItem value="SE">SE</SelectItem>
+                              <SelectItem value="TO">TO</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
