@@ -304,7 +304,7 @@ const FichaNegociacao = () => {
 
   // Função para recalcular restante da entrada
   const recalcularRestanteEntrada = (informacoes: InformacaoPagamento[]) => {
-    const contratoAtivo = contratos.find(c => c.empreendimento);
+    const contratoAtivo = contratos.find(c => c.empreendimentoId);
     if (!contratoAtivo) return informacoes;
 
     const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
@@ -680,7 +680,7 @@ const FichaNegociacao = () => {
       }
 
     } catch (error: any) {
-      console.error('❌ Erro no processo de envio:', error);
+      console.error('�� Erro no processo de envio:', error);
       alert(`❌ Erro ao enviar a ficha: ${error.message || 'Erro desconhecido'}`);
     }
   };
