@@ -49,11 +49,6 @@ const App = () => (
           } />
 
           {/* Rotas protegidas para consultores */}
-          <Route path="/area-consultor" element={
-            <ProtectedRoute allowedTypes={['consultor']}>
-              <AreaConsultor />
-            </ProtectedRoute>
-          } />
           <Route path="/cadastro-cliente" element={
             <ProtectedRoute allowedTypes={['consultor']}>
               <CadastroCliente />
@@ -62,11 +57,6 @@ const App = () => (
           <Route path="/ficha-negociacao" element={
             <ProtectedRoute allowedTypes={['consultor']}>
               <Index />
-            </ProtectedRoute>
-          } />
-          <Route path="/historico-consultor" element={
-            <ProtectedRoute allowedTypes={['consultor']}>
-              <HistoricoConsultor />
             </ProtectedRoute>
           } />
 
