@@ -1086,37 +1086,30 @@ const FichaNegociacao = () => {
     }
   };
 
-  const testarEmail = async () => {
-    try {
-      console.log('🧪 Testando sistema de email...');
-      setMensagemStatus('🧪 Testando envio de email...');
+  const testarSistema = () => {
+    const usuario = AuthService.getUsuarioLogado();
 
-      const resultado = await EmailSimples.testarSistema();
-
-      if (resultado.sucesso) {
-        setMensagemStatus(`✅ Teste bem-sucedido: ${resultado.mensagem}`);
-        alert(`✅ Teste bem-sucedido!\n\n${resultado.mensagem}\n\nID: ${resultado.detalhes || 'N/A'}`);
-      } else {
-        setMensagemStatus(`❌ Teste falhou: ${resultado.mensagem}`);
-        alert(`❌ Teste falhou:\n\n${resultado.mensagem}\n\nDetalhes: ${resultado.detalhes || 'N/A'}`);
-      }
-    } catch (error: any) {
-      console.error('❌ Erro no teste:', error);
-      setMensagemStatus(`❌ Erro no teste: ${error.message}`);
-      alert(`❌ Erro no teste: ${error.message}`);
+    if (!usuario) {
+      alert('❌ Usuário não está logado');
+      return;
     }
+
+    const fichas = AuthService.getFichas();
+    const fichasPendentes = AuthService.getFichasPendentes();
+
+    alert(`✅ Sistema funcionando!\n\nUsuário: ${usuario.nome} (${usuario.tipo})\nFichas no sistema: ${fichas.length}\nFichas pendentes: ${fichasPendentes.length}\n\nSessão válida até: ${new Date(usuario.loginTime + 12 * 60 * 60 * 1000).toLocaleString('pt-BR')}`);
   };
 
 
 
   const imprimirFichas = () => {
     try {
-      console.log('🖨️ Iniciando processo de impressão...');
+      console.log('🖨��� Iniciando processo de impressão...');
 
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
-        alert('Dados do cliente n��o encontrados. Volte ao cadastro do cliente.');
+        alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
         return;
       }
 
