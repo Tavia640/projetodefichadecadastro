@@ -205,24 +205,24 @@ export class PDFGeneratorOfficial {
     drawBox(margin, currentY, logradouroWidth, rowHeight);
     drawBox(margin + logradouroWidth, currentY, numeroWidth, rowHeight);
     
-    pdf.setFontSize(9);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('Logradouro:', margin + 2, currentY + 5);
-    pdf.text('Nº:', margin + logradouroWidth + 2, currentY + 5);
-    
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
+    pdf.text('Logradouro:', margin + 2, currentY + 6);
+    pdf.text('Nº:', margin + logradouroWidth + 2, currentY + 6);
+
+    pdf.setFont('helvetica', 'normal');
     const enderecoCompleto = dadosCliente.logradouro || '';
-    pdf.text(enderecoCompleto, margin + 25, currentY + 5);
-    pdf.text(dadosCliente.numero || '', margin + logradouroWidth + 10, currentY + 5);
-    nextLine(1.5);
+    pdf.text(enderecoCompleto, margin + 30, currentY + 6);
+    pdf.text(dadosCliente.numero || '', margin + logradouroWidth + 15, currentY + 6);
+    nextLine(1.7);
 
     // Bairro
     drawBox(margin, currentY, tableWidth, rowHeight);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('Bairro:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.bairro || '', margin + 20, currentY + 5);
-    nextLine(1.5);
+    pdf.text('Bairro:', margin + 2, currentY + 6);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.bairro || '', margin + 25, currentY + 6);
+    nextLine(1.7);
 
     // Complemento e CEP
     const complementoWidth = tableWidth * 0.6;
@@ -231,14 +231,14 @@ export class PDFGeneratorOfficial {
     drawBox(margin, currentY, complementoWidth, rowHeight);
     drawBox(margin + complementoWidth, currentY, cepWidth, rowHeight);
     
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('Complemento:', margin + 2, currentY + 5);
-    pdf.text('CEP:', margin + complementoWidth + 2, currentY + 5);
-    
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.complemento || '', margin + 30, currentY + 5);
-    pdf.text(dadosCliente.cep || '', margin + complementoWidth + 15, currentY + 5);
-    nextLine(1.5);
+    pdf.text('Complemento:', margin + 2, currentY + 6);
+    pdf.text('CEP:', margin + complementoWidth + 2, currentY + 6);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.complemento || '', margin + 35, currentY + 6);
+    pdf.text(dadosCliente.cep || '', margin + complementoWidth + 20, currentY + 6);
+    nextLine(1.7);
 
     // Cidade e UF
     const cidadeWidth = tableWidth * 0.7;
@@ -247,13 +247,13 @@ export class PDFGeneratorOfficial {
     drawBox(margin, currentY, cidadeWidth, rowHeight);
     drawBox(margin + cidadeWidth, currentY, ufEnderecoWidth, rowHeight);
     
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('Cidade:', margin + 2, currentY + 5);
-    pdf.text('UF:', margin + cidadeWidth + 2, currentY + 5);
-    
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.cidade || '', margin + 20, currentY + 5);
-    pdf.text(dadosCliente.estado || '', margin + cidadeWidth + 10, currentY + 5);
+    pdf.text('Cidade:', margin + 2, currentY + 6);
+    pdf.text('UF:', margin + cidadeWidth + 2, currentY + 6);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.cidade || '', margin + 25, currentY + 6);
+    pdf.text(dadosCliente.estado || '', margin + cidadeWidth + 15, currentY + 6);
     nextLine(3);
 
     // SALA DE VENDAS
