@@ -1013,7 +1013,7 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Select
-                          value={contrato.empreendimento}
+                          value={contrato.empreendimentoId || ''}
                           onValueChange={(value) => {
                             const newContratos = [...contratos];
                             // Buscar o nome do empreendimento pelo ID selecionado
