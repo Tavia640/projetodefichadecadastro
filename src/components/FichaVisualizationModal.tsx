@@ -119,6 +119,49 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
             </CardContent>
           </Card>
 
+          {/* Endereço */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Endereço</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div>
+                    <span className="font-medium">Logradouro:</span>
+                    <p className="text-sm text-gray-600">{ficha.dadosCliente.logradouro || 'Não informado'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Número:</span>
+                    <p className="text-sm text-gray-600">{ficha.dadosCliente.numero || 'Não informado'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Bairro:</span>
+                    <p className="text-sm text-gray-600">{ficha.dadosCliente.bairro || 'Não informado'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Complemento:</span>
+                    <p className="text-sm text-gray-600">{ficha.dadosCliente.complemento || 'Não informado'}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <span className="font-medium">CEP:</span>
+                    <p className="text-sm text-gray-600">{ficha.dadosCliente.cep || 'Não informado'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Cidade:</span>
+                    <p className="text-sm text-gray-600">{ficha.dadosCliente.cidade || 'Não informado'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Estado (UF):</span>
+                    <p className="text-sm text-gray-600">{ficha.dadosCliente.estado || 'Não informado'}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Dados da Negociação */}
           <Card>
             <CardHeader>
