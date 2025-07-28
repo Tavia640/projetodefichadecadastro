@@ -366,8 +366,9 @@ export class PDFGeneratorOfficial {
     });
     nextLine(1.5);
 
-    // Dados da tabela
-    dadosNegociacao.parcelasPagasSala.forEach(parcela => {
+    // Dados da tabela - com tratamento de dados seguro
+    const parcelasPagasSala = dadosNegociacao.parcelasPagasSala || [];
+    parcelasPagasSala.forEach(parcela => {
       xPos2 = margin;
       const valores = [
         parcela.tipo,
