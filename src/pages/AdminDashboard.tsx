@@ -352,6 +352,20 @@ const AdminDashboard = () => {
                           </div>
                         </div>
 
+                        {/* Informações do Admin Responsável */}
+                        {ficha.adminResponsavel && (
+                          <div className="mt-2 p-2 bg-blue-50 rounded text-sm">
+                            <span className="font-medium text-blue-800">
+                              📋 Admin Responsável: {ficha.adminResponsavel}
+                            </span>
+                            {ficha.timestampInicio && (
+                              <span className="ml-4 text-blue-600">
+                                Iniciado: {formatarData(ficha.timestampInicio)}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
                         {ficha.dadosNegociacao.contratos.length > 0 && (
                           <div className="mt-2 text-sm text-gray-600">
                             <span>Empreendimento: {ficha.dadosNegociacao.contratos[0].empreendimento}</span>
