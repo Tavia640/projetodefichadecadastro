@@ -234,50 +234,74 @@ const AdminDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center">
-                <FileText className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900">{estatisticas.total || 0}</p>
-                  <p className="text-gray-600">Total de Fichas</p>
+                <FileText className="h-6 w-6 text-blue-600" />
+                <div className="ml-3">
+                  <p className="text-xl font-bold text-gray-900">{estatisticas.total || 0}</p>
+                  <p className="text-xs text-gray-600">Total</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center">
-                <Clock className="h-8 w-8 text-yellow-600" />
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900">{estatisticas.pendentes || 0}</p>
-                  <p className="text-gray-600">Pendentes</p>
+                <Clock className="h-6 w-6 text-yellow-600" />
+                <div className="ml-3">
+                  <p className="text-xl font-bold text-gray-900">{estatisticas.pendentes || 0}</p>
+                  <p className="text-xs text-gray-600">Pendentes</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center">
-                <Eye className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900">{estatisticas.visualizadas || 0}</p>
-                  <p className="text-gray-600">Visualizadas</p>
+                <PlayCircle className="h-6 w-6 text-orange-600" />
+                <div className="ml-3">
+                  <p className="text-xl font-bold text-gray-900">{estatisticas.emAndamento || 0}</p>
+                  <p className="text-xs text-gray-600">Em Andamento</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center">
-                <Printer className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900">{estatisticas.impressas || 0}</p>
-                  <p className="text-gray-600">Impressas</p>
+                <CheckCircle className="h-6 w-6 text-green-600" />
+                <div className="ml-3">
+                  <p className="text-xl font-bold text-gray-900">{estatisticas.concluidas || 0}</p>
+                  <p className="text-xs text-gray-600">Concluídas</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <Eye className="h-6 w-6 text-blue-600" />
+                <div className="ml-3">
+                  <p className="text-xl font-bold text-gray-900">{estatisticas.visualizadas || 0}</p>
+                  <p className="text-xs text-gray-600">Visualizadas</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <Printer className="h-6 w-6 text-purple-600" />
+                <div className="ml-3">
+                  <p className="text-xl font-bold text-gray-900">{estatisticas.impressas || 0}</p>
+                  <p className="text-xs text-gray-600">Impressas</p>
                 </div>
               </div>
             </CardContent>
