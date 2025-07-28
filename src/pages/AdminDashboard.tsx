@@ -110,41 +110,83 @@ const AdminDashboard = () => {
 
   const handleImprimirFicha = (ficha: FichaCompleta) => {
     try {
-      console.log('🖨️ Gerando PDFs oficiais para impressão...');
+      console.log('🖨️ Iniciando geração dos PDFs oficiais...');
+      console.log('📋 Dados da ficha:', ficha);
 
-      // Gerar PDFs no formato oficial
+      // Gerar PDF de Cadastro
+      console.log('📄 Gerando PDF de Cadastro...');
       const pdfCadastroBlob = PDFGeneratorOfficial.gerarPDFCadastroOficial(ficha.dadosCliente);
+      console.log('✅ PDF de Cadastro gerado com sucesso', pdfCadastroBlob.size, 'bytes');
+
+      // Gerar PDF de Negociação
+      console.log('📄 Gerando PDF de Negociação...');
       const pdfNegociacaoBlob = PDFGeneratorOfficial.gerarPDFNegociacaoOficial(ficha.dadosCliente, ficha.dadosNegociacao);
-      
+      console.log('✅ PDF de Negociação gerado com sucesso', pdfNegociacaoBlob.size, 'bytes');
+
+      // Verificar se os blobs foram criados corretamente
+      if (!pdfCadastroBlob || pdfCadastroBlob.size === 0) {
+        throw new Error('Falha na geração do PDF de Cadastro');
+      }
+      if (!pdfNegociacaoBlob || pdfNegociacaoBlob.size === 0) {
+        throw new Error('Falha na geração do PDF de Negociação');
+      }
+
       // Criar URLs para os blobs
       const urlCadastro = URL.createObjectURL(pdfCadastroBlob);
       const urlNegociacao = URL.createObjectURL(pdfNegociacaoBlob);
-      
-      // Abrir PDFs em novas janelas para impressão
-      const janelaCadastro = window.open(urlCadastro, '_blank');
-      const janelaNegociacao = window.open(urlNegociacao, '_blank');
-      
-      // Aguardar carregamento e imprimir
+      console.log('🔗 URLs criadas para os PDFs');
+
+      // Função para baixar PDF com nome específico
+      const baixarPDF = (blob: Blob, nomeArquivo: string) => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = nomeArquivo;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      };
+
+      // Gerar nomes dos arquivos baseado no cliente
+      const nomeCliente = ficha.dadosCliente.nome?.replace(/[^a-zA-Z0-9]/g, '_') || 'cliente';
+      const timestamp = new Date().toISOString().slice(0, 10);
+
+      // Baixar ambos os PDFs
+      baixarPDF(pdfCadastroBlob, `Cadastro_${nomeCliente}_${timestamp}.pdf`);
+      baixarPDF(pdfNegociacaoBlob, `Negociacao_${nomeCliente}_${timestamp}.pdf`);
+
+      // Também abrir em novas janelas para visualização/impressão
       setTimeout(() => {
-        if (janelaCadastro) {
-          janelaCadastro.print();
-        }
-        if (janelaNegociacao) {
-          janelaNegociacao.print();
-        }
-        
+        console.log('🖨️ Abrindo PDFs em novas janelas...');
+        const janelaCadastro = window.open(urlCadastro, '_blank');
+        const janelaNegociacao = window.open(urlNegociacao, '_blank');
+
+        // Aguardar carregamento e preparar para impressão
+        setTimeout(() => {
+          if (janelaCadastro) {
+            janelaCadastro.print();
+            console.log('🖨️ PDF de Cadastro enviado para impressão');
+          }
+          if (janelaNegociacao) {
+            janelaNegociacao.print();
+            console.log('🖨️ PDF de Negociação enviado para impressão');
+          }
+        }, 1000);
+
         // Limpar URLs após uso
         setTimeout(() => {
           URL.revokeObjectURL(urlCadastro);
           URL.revokeObjectURL(urlNegociacao);
-        }, 5000);
-      }, 1500);
+        }, 10000);
+      }, 500);
 
       // Atualizar status para impressa
       FichaStorageService.atualizarStatus(ficha.id, 'impressa');
       carregarFichas();
-      
-      console.log('✅ PDFs enviados para impressão!');
+
+      console.log('✅ Processo de impressão completo - 2 PDFs gerados!');
+      alert('✅ 2 PDFs foram gerados e baixados: Cadastro e Negociação');
+
     } catch (error: any) {
       console.error('❌ Erro na impressão:', error);
       alert(`❌ Erro ao gerar PDFs para impressão: ${error.message || 'Erro desconhecido'}`);
