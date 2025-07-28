@@ -482,6 +482,13 @@ const AdminDashboard = () => {
                           </Button>
                         )}
 
+                        {/* Debug info */}
+                        {process.env.NODE_ENV === 'development' && (
+                          <div className="text-xs text-gray-400 mt-1">
+                            Status: {ficha.status} | Admin: {ficha.adminResponsavel} | Session: {session?.nome}
+                          </div>
+                        )}
+
                         {ficha.status === 'em_andamento' && ficha.adminResponsavel === session?.nome && (
                           <>
                             <Button
