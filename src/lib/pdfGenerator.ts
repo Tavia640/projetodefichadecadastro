@@ -482,10 +482,27 @@ export class PDFGenerator {
       // Linha divisória
       pdf.line(xPos, yPos, xPos, yPos + 10);
       
-      // Empreendimento
+      // Empreendimento - buscar nome do empreendimento pelo ID
       const contrato = dadosNegociacao.contratos[i];
       if (contrato) {
-        pdf.text(contrato.empreendimento || '', xPos + 2, yPos + 6);
+        // Se empreendimento for um ID, buscar o nome no localStorage dos empreendimentos
+        let nomeEmpreendimento = contrato.empreendimento || '';
+
+        // Tentar buscar dados dos empreendimentos do localStorage
+        try {
+          const empreendimentosData = localStorage.getItem('empreendimentos_cache');
+          if (empreendimentosData) {
+            const empreendimentos = JSON.parse(empreendimentosData);
+            const emp = empreendimentos.find((e: any) => e.id === contrato.empreendimento);
+            if (emp) {
+              nomeEmpreendimento = emp.nome;
+            }
+          }
+        } catch (error) {
+          console.warn('Erro ao buscar nome do empreendimento:', error);
+        }
+
+        pdf.text(nomeEmpreendimento, xPos + 2, yPos + 6);
       }
       xPos += colWidths[1];
       
