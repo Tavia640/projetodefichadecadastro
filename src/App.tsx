@@ -10,6 +10,7 @@ import DashboardAdmin from "./pages/DashboardAdmin";
 import CadastroCliente from "./pages/CadastroCliente";
 import Index from "./pages/Index";
 import VisualizarFicha from "./pages/VisualizarFicha";
+import HistoricoConsultor from "./pages/HistoricoConsultor";
 import ConfiguracaoSistema from "./pages/ConfiguracaoSistema";
 import NotFound from "./pages/NotFound";
 
