@@ -335,8 +335,8 @@ export class PDFGeneratorOfficial {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.width;
     const pageHeight = pdf.internal.pageSize.height;
-    
-    const margin = 15;
+
+    const margin = 12;
     const lineHeight = 6;
     let currentY = margin;
 
