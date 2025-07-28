@@ -417,36 +417,32 @@ export class PDFGeneratorOfficial {
     });
     nextLine(1.5);
 
-    // Dados da tabela - com tratamento de dados seguro
+    // Dados da tabela - estrutura fixa com tipos pré-definidos
+    const tiposParcelaFixos = ['( ) Entrada', '( ) Sinal', '( ) Saldo'];
     const parcelasPagasSala = dadosNegociacao.parcelasPagasSala || [];
-    if (parcelasPagasSala.length === 0) {
-      // Se não há parcelas, criar uma linha vazia
+
+    tiposParcelaFixos.forEach(tipoFixo => {
+      const parcelaCorrespondente = parcelasPagasSala.find(parcela =>
+        parcela && parcela.tipo && tipoFixo.toLowerCase().includes(parcela.tipo.toLowerCase())
+      );
+
       xPos2 = margin;
-      colWidths.forEach((width, i) => {
-        drawBox(xPos2, currentY, width, 6);
-        xPos2 += width;
+      const valores = [
+        tipoFixo,
+        parcelaCorrespondente?.valorTotal ? `R$ ${safeString(parcelaCorrespondente.valorTotal)}` : '',
+        safeString(parcelaCorrespondente?.quantidadeCotas),
+        parcelaCorrespondente?.valorDistribuido ? `R$ ${safeString(parcelaCorrespondente.valorDistribuido)}` : '',
+        (parcelaCorrespondente?.formasPagamento || []).join(', ')
+      ];
+
+      valores.forEach((valor, i) => {
+        drawBox(xPos2, currentY, colWidths[i], 6);
+        pdf.setFontSize(8);
+        pdf.text(valor || '', xPos2 + 1, currentY + 4);
+        xPos2 += colWidths[i];
       });
       nextLine();
-    } else {
-      parcelasPagasSala.forEach(parcela => {
-        xPos2 = margin;
-        const valores = [
-          safeString(parcela?.tipo),
-          parcela?.valorTotal ? `R$ ${safeString(parcela.valorTotal)}` : '',
-          safeString(parcela?.quantidadeCotas),
-          parcela?.valorDistribuido ? `R$ ${safeString(parcela.valorDistribuido)}` : '',
-          (parcela?.formasPagamento || []).join(', ')
-        ];
-
-        valores.forEach((valor, i) => {
-          drawBox(xPos2, currentY, colWidths[i], 6);
-          pdf.setFontSize(8);
-          pdf.text(valor || '', xPos2 + 1, currentY + 4);
-          xPos2 += colWidths[i];
-        });
-        nextLine();
-      });
-    }
+    });
 
     nextLine(2);
 
