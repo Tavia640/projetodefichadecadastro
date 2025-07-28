@@ -102,6 +102,12 @@ const AdminDashboard = () => {
     }
   };
 
+  const getFichasFiltradas = () => {
+    if (filtroStatus === 'todas') return fichas;
+    if (filtroStatus === 'minhas') return fichas.filter(f => f.adminResponsavel === session?.nome);
+    return fichas.filter(f => f.status === filtroStatus);
+  };
+
   const handleImprimirFicha = (ficha: FichaCompleta) => {
     try {
       console.log('🖨️ Gerando PDFs oficiais para impressão...');
