@@ -284,11 +284,14 @@ export class PDFGeneratorOfficial {
       nextLine();
     });
 
-    return pdf.output('blob');
+    console.log('✅ PDF de Cadastro gerado com sucesso');
+    const blob = pdf.output('blob');
+    console.log('📦 Blob de Cadastro criado:', blob.size, 'bytes');
+    return blob;
   }
 
   static gerarPDFNegociacaoOficial(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): Blob {
-    console.log('🔍 Iniciando geração PDF Negociação...');
+    console.log('��� Iniciando geração PDF Negociação...');
     console.log('📊 Dados do cliente:', dadosCliente);
     console.log('📊 Dados da negociação:', dadosNegociacao);
 
