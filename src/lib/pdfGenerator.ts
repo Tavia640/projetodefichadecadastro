@@ -11,6 +11,28 @@ export interface DadosCliente {
   estadoCivil?: string;
   email?: string;
   telefone?: string;
+
+  // Campos de endereço
+  logradouro?: string;
+  numero?: string;
+  bairro?: string;
+  complemento?: string;
+  cep?: string;
+  cidade?: string;
+  estado?: string;
+
+  // Campos do cônjuge
+  nomeConjuge?: string;
+  cpfConjuge?: string;
+  rgConjuge?: string;
+  orgaoEmissorConjuge?: string;
+  estadoEmissorConjuge?: string;
+  profissaoConjuge?: string;
+  dataNascimentoConjuge?: string;
+  estadoCivilConjuge?: string;
+  emailConjuge?: string;
+  telefoneConjuge?: string;
+
   [key: string]: any;
 }
 
