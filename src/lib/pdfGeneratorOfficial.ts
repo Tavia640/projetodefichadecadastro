@@ -375,7 +375,7 @@ export class PDFGeneratorOfficial {
         `R$ ${parcela.valorTotal}`,
         parcela.quantidadeCotas,
         `R$ ${parcela.valorDistribuido}`,
-        parcela.formasPagamento.join(', ')
+        (parcela.formasPagamento || []).join(', ')
       ];
       
       valores.forEach((valor, i) => {
