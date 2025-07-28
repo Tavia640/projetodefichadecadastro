@@ -64,6 +64,11 @@ const App = () => (
               <Index />
             </ProtectedRoute>
           } />
+          <Route path="/historico-consultor" element={
+            <ProtectedRoute allowedTypes={['consultor']}>
+              <HistoricoConsultor />
+            </ProtectedRoute>
+          } />
 
           {/* Rotas protegidas para administradores */}
           <Route path="/dashboard-admin" element={
