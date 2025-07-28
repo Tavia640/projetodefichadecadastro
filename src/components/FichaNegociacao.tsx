@@ -510,6 +510,7 @@ const FichaNegociacao = () => {
       id: Date.now().toString(),
       tipoContrato: '',
       empreendimento: '',
+      empreendimentoId: '',
       torre: '',
       apartamento: '',
       cota: '',
