@@ -398,7 +398,14 @@ export class PDFGeneratorOfficial {
 
     // TABELA DE PARCELAS PAGAS EM SALA
     const tableY = currentY;
-    const colWidths = [35, 30, 25, 35, 35];
+    const totalTableWidth = pageWidth - 2 * margin;
+    const colWidths = [
+      totalTableWidth * 0.22,
+      totalTableWidth * 0.18,
+      totalTableWidth * 0.15,
+      totalTableWidth * 0.22,
+      totalTableWidth * 0.23
+    ];
     const headers = [
       'Tipo de Parcela Paga em Sala',
       'Valor Total Pago em Sala',
