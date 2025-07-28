@@ -632,17 +632,17 @@ const FichaNegociacao = () => {
   const imprimirFichas = () => {
     try {
       console.log('🖨️ Iniciando processo de impressão...');
-      
+
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
         alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
         return;
       }
-      
+
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
       console.log('📋 Dados do cliente recuperados:', dadosCliente);
-      
+
       // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
@@ -652,42 +652,59 @@ const FichaNegociacao = () => {
         contratos,
         informacoesPagamento
       };
-      
+
       console.log('💼 Dados da negociação preparados:', dadosNegociacao);
       console.log('📄 Gerando PDFs para impressão...');
-      
+
       // Gerar PDFs como blob URLs para impressão
+      console.log('📋 Gerando PDF de cadastro...');
       const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
+      console.log('✅ PDF de cadastro gerado, tamanho:', pdfCadastroBlob.size);
+
+      console.log('💼 Gerando PDF de negociação...');
       const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
-      
-      console.log('🖨️ Abrindo PDFs para impressão...');
-      
+      console.log('✅ PDF de negociação gerado, tamanho:', pdfNegociacaoBlob.size);
+
+      console.log('🖨️ Abrindo PDFs para visualização...');
+
       // Criar URLs para os blobs
       const urlCadastro = URL.createObjectURL(pdfCadastroBlob);
       const urlNegociacao = URL.createObjectURL(pdfNegociacaoBlob);
-      
-      // Abrir PDFs em novas janelas para impressão
-      const janelaCadastro = window.open(urlCadastro, '_blank');
-      const janelaNegociacao = window.open(urlNegociacao, '_blank');
-      
+
+      console.log('🔗 URLs criadas:', { urlCadastro, urlNegociacao });
+
+      // Abrir PDFs em novas janelas
+      const janelaCadastro = window.open(urlCadastro, '_blank', 'width=800,height=600');
+      const janelaNegociacao = window.open(urlNegociacao, '_blank', 'width=800,height=600');
+
+      if (!janelaCadastro || !janelaNegociacao) {
+        console.warn('⚠️ Algumas janelas podem ter sido bloqueadas pelo navegador');
+        alert('Algumas janelas podem ter sido bloqueadas. Verifique as configurações do navegador e permita pop-ups.');
+        return;
+      }
+
       // Aguardar carregamento e imprimir
       setTimeout(() => {
-        if (janelaCadastro) {
+        console.log('🖨️ Enviando comando de impressão...');
+
+        if (janelaCadastro && !janelaCadastro.closed) {
           janelaCadastro.print();
         }
-        if (janelaNegociacao) {
+        if (janelaNegociacao && !janelaNegociacao.closed) {
           janelaNegociacao.print();
         }
-        
+
         // Limpar URLs após uso
         setTimeout(() => {
           URL.revokeObjectURL(urlCadastro);
           URL.revokeObjectURL(urlNegociacao);
-        }, 5000);
-      }, 1500);
-      
+          console.log('🧹 URLs limpas');
+        }, 8000);
+      }, 2000);
+
       console.log('✅ PDFs abertos para impressão!');
-      
+      alert('PDFs abertos para impressão! Verifique se ambos os documentos foram carregados.');
+
     } catch (error: any) {
       console.error('❌ Erro na impressão:', error);
       alert(`❌ Erro ao gerar PDFs para impressão: ${error.message || 'Erro desconhecido'}`);
