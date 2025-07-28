@@ -489,7 +489,8 @@ const AdminDashboard = () => {
                           </div>
                         )}
 
-                        {ficha.status === 'em_andamento' && ficha.adminResponsavel === session?.nome && (
+                        {ficha.status === 'em_andamento' && ficha.adminResponsavel && session?.nome &&
+                         ficha.adminResponsavel === session.nome && (
                           <>
                             <Button
                               variant="default"
