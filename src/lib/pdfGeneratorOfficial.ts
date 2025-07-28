@@ -86,21 +86,21 @@ export class PDFGeneratorOfficial {
     const rgWidth = tableWidth * 0.5;
     const orgaoWidth = tableWidth * 0.25;
     const ufWidth = tableWidth * 0.25;
-    
+
     drawBox(margin, currentY, rgWidth, rowHeight);
     drawBox(margin + rgWidth, currentY, orgaoWidth, rowHeight);
     drawBox(margin + rgWidth + orgaoWidth, currentY, ufWidth, rowHeight);
-    
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('RG:', margin + 2, currentY + 5);
-    pdf.text('ÓRGÃO:', margin + rgWidth + 2, currentY + 5);
-    pdf.text('UF:', margin + rgWidth + orgaoWidth + 2, currentY + 5);
-    
+
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.rg || '', margin + 10, currentY + 5);
-    pdf.text(dadosCliente.orgaoEmissor || '', margin + rgWidth + 20, currentY + 5);
-    pdf.text(dadosCliente.estadoEmissor || '', margin + rgWidth + orgaoWidth + 10, currentY + 5);
-    nextLine(1.5);
+    pdf.text('RG:', margin + 2, currentY + 6);
+    pdf.text('ÓRGÃO:', margin + rgWidth + 2, currentY + 6);
+    pdf.text('UF:', margin + rgWidth + orgaoWidth + 2, currentY + 6);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.rg || '', margin + 15, currentY + 6);
+    pdf.text(dadosCliente.orgaoEmissor || '', margin + rgWidth + 25, currentY + 6);
+    pdf.text(dadosCliente.estadoEmissor || '', margin + rgWidth + orgaoWidth + 15, currentY + 6);
+    nextLine(1.7);
 
     // Profissão
     drawBox(margin, currentY, tableWidth, rowHeight);
