@@ -162,16 +162,16 @@ export class PDFGeneratorOfficial {
     drawBox(margin + rgWidth, currentY, orgaoWidth, rowHeight);
     drawBox(margin + rgWidth + orgaoWidth, currentY, ufWidth, rowHeight);
     
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('RG:', margin + 2, currentY + 5);
-    pdf.text('ÓRGÃO:', margin + rgWidth + 2, currentY + 5);
-    pdf.text('UF:', margin + rgWidth + orgaoWidth + 2, currentY + 5);
-    
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.rgConjuge || '', margin + 10, currentY + 5);
-    pdf.text(dadosCliente.orgaoEmissorConjuge || '', margin + rgWidth + 20, currentY + 5);
-    pdf.text(dadosCliente.estadoEmissorConjuge || '', margin + rgWidth + orgaoWidth + 10, currentY + 5);
-    nextLine(1.5);
+    pdf.text('RG:', margin + 2, currentY + 6);
+    pdf.text('ÓRGÃO:', margin + rgWidth + 2, currentY + 6);
+    pdf.text('UF:', margin + rgWidth + orgaoWidth + 2, currentY + 6);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.rgConjuge || '', margin + 15, currentY + 6);
+    pdf.text(dadosCliente.orgaoEmissorConjuge || '', margin + rgWidth + 25, currentY + 6);
+    pdf.text(dadosCliente.estadoEmissorConjuge || '', margin + rgWidth + orgaoWidth + 15, currentY + 6);
+    nextLine(1.7);
 
     // Demais campos do cônjuge...
     const camposConjuge = [
