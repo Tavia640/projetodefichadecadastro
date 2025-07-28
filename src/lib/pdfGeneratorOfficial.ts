@@ -151,11 +151,11 @@ export class PDFGeneratorOfficial {
 
     // CPF do cônjuge
     drawBox(margin, currentY, tableWidth, rowHeight);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('CPF:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(dadosCliente.cpfConjuge || '', margin + 15, currentY + 5);
-    nextLine(1.5);
+    pdf.text('CPF:', margin + 2, currentY + 6);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(dadosCliente.cpfConjuge || '', margin + 20, currentY + 6);
+    nextLine(1.7);
 
     // RG, Órgão, UF do cônjuge
     drawBox(margin, currentY, rgWidth, rowHeight);
