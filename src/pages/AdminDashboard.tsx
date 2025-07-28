@@ -61,11 +61,11 @@ const AdminDashboard = () => {
 
   const handleImprimirFicha = (ficha: FichaCompleta) => {
     try {
-      console.log('🖨️ Gerando PDFs para impressão...');
-      
-      // Gerar PDFs como blob URLs para impressão
-      const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(ficha.dadosCliente);
-      const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(ficha.dadosCliente, ficha.dadosNegociacao);
+      console.log('🖨️ Gerando PDFs oficiais para impressão...');
+
+      // Gerar PDFs no formato oficial
+      const pdfCadastroBlob = PDFGeneratorOfficial.gerarPDFCadastroOficial(ficha.dadosCliente);
+      const pdfNegociacaoBlob = PDFGeneratorOfficial.gerarPDFNegociacaoOficial(ficha.dadosCliente, ficha.dadosNegociacao);
       
       // Criar URLs para os blobs
       const urlCadastro = URL.createObjectURL(pdfCadastroBlob);
