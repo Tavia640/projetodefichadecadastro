@@ -523,7 +523,15 @@ export class PDFGeneratorOfficial {
     nextLine(2);
 
     const pagamentoHeaders = ['Tipo', 'Total', 'Qtd. Parcelas', 'Valor Parcela', 'Forma de Pag.', '1º Vencimento'];
-    const pagamentoWidths = [28, 23, 22, 23, 23, 31];
+    const totalPagamentoWidth = pageWidth - 2 * margin;
+    const pagamentoWidths = [
+      totalPagamentoWidth * 0.17,
+      totalPagamentoWidth * 0.15,
+      totalPagamentoWidth * 0.15,
+      totalPagamentoWidth * 0.15,
+      totalPagamentoWidth * 0.18,
+      totalPagamentoWidth * 0.20
+    ];
 
     // Cabeçalho pagamentos
     xPos2 = margin;
