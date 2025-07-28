@@ -373,7 +373,8 @@ const AdminDashboard = () => {
                         )}
                       </div>
 
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 flex-wrap gap-2">
+                        {/* Botão Visualizar - sempre disponível */}
                         <Button
                           variant="outline"
                           size="sm"
@@ -383,9 +384,52 @@ const AdminDashboard = () => {
                           <Eye className="h-4 w-4" />
                           <span>Visualizar</span>
                         </Button>
-                        
+
+                        {/* Botões baseados no status da ficha */}
+                        {ficha.status === 'pendente' && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handlePegarParaFazer(ficha)}
+                            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
+                          >
+                            <PlayCircle className="h-4 w-4" />
+                            <span>Pegar para Fazer</span>
+                          </Button>
+                        )}
+
+                        {ficha.status === 'em_andamento' && ficha.adminResponsavel === session?.nome && (
+                          <>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => handleEncerrarAtendimento(ficha)}
+                              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                              <span>Encerrar Atendimento</span>
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleLiberarFicha(ficha)}
+                              className="flex items-center space-x-2 text-orange-600 border-orange-300 hover:bg-orange-50"
+                            >
+                              <XCircle className="h-4 w-4" />
+                              <span>Liberar</span>
+                            </Button>
+                          </>
+                        )}
+
+                        {(ficha.status === 'em_andamento' && ficha.adminResponsavel !== session?.nome) && (
+                          <div className="text-xs text-gray-500 italic">
+                            Em atendimento por {ficha.adminResponsavel}
+                          </div>
+                        )}
+
+                        {/* Botão Imprimir - sempre disponível */}
                         <Button
-                          variant="default"
+                          variant="outline"
                           size="sm"
                           onClick={() => handleImprimirFicha(ficha)}
                           className="flex items-center space-x-2"
