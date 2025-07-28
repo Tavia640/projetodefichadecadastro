@@ -441,27 +441,37 @@ export class PDFGeneratorOfficial {
 
     // Dados dos contratos - com tratamento de dados seguro
     const contratos = dadosNegociacao.contratos || [];
-    contratos.forEach((contrato, index) => {
+    if (contratos.length === 0) {
+      // Se não há contratos, criar uma linha vazia
       xPos2 = margin;
-      const contratoValues = [
-        '( ) Físico ( ) Digital',
-        contrato.empreendimento,
-        contrato.torre,
-        contrato.apartamento,
-        contrato.cota,
-        '( ) Sim ( ) Não',
-        '( ) Sim ( ) Não', 
-        `R$ ${contrato.valor}`
-      ];
-      
-      contratoValues.forEach((valor, i) => {
-        drawBox(xPos2, currentY, contratoWidths[i], 6);
-        pdf.setFontSize(7);
-        pdf.text(valor || '', xPos2 + 1, currentY + 4);
-        xPos2 += contratoWidths[i];
+      contratoWidths.forEach((width, i) => {
+        drawBox(xPos2, currentY, width, 6);
+        xPos2 += width;
       });
       nextLine();
-    });
+    } else {
+      contratos.forEach((contrato, index) => {
+        xPos2 = margin;
+        const contratoValues = [
+          '( ) Físico ( ) Digital',
+          contrato?.empreendimento || '',
+          contrato?.torre || '',
+          contrato?.apartamento || '',
+          contrato?.cota || '',
+          '( ) Sim ( ) Não',
+          '( ) Sim ( ) Não',
+          contrato?.valor ? `R$ ${contrato.valor}` : ''
+        ];
+
+        contratoValues.forEach((valor, i) => {
+          drawBox(xPos2, currentY, contratoWidths[i], 6);
+          pdf.setFontSize(7);
+          pdf.text(valor || '', xPos2 + 1, currentY + 4);
+          xPos2 += contratoWidths[i];
+        });
+        nextLine();
+      });
+    }
 
     nextLine(2);
 
