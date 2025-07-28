@@ -301,6 +301,12 @@ export class PDFGeneratorOfficial {
       console.log('📊 Dados do cliente:', dadosCliente);
       console.log('📊 Dados da negociação:', dadosNegociacao);
 
+      // Função auxiliar para converter valores para string de forma segura
+      const safeString = (value: any): string => {
+        if (value === null || value === undefined) return '';
+        return String(value);
+      };
+
       // Verificar se os dados essenciais existem
       if (!dadosCliente || typeof dadosCliente !== 'object') {
         throw new Error('Dados do cliente não fornecidos ou inválidos');
