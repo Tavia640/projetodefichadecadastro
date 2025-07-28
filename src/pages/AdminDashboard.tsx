@@ -16,6 +16,8 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [estatisticas, setEstatisticas] = useState<any>({});
   const [session, setSession] = useState(SessionService.getSession());
+  const [fichaVisualizacao, setFichaVisualizacao] = useState<FichaCompleta | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     // Verificar se é admin
