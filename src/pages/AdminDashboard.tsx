@@ -9,7 +9,7 @@ import { SessionService } from '@/lib/sessionService';
 import { PDFGenerator } from '@/lib/pdfGenerator';
 import { PDFGeneratorOfficial } from '@/lib/pdfGeneratorOfficial';
 import FichaVisualizationModal from '@/components/FichaVisualizationModal';
-import { Printer, Eye, Clock, User, FileText, LogOut, RefreshCw } from 'lucide-react';
+import { Printer, Eye, Clock, User, FileText, LogOut, RefreshCw, PlayCircle, CheckCircle, XCircle } from 'lucide-react';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
