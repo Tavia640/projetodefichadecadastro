@@ -139,13 +139,13 @@ export class PDFGeneratorOfficial {
     pdf.text('Telefone:', margin + 2, currentY + 6);
     pdf.setFont('helvetica', 'normal');
     pdf.text(safeString(dadosCliente.telefone), margin + 30, currentY + 6);
-    nextLine(2);
+    nextLine(1.5);
 
     // DADOS DO CÔNJUGE
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
     pdf.text('DADOS DO CÔNJUGE:', margin, currentY);
-    nextLine(2);
+    nextLine(1.5);
 
     // Nome do cônjuge
     drawBox(margin, currentY, tableWidth, rowHeight);
