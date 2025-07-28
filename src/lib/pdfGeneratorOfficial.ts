@@ -495,19 +495,30 @@ export class PDFGeneratorOfficial {
 
     // Dados dos pagamentos - com tratamento de dados seguro
     const informacoesPagamento = dadosNegociacao.informacoesPagamento || [];
-    informacoesPagamento
-      .filter(info => info && info.total && parseFloat(info.total || '0') > 0)
-      .forEach(info => {
+    const pagamentosValidos = informacoesPagamento.filter(info =>
+      info && info.total && parseFloat(info.total.toString() || '0') > 0
+    );
+
+    if (pagamentosValidos.length === 0) {
+      // Se não há pagamentos, criar uma linha vazia
+      xPos2 = margin;
+      pagamentoWidths.forEach((width, i) => {
+        drawBox(xPos2, currentY, width, 6);
+        xPos2 += width;
+      });
+      nextLine();
+    } else {
+      pagamentosValidos.forEach(info => {
         xPos2 = margin;
         const pagamentoValues = [
-          info.tipo,
-          `R$ ${info.total}`,
-          info.qtdParcelas,
-          `R$ ${info.valorParcela}`,
-          info.formaPagamento,
-          info.primeiroVencimento ? new Date(info.primeiroVencimento).toLocaleDateString('pt-BR') : ''
+          info?.tipo || '',
+          info?.total ? `R$ ${info.total}` : '',
+          info?.qtdParcelas || '',
+          info?.valorParcela ? `R$ ${info.valorParcela}` : '',
+          info?.formaPagamento || '',
+          info?.primeiroVencimento ? new Date(info.primeiroVencimento).toLocaleDateString('pt-BR') : ''
         ];
-        
+
         pagamentoValues.forEach((valor, i) => {
           drawBox(xPos2, currentY, pagamentoWidths[i], 6);
           pdf.setFontSize(8);
@@ -516,6 +527,7 @@ export class PDFGeneratorOfficial {
         });
         nextLine();
       });
+    }
 
     console.log('✅ PDF de Negociação gerado com sucesso');
     const blob = pdf.output('blob');
