@@ -5,12 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthService } from "./lib/authService";
 import Login from "./pages/Login";
-import AreaConsultor from "./pages/AreaConsultor";
 import DashboardAdmin from "./pages/DashboardAdmin";
 import CadastroCliente from "./pages/CadastroCliente";
 import Index from "./pages/Index";
 import VisualizarFicha from "./pages/VisualizarFicha";
-import HistoricoConsultor from "./pages/HistoricoConsultor";
 import ConfiguracaoSistema from "./pages/ConfiguracaoSistema";
 import NotFound from "./pages/NotFound";
 
