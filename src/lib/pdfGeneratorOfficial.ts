@@ -291,17 +291,18 @@ export class PDFGeneratorOfficial {
   }
 
   static gerarPDFNegociacaoOficial(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): Blob {
-    console.log('🔍 Iniciando geração PDF Negociação...');
-    console.log('📊 Dados do cliente:', dadosCliente);
-    console.log('📊 Dados da negociação:', dadosNegociacao);
+    try {
+      console.log('🔍 Iniciando geração PDF Negociação...');
+      console.log('📊 Dados do cliente:', dadosCliente);
+      console.log('📊 Dados da negociação:', dadosNegociacao);
 
-    // Verificar se os dados essenciais existem
-    if (!dadosCliente) {
-      throw new Error('Dados do cliente não fornecidos');
-    }
-    if (!dadosNegociacao) {
-      throw new Error('Dados da negociação não fornecidos');
-    }
+      // Verificar se os dados essenciais existem
+      if (!dadosCliente) {
+        throw new Error('Dados do cliente não fornecidos');
+      }
+      if (!dadosNegociacao) {
+        throw new Error('Dados da negociação não fornecidos');
+      }
 
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.width;
@@ -529,9 +530,13 @@ export class PDFGeneratorOfficial {
       });
     }
 
-    console.log('✅ PDF de Negociação gerado com sucesso');
-    const blob = pdf.output('blob');
-    console.log('📦 Blob de Negociação criado:', blob.size, 'bytes');
-    return blob;
+      console.log('✅ PDF de Negociação gerado com sucesso');
+      const blob = pdf.output('blob');
+      console.log('📦 Blob de Negociação criado:', blob.size, 'bytes');
+      return blob;
+    } catch (error: any) {
+      console.error('❌ Erro na geração do PDF de Negociação:', error);
+      throw new Error(`Falha na geração do PDF de Negociação: ${error.message}`);
+    }
   }
 }
