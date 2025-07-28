@@ -84,9 +84,9 @@ const CadastroCliente = () => {
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/')}
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/area-consultor')}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
