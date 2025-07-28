@@ -449,9 +449,10 @@ export class PDFGeneratorOfficial {
     });
     nextLine(1.5);
 
-    // Dados dos pagamentos
-    dadosNegociacao.informacoesPagamento
-      .filter(info => info.total && parseFloat(info.total) > 0)
+    // Dados dos pagamentos - com tratamento de dados seguro
+    const informacoesPagamento = dadosNegociacao.informacoesPagamento || [];
+    informacoesPagamento
+      .filter(info => info && info.total && parseFloat(info.total || '0') > 0)
       .forEach(info => {
         xPos2 = margin;
         const pagamentoValues = [
