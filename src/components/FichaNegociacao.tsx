@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
 import { EmailJsService } from '@/lib/emailJsService';
+import { FichaStorageService } from '@/lib/fichaStorageService';
+import { SessionService } from '@/lib/sessionService';
 
 interface ParcelaPagaSala {
   id: string;
@@ -1267,7 +1269,7 @@ const FichaNegociacao = () => {
                            const dados = contratoAtivo ? calcularDadosCategoria(contratoAtivo.empreendimento, contratoAtivo.categoriaPreco) : null;
                            let maxParcelas = dados ? (info.tipo === 'Sinal' ? dados.maxParcelasSinal : dados.maxParcelasSaldo) : null;
                            
-                           // Limitação específica para Restante da Entrada: máximo 5 parcelas
+                           // Limitaç��o específica para Restante da Entrada: máximo 5 parcelas
                            if (info.tipo === 'Restante da Entrada') {
                              maxParcelas = 5;
                            }
