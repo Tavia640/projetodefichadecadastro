@@ -307,7 +307,7 @@ const FichaNegociacao = () => {
     const contratoAtivo = contratos.find(c => c.empreendimentoId);
     if (!contratoAtivo) return informacoes;
 
-    const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
+    const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimentoId);
     const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
     
     // Calcular total das entradas (1ª, 2ª, etc.)
