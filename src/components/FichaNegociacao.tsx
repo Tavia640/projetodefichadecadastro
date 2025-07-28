@@ -1016,7 +1016,11 @@ const FichaNegociacao = () => {
                           value={contrato.empreendimento}
                           onValueChange={(value) => {
                             const newContratos = [...contratos];
-                            newContratos[index].empreendimento = value;
+                            // Buscar o nome do empreendimento pelo ID selecionado
+                            const empreendimentoSelecionado = empreendimentos.find(emp => emp.id === value);
+                            newContratos[index].empreendimento = empreendimentoSelecionado?.nome || value;
+                            // Salvar também o ID para usar nas validações
+                            newContratos[index].empreendimentoId = value;
                             // Limpar categoria e torre quando mudar empreendimento
                             newContratos[index].categoriaPreco = '';
                             newContratos[index].torre = '';
