@@ -281,6 +281,18 @@ export class PDFGeneratorOfficial {
   }
 
   static gerarPDFNegociacaoOficial(dadosCliente: DadosCliente, dadosNegociacao: DadosNegociacao): Blob {
+    console.log('🔍 Iniciando geração PDF Negociação...');
+    console.log('📊 Dados do cliente:', dadosCliente);
+    console.log('📊 Dados da negociação:', dadosNegociacao);
+
+    // Verificar se os dados essenciais existem
+    if (!dadosCliente) {
+      throw new Error('Dados do cliente não fornecidos');
+    }
+    if (!dadosNegociacao) {
+      throw new Error('Dados da negociação não fornecidos');
+    }
+
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.width;
     const pageHeight = pdf.internal.pageSize.height;
