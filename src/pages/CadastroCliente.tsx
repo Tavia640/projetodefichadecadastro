@@ -23,17 +23,25 @@ const formSchema = z.object({
   profissao: z.string().min(2, 'Profissão é obrigatória'),
   dataNascimento: z.string().min(10, 'Data de nascimento é obrigatória'),
   estadoCivil: z.string().min(1, 'Estado civil é obrigatório'),
+  // Campos de endereço
+  logradouro: z.string().default(''),
+  numeroEndereco: z.string().default(''),
+  bairro: z.string().default(''),
+  complemento: z.string().default(''),
+  cep: z.string().default(''),
+  cidade: z.string().default(''),
+  ufEndereco: z.string().default(''),
   // Campos do cônjuge (opcionais)
-  nomeConjuge: z.string().optional(),
-  cpfConjuge: z.string().optional(),
-  rgConjuge: z.string().optional(),
-  orgaoEmissorConjuge: z.string().optional(),
-  estadoEmissorConjuge: z.string().optional(),
-  emailConjuge: z.string().optional(),
-  telefoneConjuge: z.string().optional(),
-  profissaoConjuge: z.string().optional(),
-  dataNascimentoConjuge: z.string().optional(),
-  estadoCivilConjuge: z.string().optional(),
+  nomeConjuge: z.string().default(''),
+  cpfConjuge: z.string().default(''),
+  rgConjuge: z.string().default(''),
+  orgaoEmissorConjuge: z.string().default(''),
+  estadoEmissorConjuge: z.string().default(''),
+  emailConjuge: z.string().default(''),
+  telefoneConjuge: z.string().default(''),
+  profissaoConjuge: z.string().default(''),
+  dataNascimentoConjuge: z.string().default(''),
+  estadoCivilConjuge: z.string().default(''),
 });
 
 const CadastroCliente = () => {
@@ -42,6 +50,7 @@ const CadastroCliente = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: 'onChange',
     defaultValues: {
       nome: '',
       cpf: '',
@@ -53,6 +62,25 @@ const CadastroCliente = () => {
       profissao: '',
       dataNascimento: '',
       estadoCivil: '',
+      // Campos de endereço
+      logradouro: '',
+      numeroEndereco: '',
+      bairro: '',
+      complemento: '',
+      cep: '',
+      cidade: '',
+      ufEndereco: '',
+      // Campos do cônjuge
+      nomeConjuge: '',
+      cpfConjuge: '',
+      rgConjuge: '',
+      orgaoEmissorConjuge: '',
+      estadoEmissorConjuge: '',
+      emailConjuge: '',
+      telefoneConjuge: '',
+      profissaoConjuge: '',
+      dataNascimentoConjuge: '',
+      estadoCivilConjuge: '',
     },
   });
 
@@ -258,6 +286,117 @@ const CadastroCliente = () => {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Dados de Endereço */}
+              <div className="space-y-4 border-t pt-6">
+                <h3 className="text-lg font-semibold">Endereço</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="logradouro"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-3">
+                        <FormLabel>Logradouro</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="numeroEndereco"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Número</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="bairro"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bairro</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="complemento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Complemento</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="cep"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CEP</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="cidade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ufEndereco"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>UF</FormLabel>
+                        <FormControl>
+                          <Input {...field} maxLength={2} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

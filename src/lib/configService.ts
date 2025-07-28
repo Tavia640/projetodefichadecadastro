@@ -16,6 +16,92 @@ export class ConfigService {
   private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
   /**
+   * Função de diagnóstico para verificar se a tabela e dados existem
+   */
+  static async diagnosticarSistema(): Promise<{ success: boolean; message: string; details?: any }> {
+    try {
+      console.log('🔍 Iniciando diagnóstico do sistema de configurações...');
+
+      // Teste 1: Verificar se consegue acessar a tabela
+      console.log('📋 Teste 1: Verificando acesso à tabela configuracoes...');
+      const { data: allConfigs, error: accessError } = await supabase
+        .from('configuracoes')
+        .select('*');
+
+      if (accessError) {
+        const errorMsg = accessError?.message || accessError?.toString() || 'Erro desconhecido';
+        console.error('❌ Erro ao acessar tabela:', errorMsg);
+        return {
+          success: false,
+          message: `Erro ao acessar tabela: ${errorMsg}`,
+          details: accessError
+        };
+      }
+
+      console.log('✅ Tabela acessível. Total de configurações:', allConfigs?.length || 0);
+
+      // Teste 2: Verificar configurações específicas
+      const configsNecessarias = ['RESEND_API_KEY', 'EMAIL_DESTINO', 'EMAIL_REMETENTE'];
+      const configsEncontradas: Record<string, any> = {};
+
+      for (const config of configsNecessarias) {
+        const encontrada = allConfigs?.find(c => c.chave === config);
+        configsEncontradas[config] = {
+          existe: !!encontrada,
+          ativo: encontrada?.ativo || false,
+          tamanhoValor: encontrada?.valor?.length || 0,
+          valor_preview: encontrada?.valor ? `${encontrada.valor.substring(0, 10)}...` : 'VAZIO'
+        };
+      }
+
+      console.log('📊 Configurações encontradas:', configsEncontradas);
+
+      // Teste 3: Testar getConfigs múltiplas
+      console.log('🧪 Teste 3: Testando getConfigs...');
+      try {
+        const configs = await this.getConfigs(['RESEND_API_KEY', 'EMAIL_DESTINO']);
+        console.log('✅ getConfigs funcionou:', Object.keys(configs));
+        configsEncontradas['TESTE_getConfigs'] = { sucesso: true, configs: Object.keys(configs) };
+      } catch (configError: any) {
+        console.error('❌ getConfigs falhou:', configError);
+        configsEncontradas['TESTE_getConfigs'] = {
+          sucesso: false,
+          erro: configError.message,
+          tipo: configError.constructor?.name
+        };
+      }
+
+      // Teste 4: Testar getConfig individual
+      console.log('🧪 Teste 4: Testando getConfig individual...');
+      const resendKey = await this.getConfig('RESEND_API_KEY');
+      console.log('🔑 RESEND_API_KEY resultado:', {
+        encontrada: !!resendKey,
+        tamanho: resendKey?.length || 0,
+        preview: resendKey ? `${resendKey.substring(0, 10)}...` : 'VAZIO'
+      });
+
+      return {
+        success: true,
+        message: 'Diagnóstico concluído com sucesso',
+        details: {
+          totalConfigs: allConfigs?.length || 0,
+          configuracoes: configsEncontradas,
+          resendKeyFunciona: !!resendKey
+        }
+      };
+
+    } catch (error: any) {
+      const errorMsg = error?.message || error?.toString() || 'Erro crítico desconhecido';
+      console.error('❌ Erro crítico no diagnóstico:', errorMsg);
+      return {
+        success: false,
+        message: `Erro crítico: ${errorMsg}`,
+        details: error
+      };
+    }
+  }
+
+  /**
    * Busca uma configuração por chave
    */
   static async getConfig(chave: string): Promise<string | null> {
@@ -36,7 +122,12 @@ export class ConfigService {
         .single();
 
       if (error) {
-        console.error(`❌ Erro ao buscar configuração ${chave}:`, error);
+        const errorMsg = typeof error === 'string' ? error :
+                        error?.message ||
+                        error?.details ||
+                        JSON.stringify(error) ||
+                        'Erro desconhecido';
+        console.error(`❌ Erro ao buscar configuração ${chave}:`, errorMsg);
         return null;
       }
 
@@ -51,8 +142,12 @@ export class ConfigService {
       console.log(`✅ Configuração encontrada: ${chave}`);
       return data.valor;
 
-    } catch (error) {
-      console.error(`❌ Erro inesperado ao buscar configuração ${chave}:`, error);
+    } catch (error: any) {
+      const errorMsg = typeof error === 'string' ? error :
+                      error?.message ||
+                      error?.details ||
+                      'Erro desconhecido';
+      console.error(`❌ Erro inesperado ao buscar configuração ${chave}:`, errorMsg);
       return null;
     }
   }
@@ -62,6 +157,7 @@ export class ConfigService {
    */
   static async getConfigs(chaves: string[]): Promise<Record<string, string>> {
     try {
+      console.log('🔍 ConfigService.getConfigs iniciado para:', chaves);
       const result: Record<string, string> = {};
       const chavesParaBuscar: string[] = [];
 
@@ -70,6 +166,7 @@ export class ConfigService {
         const cached = this.getCachedValue(chave);
         if (cached !== null) {
           result[chave] = cached;
+          console.log(`✅ ${chave} encontrada no cache`);
         } else {
           chavesParaBuscar.push(chave);
         }
@@ -86,8 +183,21 @@ export class ConfigService {
           .eq('ativo', true);
 
         if (error) {
-          console.error('❌ Erro ao buscar configurações:', error);
-          return result;
+          const errorMsg = typeof error === 'string' ? error :
+                          error?.message ||
+                          error?.details ||
+                          JSON.stringify(error) ||
+                          'Erro desconhecido do Supabase';
+
+          console.error('❌ Erro ao buscar configurações do Supabase:', errorMsg);
+          console.error('❌ Objeto de erro completo:', error);
+
+          // Se a tabela não existe, lançar erro específico
+          if (error.code === 'PGRST116' || errorMsg.includes('does not exist') || errorMsg.includes('relation') && errorMsg.includes('does not exist')) {
+            throw new Error('TABELA_CONFIGURACOES_NAO_EXISTE');
+          }
+
+          throw new Error(`Erro do Supabase: ${errorMsg}`);
         }
 
         // Processar resultados e armazenar no cache
@@ -101,9 +211,19 @@ export class ConfigService {
 
       return result;
 
-    } catch (error) {
-      console.error('❌ Erro inesperado ao buscar configurações:', error);
-      return {};
+    } catch (error: any) {
+      const errorMsg = typeof error === 'string' ? error :
+                      error?.message ||
+                      error?.details ||
+                      error?.hint ||
+                      'Erro desconhecido';
+
+      console.error('❌ Erro inesperado ao buscar configurações:', errorMsg);
+      console.error('❌ Stack trace:', error?.stack);
+      console.error('❌ Objeto completo:', error);
+
+      // Re-throw o erro para que o EmailService possa capturar e usar fallback
+      throw new Error(errorMsg);
     }
   }
 

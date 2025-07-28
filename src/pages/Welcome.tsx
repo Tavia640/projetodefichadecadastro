@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
-import gavLogo from '@/assets/gav-logo.png';
+
+const gavLogo = 'https://cdn.builder.io/api/v1/image/assets%2Fc8c896b761d24232b80a27a492248c56%2F39e6e168fc74423b8d3b78807d7eef5f?format=webp&width=800';
 
 const Welcome = () => {
   const navigate = useNavigate();
