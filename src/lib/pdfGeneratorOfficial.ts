@@ -487,6 +487,9 @@ export class PDFGeneratorOfficial {
         nextLine();
       });
 
-    return pdf.output('blob');
+    console.log('✅ PDF de Negociação gerado com sucesso');
+    const blob = pdf.output('blob');
+    console.log('📦 Blob de Negociação criado:', blob.size, 'bytes');
+    return blob;
   }
 }
