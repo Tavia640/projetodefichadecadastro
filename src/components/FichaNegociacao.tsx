@@ -183,7 +183,7 @@ const FichaNegociacao = () => {
     
     return {
       valida: diferenca < 0.01, // Tolerância para erros de arredondamento
-      detalhes: `Valor Total: R$ ${valorTotal.toFixed(2)} | Entradas: R$ ${totalEntradas.toFixed(2)} | Sinal: R$ ${valorSinal.toFixed(2)} | Saldo: R$ ${valorSaldo.toFixed(2)} | Diferença: R$ ${diferenca.toFixed(2)}`
+      detalhes: `Valor Total: R$ ${valorTotal.toFixed(2)} | Entradas: R$ ${totalEntradas.toFixed(2)} | Sinal: R$ ${valorSinal.toFixed(2)} | Saldo: R$ ${valorSaldo.toFixed(2)} | Diferen��a: R$ ${diferenca.toFixed(2)}`
     };
   };
 
@@ -751,7 +751,9 @@ const FichaNegociacao = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-background">
+      <SessionHeader />
+      <div className="max-w-6xl mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -1140,7 +1142,7 @@ const FichaNegociacao = () => {
           {/* Local para Assinatura */}
           <div className="text-center space-y-4">
             <p className="text-sm text-muted-foreground">
-              O financeiro descrito acima é referente a cada unidade separadamente.
+              O financeiro descrito acima �� referente a cada unidade separadamente.
             </p>
             <div className="border-t border-border pt-4">
               <Label className="text-base font-semibold">Assinatura do Cliente</Label>
@@ -1468,6 +1470,7 @@ const FichaNegociacao = () => {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };
