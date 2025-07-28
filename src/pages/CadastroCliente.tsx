@@ -102,11 +102,14 @@ const CadastroCliente = () => {
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
-              onClick={() => navigate('/area-consultor')}
+              onClick={() => {
+                AuthService.logout();
+                navigate('/login');
+              }}
               className="flex items-center gap-2"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
+              <LogOut className="h-4 w-4" />
+              Sair
             </Button>
             <CardTitle className="text-2xl font-bold">
               Cadastro do Cliente
