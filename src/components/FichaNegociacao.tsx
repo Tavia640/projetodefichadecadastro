@@ -1104,7 +1104,7 @@ const FichaNegociacao = () => {
 
   const imprimirFichas = () => {
     try {
-      console.log('🖨��� Iniciando processo de impressão...');
+      console.log('🖨️ Iniciando processo de impressão...');
 
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
@@ -1921,22 +1921,23 @@ const FichaNegociacao = () => {
             </div>
           )}
 
-          {/* Sistema Simples de Envio */}
+          {/* Sistema de Envio para Administradores */}
           <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-lg border">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-              📧 Sistema Simplificado de Envio de PDFs
+              📋 Envio de Ficha para Administradores
             </h3>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
-                onClick={enviarPDFsPorEmail}
+                onClick={enviarFichaParaAdmins}
                 className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 flex-1 h-12"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="8.5" cy="7" r="4"/>
+                  <polyline points="17,11 19,13 23,9"/>
                 </svg>
-                📧 Enviar por Email
+                👨‍💼 Enviar para Administradores
               </Button>
 
               <Button
@@ -1954,7 +1955,7 @@ const FichaNegociacao = () => {
             </div>
 
             <p className="text-sm text-gray-600 text-center mt-3">
-              ✅ Sistema novo e simplificado - Funciona de forma confiável
+              ✅ Sistema interno - As fichas serão enviadas diretamente para os administradores
             </p>
           </div>
 
@@ -2057,7 +2058,7 @@ const FichaNegociacao = () => {
                 <line x1="16" y1="17" x2="8" y2="17"/>
                 <polyline points="10,9 9,9 8,9"/>
               </svg>
-              💾 Salvar e Enviar (Antigo)
+              ���� Salvar e Enviar (Antigo)
             </Button>
           </div>
         </CardContent>
