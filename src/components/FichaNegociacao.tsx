@@ -638,7 +638,7 @@ const FichaNegociacao = () => {
 
       if (alertasCriticos.length > 0) {
         console.warn('⚠️ Alertas encontrados:', alertasCriticos);
-        if (alertasCriticos.some(alerta => alerta.includes('CR��TICO'))) {
+        if (alertasCriticos.some(alerta => alerta.includes('CRÍTICO'))) {
           alert('Não é possível enviar devido a erros críticos. Verifique os campos obrigatórios.');
           return;
         }
@@ -1098,8 +1098,8 @@ const FichaNegociacao = () => {
                         >
                           <SelectTrigger className="bg-background">
                             <SelectValue placeholder={
-                              !contrato.empreendimento 
-                                ? "Selecione empreendimento primeiro" 
+                              !contrato.empreendimentoId
+                                ? "Selecione empreendimento primeiro"
                                 : "Selecione categoria de preço"
                             } />
                           </SelectTrigger>
