@@ -713,6 +713,8 @@ const FichaNegociacao = () => {
       const dadosNegociacao: DadosNegociacao = {
         liner,
         closer,
+        liderSala,
+        nomeSala,
         tipoVenda,
         parcelasPagasSala,
         contratos,
