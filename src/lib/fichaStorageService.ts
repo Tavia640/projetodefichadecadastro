@@ -244,6 +244,7 @@ export class FichaStorageService {
       impressas: fichas.filter(f => f.status === 'impressa').length,
       emAndamento: fichas.filter(f => f.status === 'em_andamento').length,
       concluidas: fichas.filter(f => f.status === 'concluida').length,
+      arquivadas: fichas.filter(f => f.status === 'arquivada').length,
       ultimaFicha: fichas.length > 0 ? fichas[0].timestamp : null
     };
   }
