@@ -572,6 +572,32 @@ const AdminDashboard = () => {
                           </div>
                         )}
 
+                        {/* Botão Arquivar - para fichas concluídas */}
+                        {ficha.status === 'concluida' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleArquivarFicha(ficha)}
+                            className="flex items-center space-x-2 text-gray-600 border-gray-300 hover:bg-gray-50"
+                          >
+                            <Archive className="h-4 w-4" />
+                            <span>Arquivar</span>
+                          </Button>
+                        )}
+
+                        {/* Botão Desarquivar - para fichas arquivadas */}
+                        {ficha.status === 'arquivada' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDesarquivarFicha(ficha)}
+                            className="flex items-center space-x-2 text-blue-600 border-blue-300 hover:bg-blue-50"
+                          >
+                            <ArchiveRestore className="h-4 w-4" />
+                            <span>Desarquivar</span>
+                          </Button>
+                        )}
+
                         {/* Botão Imprimir - sempre disponível */}
                         <Button
                           variant="outline"
