@@ -292,16 +292,15 @@ export class PDFGeneratorOfficial {
     });
 
     // CAMPO DE ASSINATURA DO CLIENTE
-    nextLine(3);
-    const assinaturaY = currentY;
+    nextLine(2);
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('ASSINATURA DO CLIENTE:', margin, assinaturaY);
+    pdf.text('ASSINATURA DO CLIENTE:', margin, currentY);
 
     // Linha para assinatura
-    pdf.line(margin + 50, assinaturaY + 15, pageWidth - margin, assinaturaY + 15);
+    pdf.line(margin + 50, currentY + 10, pageWidth - margin, currentY + 10);
 
-    nextLine(3);
+    nextLine(2);
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(9);
     pdf.text('Data: ___/___/______', margin, currentY);
