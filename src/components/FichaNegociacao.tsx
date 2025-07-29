@@ -171,7 +171,7 @@ const FichaNegociacao = () => {
     
     // Somar todas as entradas
     const totalEntradas = informacoesPagamento
-      .filter(info => info.tipo.includes('ª Entrada') || info.tipo === 'Restante da Entrada')
+      .filter(info => info.tipo.includes('Entrada'))
       .reduce((total, info) => total + (parseFloat(info.total) || 0), 0);
     
     const sinalInfo = informacoesPagamento.find(info => info.tipo === 'Sinal');
@@ -695,7 +695,7 @@ const FichaNegociacao = () => {
 
   const imprimirFichas = () => {
     try {
-      console.log('���️ Iniciando processo de impressão...');
+      console.log('🖨️ Iniciando processo de impressão...');
 
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
