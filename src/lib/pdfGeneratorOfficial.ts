@@ -391,7 +391,9 @@ export class PDFGeneratorOfficial {
     nextLine();
     pdf.text(`CPF: ${dadosCliente.cpf}`, margin, currentY);
     nextLine();
-    pdf.text('SALA DE VENDAS: ', margin, currentY);
+    pdf.text(`SALA DE VENDAS: ${dadosNegociacao.nomeSala || '_________________'}`, margin, currentY);
+    nextLine();
+    pdf.text(`LÍDER DE SALA: ${dadosNegociacao.liderSala || '_________________'}`, margin, currentY);
     nextLine(2);
 
     // TIPO DE VENDA - Checkboxes com marcação correta
