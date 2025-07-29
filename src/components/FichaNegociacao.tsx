@@ -84,6 +84,8 @@ const FichaNegociacao = () => {
   const navigate = useNavigate();
   const [liner, setLiner] = useState('');
   const [closer, setCloser] = useState('');
+  const [liderSala, setLiderSala] = useState('');
+  const [nomeSala, setNomeSala] = useState('');
   const [tipoVenda, setTipoVenda] = useState('');
   const [parcelasPagasSala, setParcelasPagasSala] = useState<ParcelaPagaSala[]>([{
     id: '1',
