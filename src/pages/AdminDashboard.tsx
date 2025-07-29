@@ -134,7 +134,7 @@ const AdminDashboard = () => {
 
   const getFichasFiltradas = () => {
     if (filtroStatus === 'todas') return fichas;
-    if (filtroStatus === 'minhas') return fichas.filter(f => f.adminResponsável === session?.nome);
+    if (filtroStatus === 'minhas') return fichas.filter(f => f.adminResponsavel === session?.nome);
     return fichas.filter(f => f.status === filtroStatus);
   };
 
@@ -488,7 +488,7 @@ const AdminDashboard = () => {
                       </div>
 
                       <div className="flex items-center space-x-2 flex-wrap gap-2">
-                        {/* Botão Visualizar - sempre disponível */}
+                        {/* Bot��o Visualizar - sempre disponível */}
                         <Button
                           variant="outline"
                           size="sm"
