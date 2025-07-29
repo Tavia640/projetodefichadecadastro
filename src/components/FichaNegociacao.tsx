@@ -172,7 +172,7 @@ const FichaNegociacao = () => {
     
     // Somar todas as entradas
     const totalEntradas = informacoesPagamento
-      .filter(info => info.tipo.includes('Entrada'))
+      .filter(info => info.tipo.includes('ª Entrada') || info.tipo === 'Restante da Entrada')
       .reduce((total, info) => total + (parseFloat(info.total) || 0), 0);
     
     const sinalInfo = informacoesPagamento.find(info => info.tipo === 'Sinal');
@@ -215,7 +215,7 @@ const FichaNegociacao = () => {
       }
     }
     
-    // Validar data do sinal (nível 2 - regional, nível 3 - diretoria)
+    // Validar data do sinal (nível 2 - regional, n��vel 3 - diretoria)
     const sinalInfo = informacoesPagamento.find(info => info.tipo === 'Sinal');
     if (sinalInfo?.primeiroVencimento) {
       const alerta = validarDataVencimentoSinal(sinalInfo.primeiroVencimento);
