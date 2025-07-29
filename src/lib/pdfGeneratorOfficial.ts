@@ -276,6 +276,7 @@ export class PDFGeneratorOfficial {
 
     // Campos da sala de vendas - mais compactos
     const camposSala = [
+      'SALA DE VENDAS: ____________________________',
       'LINER: ________________    EMPRESA (Liner): ________________',
       'CLOSER: _______________    EMPRESA (Closer): _______________',
       'PEP: __________________    EMPRESA (PEP): __________________',
