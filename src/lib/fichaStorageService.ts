@@ -182,6 +182,54 @@ export class FichaStorageService {
     }
   }
 
+  static arquivarFicha(id: string, nomeAdmin: string): boolean {
+    try {
+      const fichas = this.getFichas();
+      const index = fichas.findIndex(ficha => ficha.id === id);
+
+      if (index === -1) return false;
+
+      // Só pode arquivar fichas concluídas
+      if (fichas[index].status !== 'concluida') {
+        return false;
+      }
+
+      fichas[index].status = 'arquivada';
+
+      localStorage.setItem(this.FICHAS_KEY, JSON.stringify(fichas));
+
+      console.log(`📁 Ficha ${id} arquivada por ${nomeAdmin}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao arquivar ficha:', error);
+      return false;
+    }
+  }
+
+  static desarquivarFicha(id: string, nomeAdmin: string): boolean {
+    try {
+      const fichas = this.getFichas();
+      const index = fichas.findIndex(ficha => ficha.id === id);
+
+      if (index === -1) return false;
+
+      // Só pode desarquivar fichas arquivadas
+      if (fichas[index].status !== 'arquivada') {
+        return false;
+      }
+
+      fichas[index].status = 'concluida';
+
+      localStorage.setItem(this.FICHAS_KEY, JSON.stringify(fichas));
+
+      console.log(`📂 Ficha ${id} desarquivada por ${nomeAdmin}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao desarquivar ficha:', error);
+      return false;
+    }
+  }
+
   static getFichasDoAdmin(nomeAdmin: string): FichaCompleta[] {
     return this.getFichas().filter(ficha => ficha.adminResponsavel === nomeAdmin);
   }
