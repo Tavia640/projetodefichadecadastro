@@ -6,7 +6,7 @@ export interface FichaCompleta {
   dadosNegociacao: DadosNegociacao;
   nomeConsultor: string;
   timestamp: number;
-  status: 'pendente' | 'visualizada' | 'impressa' | 'em_andamento' | 'concluida';
+  status: 'pendente' | 'visualizada' | 'impressa' | 'em_andamento' | 'concluida' | 'arquivada';
   adminResponsavel?: string; // Nome do admin que pegou para fazer
   timestampInicio?: number; // Quando foi iniciado o atendimento
   timestampConclusao?: number; // Quando foi concluído
@@ -39,7 +39,7 @@ export class FichaStorageService {
 
       localStorage.setItem(this.FICHAS_KEY, JSON.stringify(fichas));
       
-      console.log(`✅ Ficha salva para administração - ID: ${novaFicha.id}`);
+      console.log(`��� Ficha salva para administração - ID: ${novaFicha.id}`);
       return novaFicha.id;
     } catch (error) {
       console.error('❌ Erro ao salvar ficha:', error);
