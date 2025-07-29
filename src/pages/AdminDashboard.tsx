@@ -432,6 +432,7 @@ const AdminDashboard = () => {
                   <option value="pendente">Pendentes</option>
                   <option value="em_andamento">Em Andamento</option>
                   <option value="concluida">Concluídas</option>
+                  <option value="arquivada">Arquivadas</option>
                   <option value="minhas">Minhas Fichas</option>
                 </select>
               </div>
