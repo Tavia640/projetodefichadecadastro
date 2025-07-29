@@ -261,7 +261,7 @@ export class PDFGeneratorOfficial {
     pdf.setFont('helvetica', 'normal');
     pdf.text(dadosCliente.cidade || '', margin + 25, currentY + 6);
     pdf.text(dadosCliente.estado || '', margin + cidadeWidth + 15, currentY + 6);
-    nextLine(3);
+    nextLine(1.5);
 
     // SALA DE VENDAS
     pdf.setFontSize(10);
@@ -274,21 +274,19 @@ export class PDFGeneratorOfficial {
     pdf.text('BEEBACK', margin + 95, currentY);
     nextLine(2);
 
-    // Campos da sala de vendas
+    // Campos da sala de vendas - mais compactos
     const camposSala = [
-      'LINER: ____',
-      'EMPRESA (Liner): ',
-      'CLOSER: ',
-      'EMPRESA (Closer):',
-      'PEP:',
-      'EMPRESA (PEP): ',
-      'LÍDER DE SALA: ___________________________________________________________________________________________',
-      'SUB LÍDER DE SALA: ________________________________________________________________________________________'
+      'LINER: ________________    EMPRESA (Liner): ________________',
+      'CLOSER: _______________    EMPRESA (Closer): _______________',
+      'PEP: __________________    EMPRESA (PEP): __________________',
+      'LÍDER DE SALA: ________________________________________________',
+      'SUB LÍDER DE SALA: ___________________________________________'
     ];
 
     camposSala.forEach(campo => {
+      pdf.setFontSize(9);
       pdf.text(campo, margin, currentY);
-      nextLine();
+      nextLine(0.8);
     });
 
     // CAMPO DE ASSINATURA DO CLIENTE
