@@ -39,6 +39,8 @@ export interface DadosCliente {
 export interface DadosNegociacao {
   liner?: string;
   closer?: string;
+  liderSala?: string;
+  nomeSala?: string;
   tipoVenda?: string;
   parcelasPagasSala: Array<{
     tipo: string;
