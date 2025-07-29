@@ -144,7 +144,7 @@ const AdminDashboard = () => {
       console.log('📋 Dados da ficha:', ficha);
 
       // Gerar PDF de Cadastro
-      console.log('�� Gerando PDF de Cadastro...');
+      console.log('📄 Gerando PDF de Cadastro...');
       const pdfCadastroBlob = PDFGeneratorOfficial.gerarPDFCadastroOficial(ficha.dadosCliente);
       console.log('✅ PDF de Cadastro gerado com sucesso', pdfCadastroBlob.size, 'bytes');
 
@@ -393,6 +393,18 @@ const AdminDashboard = () => {
                 <div className="ml-3">
                   <p className="text-xl font-bold text-gray-900">{estatisticas.impressas || 0}</p>
                   <p className="text-xs text-gray-600">Impressas</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <Archive className="h-6 w-6 text-gray-600" />
+                <div className="ml-3">
+                  <p className="text-xl font-bold text-gray-900">{estatisticas.arquivadas || 0}</p>
+                  <p className="text-xs text-gray-600">Arquivadas</p>
                 </div>
               </div>
             </CardContent>
