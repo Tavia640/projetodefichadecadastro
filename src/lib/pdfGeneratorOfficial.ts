@@ -566,7 +566,7 @@ export class PDFGeneratorOfficial {
     });
     nextLine(1.5);
 
-    // Dados dos pagamentos - estrutura fixa SEM segunda entrada
+    // Dados dos pagamentos - estrutura fixa sem segunda entrada
     const tiposPagamentoFixos = ['Entrada', 'Sinal', 'Saldo'];
     const informacoesPagamento = dadosNegociacao.informacoesPagamento || [];
 
