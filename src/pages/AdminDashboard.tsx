@@ -102,9 +102,39 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleArquivarFicha = (ficha: FichaCompleta) => {
+    if (!session) return;
+
+    const confirmar = window.confirm(`Tem certeza que deseja arquivar a ficha de ${ficha.dadosCliente.nome}?`);
+    if (!confirmar) return;
+
+    const sucesso = FichaStorageService.arquivarFicha(ficha.id, session.nome);
+    if (sucesso) {
+      carregarFichas();
+      alert(`📁 Ficha arquivada com sucesso!`);
+    } else {
+      alert('❌ Não foi possível arquivar a ficha. Só é possível arquivar fichas concluídas.');
+    }
+  };
+
+  const handleDesarquivarFicha = (ficha: FichaCompleta) => {
+    if (!session) return;
+
+    const confirmar = window.confirm(`Tem certeza que deseja desarquivar a ficha de ${ficha.dadosCliente.nome}?`);
+    if (!confirmar) return;
+
+    const sucesso = FichaStorageService.desarquivarFicha(ficha.id, session.nome);
+    if (sucesso) {
+      carregarFichas();
+      alert(`📂 Ficha desarquivada com sucesso!`);
+    } else {
+      alert('❌ Não foi possível desarquivar a ficha.');
+    }
+  };
+
   const getFichasFiltradas = () => {
     if (filtroStatus === 'todas') return fichas;
-    if (filtroStatus === 'minhas') return fichas.filter(f => f.adminResponsavel === session?.nome);
+    if (filtroStatus === 'minhas') return fichas.filter(f => f.adminResponsável === session?.nome);
     return fichas.filter(f => f.status === filtroStatus);
   };
 
