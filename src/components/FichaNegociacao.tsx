@@ -107,11 +107,9 @@ const FichaNegociacao = () => {
     valor: ''
   }]);
   const [informacoesPagamento, setInformacoesPagamento] = useState<InformacaoPagamento[]>([
-    { id: '1', tipo: '1ª Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-    { id: '2', tipo: 'Restante da Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-    { id: '3', tipo: '2ª Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-    { id: '4', tipo: 'Sinal', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-    { id: '5', tipo: 'Saldo', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' }
+    { id: '1', tipo: 'Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
+    { id: '2', tipo: 'Sinal', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
+    { id: '3', tipo: 'Saldo', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' }
   ]);
 
   // Estados para dados do Supabase
@@ -697,7 +695,7 @@ const FichaNegociacao = () => {
 
   const imprimirFichas = () => {
     try {
-      console.log('🖨️ Iniciando processo de impressão...');
+      console.log('���️ Iniciando processo de impressão...');
 
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
