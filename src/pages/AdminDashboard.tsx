@@ -249,6 +249,7 @@ const AdminDashboard = () => {
       case 'impressa': return 'bg-green-100 text-green-800';
       case 'em_andamento': return 'bg-orange-100 text-orange-800';
       case 'concluida': return 'bg-green-100 text-green-800';
+      case 'arquivada': return 'bg-gray-100 text-gray-600';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -260,6 +261,7 @@ const AdminDashboard = () => {
       case 'impressa': return 'Impressa';
       case 'em_andamento': return 'Em Andamento';
       case 'concluida': return 'Concluída';
+      case 'arquivada': return 'Arquivada';
       default: return status;
     }
   };
