@@ -523,7 +523,7 @@ export class PDFGeneratorOfficial {
           safeString(contrato?.torre),
           safeString(contrato?.apartamento),
           safeString(contrato?.cota),
-          '( ) Sim ( ) Não',
+          '____________________', // Caixa para consultor preencher
           '( ) Sim ( ) Não',
           contrato?.valor ? `R$ ${safeString(contrato.valor)}` : ''
         ];
@@ -567,7 +567,7 @@ export class PDFGeneratorOfficial {
     nextLine(1.5);
 
     // Dados dos pagamentos - estrutura fixa SEM segunda entrada
-    const tiposPagamentoFixos = ['Entrada', 'Entrada Restante', 'Sinal', 'Saldo'];
+    const tiposPagamentoFixos = ['Entrada', 'Sinal', 'Saldo'];
     const informacoesPagamento = dadosNegociacao.informacoesPagamento || [];
 
     tiposPagamentoFixos.forEach(tipoFixo => {
@@ -599,6 +599,20 @@ export class PDFGeneratorOfficial {
       });
       nextLine();
     });
+
+      // CAMPO DE ASSINATURA DO CLIENTE
+      nextLine(4);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('ASSINATURA DO CLIENTE:', margin, currentY);
+
+      // Linha para assinatura
+      pdf.line(margin + 50, currentY + 10, pageWidth - margin, currentY + 10);
+
+      nextLine(2);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      pdf.text('Data: ___/___/______', margin, currentY);
 
       console.log('✅ PDF de Negociação gerado com sucesso');
       const blob = pdf.output('blob');
