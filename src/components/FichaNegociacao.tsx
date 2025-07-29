@@ -798,6 +798,26 @@ const FichaNegociacao = () => {
                 className="mt-1"
               />
             </div>
+            <div>
+              <Label htmlFor="liderSala">LÍDER DE SALA:</Label>
+              <Input
+                id="liderSala"
+                value={liderSala}
+                onChange={(e) => setLiderSala(e.target.value)}
+                className="mt-1"
+                placeholder="Nome do líder de sala"
+              />
+            </div>
+            <div>
+              <Label htmlFor="nomeSala">NOME DA SALA:</Label>
+              <Input
+                id="nomeSala"
+                value={nomeSala}
+                onChange={(e) => setNomeSala(e.target.value)}
+                className="mt-1"
+                placeholder="Nome da sala de vendas"
+              />
+            </div>
           </div>
 
           {/* Tipo de Venda */}
