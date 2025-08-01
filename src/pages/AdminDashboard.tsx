@@ -73,9 +73,19 @@ const AdminDashboard = () => {
   };
 
   const handleEncerrarAtendimento = (ficha: FichaCompleta) => {
-    if (!session) return;
+    if (!session) {
+      alert('❌ Erro: Sessão não encontrada');
+      return;
+    }
 
-    const confirmar = window.confirm(`Tem certeza que deseja encerrar o atendimento da ficha de ${ficha.dadosCliente.nome}?`);
+    console.log('🔍 Debug Encerrar Atendimento:');
+    console.log('- Ficha ID:', ficha.id);
+    console.log('- Status da ficha:', ficha.status);
+    console.log('- Admin responsável na ficha:', ficha.adminResponsavel);
+    console.log('- Admin da sessão atual:', session.nome);
+    console.log('- Comparação:', ficha.adminResponsavel === session.nome);
+
+    const confirmar = window.confirm(`Tem certeza que deseja encerrar o atendimento da ficha de ${ficha.dadosCliente.nome}?\n\nAdmin responsável: ${ficha.adminResponsavel}\nSua sessão: ${session.nome}`);
     if (!confirmar) return;
 
     const sucesso = FichaStorageService.encerrarAtendimento(ficha.id, session.nome);
@@ -83,7 +93,7 @@ const AdminDashboard = () => {
       carregarFichas();
       alert(`✅ Atendimento encerrado com sucesso!`);
     } else {
-      alert('❌ Não foi possível encerrar o atendimento. Verifique se você é o responsável por esta ficha.');
+      alert(`❌ Não foi possível encerrar o atendimento.\n\nDetalhes:\n- Status da ficha: ${ficha.status}\n- Admin responsável: ${ficha.adminResponsavel}\n- Sua sessão: ${session.nome}\n\nVerifique o console para mais informações.`);
     }
   };
 
