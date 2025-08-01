@@ -338,7 +338,7 @@ const FichaNegociacao = () => {
     return novasInformacoes;
   };
 
-  // Executar validações sempre que informações mudarem
+  // Executar valida��ões sempre que informações mudarem
   useEffect(() => {
     atualizarAlertas();
   }, [informacoesPagamento, contratos]);
@@ -786,12 +786,14 @@ const FichaNegociacao = () => {
           {/* Seção Inicial */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="liner">LINER:</Label>
+              <Label htmlFor="liner">LINER: *</Label>
               <Input
                 id="liner"
                 value={liner}
                 onChange={(e) => setLiner(e.target.value)}
                 className="mt-1"
+                required
+                placeholder="Nome do liner (obrigatório)"
               />
             </div>
             <div>
