@@ -405,11 +405,13 @@ export class PDFGeneratorOfficial {
     nextLine();
     pdf.text(`SALA DE VENDAS: ${dadosNegociacao.nomeSala || '_________________'}`, margin, currentY);
     nextLine();
+    pdf.text(`LINER: ${dadosNegociacao.liner || '_______________'}     CLOSER: ${dadosNegociacao.closer || '_______________'}`, margin, currentY);
+    nextLine();
     pdf.text(`LÍDER DE SALA: ${dadosNegociacao.liderSala || '_________________'}`, margin, currentY);
     nextLine(2);
 
     // TIPO DE VENDA - Checkboxes com marcação correta
-    const tiposVenda = ['PADRÃO', 'SEMESTRAL', 'ANUAL', 'À VISTA', 'ATÉ 36x', 'LINEAR'];
+    const tiposVenda = ['PADRÃO', 'SEMESTRAL', 'ANUAL', '�� VISTA', 'ATÉ 36x', 'LINEAR'];
     let xPos = margin;
 
     tiposVenda.forEach(tipo => {
