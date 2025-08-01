@@ -334,6 +334,26 @@ const AdminDashboard = () => {
                 <RefreshCw className="h-4 w-4" />
                 <span>Atualizar</span>
               </Button>
+              {process.env.NODE_ENV === 'development' && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDebugFichas}
+                    className="flex items-center space-x-2 text-yellow-600"
+                  >
+                    <span>🔍 Debug</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleResetarStatusFichas}
+                    className="flex items-center space-x-2 text-red-600"
+                  >
+                    <span>🔄 Reset</span>
+                  </Button>
+                </>
+              )}
               <Button
                 variant="outline"
                 size="sm"
