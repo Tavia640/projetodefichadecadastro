@@ -271,17 +271,18 @@ export class PDFGeneratorOfficial {
       nextLine(1.5);
 
       // SALA DE VENDAS
+      nextLine(1); // Espaço adicional antes do título
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'bold');
       pdf.text('SALA DE VENDAS:', margin, currentY);
-      nextLine(1.2);
+      nextLine(1.5);
 
       // Checkbox BEEBACK (não marcado por padrão)
       pdf.setFontSize(8);
       pdf.setFont('helvetica', 'normal');
       pdf.rect(margin, currentY - 2.5, 2.5, 2.5);
       pdf.text('BEEBACK', margin + 4, currentY);
-      nextLine(1.5);
+      nextLine(1.8);
 
       // Campos da sala de vendas com dados preenchidos quando disponível
       const salaVendas = dadosNegociacao?.nomeSala || '';
