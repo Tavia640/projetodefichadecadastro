@@ -145,7 +145,7 @@ const AdminDashboard = () => {
 
       // Gerar PDF de Cadastro
       console.log('📄 Gerando PDF de Cadastro...');
-      const pdfCadastroBlob = PDFGeneratorOfficial.gerarPDFCadastroOficial(ficha.dadosCliente);
+      const pdfCadastroBlob = PDFGeneratorOfficial.gerarPDFCadastroOficial(ficha.dadosCliente, ficha.dadosNegociacao);
       console.log('✅ PDF de Cadastro gerado com sucesso', pdfCadastroBlob.size, 'bytes');
 
       // Gerar PDF de Negociação
