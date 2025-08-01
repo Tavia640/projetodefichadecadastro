@@ -12,7 +12,7 @@ export class PDFGeneratorOfficial {
         throw new Error('Dados do cliente não fornecidos para PDF de cadastro');
       }
 
-      // Função auxiliar para converter valores para string de forma segura
+      // Funç��o auxiliar para converter valores para string de forma segura
       const safeString = (value: any): string => {
         if (value === null || value === undefined) return '';
         return String(value);
@@ -116,34 +116,36 @@ export class PDFGeneratorOfficial {
     // Profissão
     drawBox(margin, currentY, tableWidth, rowHeight);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Profissão:', margin + 2, currentY + 6);
+    pdf.text('Profissão:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(safeString(dadosCliente.profissao), margin + 30, currentY + 6);
-    nextLine(1.7);
+    pdf.text(safeString(dadosCliente.profissao), margin + 32, currentY + 5);
+    nextLine(1.4);
 
     // Estado Civil
     drawBox(margin, currentY, tableWidth, rowHeight);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Estado Civil:', margin + 2, currentY + 6);
+    pdf.text('Estado Civil:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(safeString(dadosCliente.estadoCivil), margin + 35, currentY + 6);
-    nextLine(1.7);
+    pdf.text(safeString(dadosCliente.estadoCivil), margin + 37, currentY + 5);
+    nextLine(1.4);
 
     // E-mail
     drawBox(margin, currentY, tableWidth, rowHeight);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('E-mail:', margin + 2, currentY + 6);
+    pdf.text('E-mail:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(safeString(dadosCliente.email), margin + 25, currentY + 6);
-    nextLine(1.7);
+    const emailTexto = safeString(dadosCliente.email);
+    const emailFormatado = emailTexto.length > 40 ? emailTexto.substring(0, 40) + '...' : emailTexto;
+    pdf.text(emailFormatado, margin + 27, currentY + 5);
+    nextLine(1.4);
 
     // Telefone
     drawBox(margin, currentY, tableWidth, rowHeight);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Telefone:', margin + 2, currentY + 6);
+    pdf.text('Telefone:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(safeString(dadosCliente.telefone), margin + 30, currentY + 6);
-    nextLine(1.5);
+    pdf.text(safeString(dadosCliente.telefone), margin + 32, currentY + 5);
+    nextLine(1.2);
 
     // DADOS DO CÔNJUGE
     pdf.setFontSize(12);
