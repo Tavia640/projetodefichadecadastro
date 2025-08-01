@@ -103,15 +103,15 @@ export class PDFGeneratorOfficial {
     drawBox(margin + rgWidth + orgaoWidth, currentY, ufWidth, rowHeight);
 
     pdf.setFont('helvetica', 'bold');
-    pdf.text('RG:', margin + 2, currentY + 6);
-    pdf.text('ÓRGÃO:', margin + rgWidth + 2, currentY + 6);
-    pdf.text('UF:', margin + rgWidth + orgaoWidth + 2, currentY + 6);
+    pdf.text('RG:', margin + 2, currentY + 5);
+    pdf.text('ÓRGÃO:', margin + rgWidth + 2, currentY + 5);
+    pdf.text('UF:', margin + rgWidth + orgaoWidth + 2, currentY + 5);
 
     pdf.setFont('helvetica', 'normal');
-    pdf.text(safeString(dadosCliente.rg), margin + 15, currentY + 6);
-    pdf.text(safeString(dadosCliente.orgaoEmissor), margin + rgWidth + 25, currentY + 6);
-    pdf.text(safeString(dadosCliente.estadoEmissor), margin + rgWidth + orgaoWidth + 15, currentY + 6);
-    nextLine(1.7);
+    pdf.text(safeString(dadosCliente.rg), margin + 18, currentY + 5);
+    pdf.text(safeString(dadosCliente.orgaoEmissor), margin + rgWidth + 30, currentY + 5);
+    pdf.text(safeString(dadosCliente.estadoEmissor), margin + rgWidth + orgaoWidth + 18, currentY + 5);
+    nextLine(1.4);
 
     // Profissão
     drawBox(margin, currentY, tableWidth, rowHeight);
