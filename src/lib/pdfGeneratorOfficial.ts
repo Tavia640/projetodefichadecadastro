@@ -576,9 +576,22 @@ export class PDFGeneratorOfficial {
     const informacoesPagamento = dadosNegociacao.informacoesPagamento || [];
 
     tiposPagamentoFixos.forEach(tipoFixo => {
-      const infoPagamento = informacoesPagamento.find(info =>
-        info && info.tipo && info.tipo.toLowerCase().includes(tipoFixo.toLowerCase())
-      );
+      let infoPagamento;
+
+      // Busca específica por tipo
+      if (tipoFixo === 'Entrada') {
+        infoPagamento = informacoesPagamento.find(info =>
+          info && info.tipo && (info.tipo === '1ª Entrada' || info.tipo === 'Entrada')
+        );
+      } else if (tipoFixo === 'Entrada Restante') {
+        infoPagamento = informacoesPagamento.find(info =>
+          info && info.tipo && info.tipo === 'Restante da Entrada'
+        );
+      } else {
+        infoPagamento = informacoesPagamento.find(info =>
+          info && info.tipo && info.tipo.toLowerCase().includes(tipoFixo.toLowerCase())
+        );
+      }
 
       xPos2 = margin;
       const pagamentoValues = [
