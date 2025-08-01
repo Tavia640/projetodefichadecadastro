@@ -51,8 +51,8 @@ const AdminDashboard = () => {
   const handleVisualizarFicha = (ficha: FichaCompleta) => {
     setFichaVisualizacao(ficha);
     setModalOpen(true);
-    FichaStorageService.atualizarStatus(ficha.id, 'visualizada');
-    carregarFichas();
+    // Não alterar automaticamente o status para 'visualizada'
+    // O status só deve mudar quando o admin pegar para fazer
   };
 
   const handleCloseModal = () => {
