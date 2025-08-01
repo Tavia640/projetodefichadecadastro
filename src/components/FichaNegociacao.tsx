@@ -581,6 +581,12 @@ const FichaNegociacao = () => {
     try {
       console.log('🚀 Iniciando processo de salvamento...');
 
+      // Validar campos obrigatórios
+      if (!liner.trim()) {
+        alert('❌ Campo LINER é obrigatório!');
+        return;
+      }
+
       // Verificar se há alertas críticos (apenas erros, não avisos)
       const alertasCriticos = Object.values(alertas).filter(alerta =>
         alerta.includes('ERRO') && !alerta.includes('AVISO')
