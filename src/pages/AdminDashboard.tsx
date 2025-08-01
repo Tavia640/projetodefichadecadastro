@@ -238,6 +238,31 @@ const AdminDashboard = () => {
     navigate('/login');
   };
 
+  const handleDebugFichas = () => {
+    const fichasData = FichaStorageService.exportarFichas();
+    console.log('🔍 Debug - Dados das fichas:', fichasData);
+    const fichas = FichaStorageService.getFichas();
+    console.log('🔍 Debug - Status das fichas:');
+    fichas.forEach((ficha, index) => {
+      console.log(`Ficha ${index + 1}: ID=${ficha.id}, Status=${ficha.status}, Nome=${ficha.dadosCliente.nome}, Admin=${ficha.adminResponsavel}`);
+    });
+    alert(`Debug: ${fichas.length} fichas encontradas. Verifique o console para detalhes.`);
+  };
+
+  const handleResetarStatusFichas = () => {
+    if (window.confirm('Deseja resetar o status de todas as fichas para "pendente"?')) {
+      const fichas = FichaStorageService.getFichas();
+      fichas.forEach(ficha => {
+        ficha.status = 'pendente';
+        ficha.adminResponsavel = undefined;
+        ficha.timestampInicio = undefined;
+      });
+      localStorage.setItem('gav_fichas_admin', JSON.stringify(fichas));
+      carregarFichas();
+      alert('✅ Status de todas as fichas resetado para "pendente"');
+    }
+  };
+
   const formatarData = (timestamp: number) => {
     return new Date(timestamp).toLocaleString('pt-BR');
   };
