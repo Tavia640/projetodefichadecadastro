@@ -2,20 +2,33 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
+import { SessionService } from '@/lib/sessionService';
 import gavLogo from '@/assets/gav-logo.png';
 
 const Welcome = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Navegar para a próxima página após 6 segundos
-    const timerNavigate = setTimeout(() => {
-      navigate('/cadastro-cliente');
-    }, 6000);
+    const session = SessionService.getSession();
 
-    return () => {
-      clearTimeout(timerNavigate);
-    };
+    if (!session) {
+      // Se não há sessão, redirecionar para login após 3 segundos
+      const timerNavigate = setTimeout(() => {
+        navigate('/login');
+      }, 3000);
+      return () => clearTimeout(timerNavigate);
+    }
+
+    // Se há sessão, redirecionar baseado no perfil após 3 segundos
+    const timerNavigate = setTimeout(() => {
+      if (session.perfil === "admin") {
+        navigate('/admin-dashboard');
+      } else {
+        navigate('/cadastro-cliente');
+      }
+    }, 3000);
+
+    return () => clearTimeout(timerNavigate);
   }, [navigate]);
 
   return (

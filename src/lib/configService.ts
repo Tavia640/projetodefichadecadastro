@@ -36,7 +36,12 @@ export class ConfigService {
         .single();
 
       if (error) {
-        console.error(`❌ Erro ao buscar configuração ${chave}:`, error);
+        // Se a tabela não existe, retornar null sem erro
+        if (error.message?.includes('does not exist')) {
+          console.warn(`⚠️ Tabela de configurações não existe para ${chave}`);
+          return null;
+        }
+        console.error(`❌ Erro ao buscar configuração ${chave}:`, error.message || JSON.stringify(error));
         return null;
       }
 
@@ -86,7 +91,12 @@ export class ConfigService {
           .eq('ativo', true);
 
         if (error) {
-          console.error('❌ Erro ao buscar configurações:', error);
+          // Se a tabela não existe, retornar resultado vazio sem erro
+          if (error.message?.includes('does not exist')) {
+            console.warn('⚠️ Tabela de configurações não existe, retornando valores vazios');
+            return result;
+          }
+          console.error('❌ Erro ao buscar configurações:', error.message || JSON.stringify(error));
           return result;
         }
 
@@ -101,8 +111,8 @@ export class ConfigService {
 
       return result;
 
-    } catch (error) {
-      console.error('❌ Erro inesperado ao buscar configurações:', error);
+    } catch (error: any) {
+      console.warn('⚠️ Erro ao buscar configurações (usando valores padrão):', error.message || JSON.stringify(error));
       return {};
     }
   }
