@@ -117,6 +117,24 @@ const FichaNegociacao = () => {
   const [empreendimentos, setEmpreendimentos] = useState<Empreendimento[]>([]);
   const [categoriasPreco, setCategoriasPreco] = useState<CategoriaPreco[]>([]);
   const [torres, setTorres] = useState<Torre[]>([]);
+
+  // Função para sincronizar formas de pagamento da primeira entrada
+  const sincronizarFormasPagamento = (formasPagamento: string[]) => {
+    setInformacoesPagamento(prev => {
+      const novasInformacoes = [...prev];
+      const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
+
+      if (primeiraEntradaIndex !== -1 && formasPagamento.length > 0) {
+        // Pegar a primeira forma de pagamento v��lida
+        const primeiraForma = formasPagamento.find(forma => forma && forma.trim() !== '');
+        if (primeiraForma) {
+          novasInformacoes[primeiraEntradaIndex].formaPagamento = primeiraForma;
+        }
+      }
+
+      return novasInformacoes;
+    });
+  };
   const [loading, setLoading] = useState(true);
 
   // Estados para alertas de autorização
@@ -631,7 +649,7 @@ const FichaNegociacao = () => {
       // Salvar ficha para os administradores
       const fichaId = FichaStorageService.salvarFicha(dadosCliente, dadosNegociacao, nomeConsultor);
 
-      console.log('✅ Processo concluído com sucesso!');
+      console.log('✅ Processo conclu��do com sucesso!');
       alert(`✅ Ficha salva com sucesso!\n\nID da Ficha: ${fichaId}\n\nA ficha foi enviada para a administração e estará disponível para impressão.`);
 
     } catch (error: any) {
@@ -1202,7 +1220,7 @@ const FichaNegociacao = () => {
             <div className="border border-destructive rounded-lg p-4 bg-destructive/5 print:hidden">
               <div className="flex items-center space-x-2 mb-3">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
-                <Label className="text-lg font-semibold text-destructive">Alertas de Validação</Label>
+                <Label className="text-lg font-semibold text-destructive">Alertas de Valida��ão</Label>
               </div>
               <div className="space-y-2">
                 {Object.entries(alertas).map(([key, mensagem]) => {
