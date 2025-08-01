@@ -149,10 +149,11 @@ export class PDFGeneratorOfficial {
       nextLine(1.5);
 
       // DADOS DO CÔNJUGE
+      nextLine(0.5); // Espaço adicional antes do título
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'bold');
       pdf.text('DADOS DO CONJUGE:', margin, currentY);
-      nextLine(1.8);
+      nextLine(2);
 
       // Nome do cônjuge
       drawBox(margin, currentY, tableWidth, rowHeight);
