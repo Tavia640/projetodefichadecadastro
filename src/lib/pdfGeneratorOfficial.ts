@@ -74,20 +74,24 @@ export class PDFGeneratorOfficial {
     
     // Nome
     drawBox(margin, currentY, tableWidth, rowHeight);
-    pdf.setFontSize(10);
+    pdf.setFontSize(9);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Nome:', margin + 2, currentY + 6);
+    pdf.text('Nome:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(safeString(dadosCliente.nome), margin + 20, currentY + 6);
-    nextLine(1.7);
+    const nomeTexto = safeString(dadosCliente.nome);
+    // Truncar nome se muito longo
+    const nomeMaxLength = 60;
+    const nomeFormatado = nomeTexto.length > nomeMaxLength ? nomeTexto.substring(0, nomeMaxLength) + '...' : nomeTexto;
+    pdf.text(nomeFormatado, margin + 25, currentY + 5);
+    nextLine(1.4);
 
     // CPF
     drawBox(margin, currentY, tableWidth, rowHeight);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('CPF:', margin + 2, currentY + 6);
+    pdf.text('CPF:', margin + 2, currentY + 5);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(safeString(dadosCliente.cpf), margin + 20, currentY + 6);
-    nextLine(1.7);
+    pdf.text(safeString(dadosCliente.cpf), margin + 25, currentY + 5);
+    nextLine(1.4);
 
     // RG, Órgão, UF
     const rgWidth = tableWidth * 0.5;
