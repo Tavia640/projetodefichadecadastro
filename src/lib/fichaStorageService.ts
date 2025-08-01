@@ -127,19 +127,36 @@ export class FichaStorageService {
 
   static encerrarAtendimento(id: string, nomeAdmin: string): boolean {
     try {
+      console.log('🔍 FichaStorageService.encerrarAtendimento - Debug:');
+      console.log('- ID da ficha:', id);
+      console.log('- Nome do admin:', nomeAdmin);
+
       const fichas = this.getFichas();
       const index = fichas.findIndex(ficha => ficha.id === id);
 
-      if (index === -1) return false;
+      console.log('- Índice encontrado:', index);
+
+      if (index === -1) {
+        console.error('❌ Ficha não encontrada');
+        return false;
+      }
+
+      const ficha = fichas[index];
+      console.log('- Status atual da ficha:', ficha.status);
+      console.log('- Admin responsável na ficha:', ficha.adminResponsavel);
+      console.log('- Tipo do admin responsável:', typeof ficha.adminResponsavel);
+      console.log('- Tipo do admin atual:', typeof nomeAdmin);
 
       // Verificar se o admin é o responsável pela ficha
       if (fichas[index].adminResponsavel !== nomeAdmin) {
         console.warn(`⚠️ Admin ${nomeAdmin} não é responsável pela ficha ${id}`);
+        console.warn(`⚠️ Admin responsável registrado: "${fichas[index].adminResponsavel}"`);
         return false;
       }
 
       // Verificar se a ficha está em andamento
       if (fichas[index].status !== 'em_andamento') {
+        console.warn(`⚠️ Ficha não está em andamento. Status atual: "${fichas[index].status}"`);
         return false;
       }
 
