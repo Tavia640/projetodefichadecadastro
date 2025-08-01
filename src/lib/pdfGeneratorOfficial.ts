@@ -591,23 +591,27 @@ export class PDFGeneratorOfficial {
       const tiposPagamentoFixos = ['Entrada', 'Entrada Restante', 'Sinal', 'Saldo'];
       const informacoesPagamento = dadosNegociacao.informacoesPagamento || [];
 
+      console.log('🔍 Informações de pagamento disponíveis:', informacoesPagamento);
+
       tiposPagamentoFixos.forEach(tipoFixo => {
         let infoPagamento;
 
         // Busca específica por tipo
         if (tipoFixo === 'Entrada') {
           infoPagamento = informacoesPagamento.find(info =>
-            info && info.tipo && (info.tipo === '1ª Entrada' || info.tipo === '1a Entrada' || info.tipo === 'Entrada' || info.tipo.toLowerCase().includes('entrada'))
+            info && info.tipo && (info.tipo === '1ª Entrada' || info.tipo === '1a Entrada' || info.tipo === 'Entrada')
           );
         } else if (tipoFixo === 'Entrada Restante') {
           infoPagamento = informacoesPagamento.find(info =>
-            info && info.tipo && (info.tipo === 'Restante da Entrada' || info.tipo.toLowerCase().includes('restante'))
+            info && info.tipo && (info.tipo === 'Restante da Entrada')
           );
         } else {
           infoPagamento = informacoesPagamento.find(info =>
             info && info.tipo && info.tipo.toLowerCase().includes(tipoFixo.toLowerCase())
           );
         }
+
+        console.log(`🔍 Buscando ${tipoFixo}, encontrado:`, infoPagamento);
 
         xPos2 = margin;
         const pagamentoValues = [
