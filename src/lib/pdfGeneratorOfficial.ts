@@ -274,13 +274,18 @@ export class PDFGeneratorOfficial {
     pdf.text('BEEBACK', margin + 95, currentY);
     nextLine(2);
 
-    // Campos da sala de vendas - mais compactos
+    // Campos da sala de vendas - preenchidos automaticamente quando disponível
+    const salaVendas = dadosNegociacao?.nomeSala || '____________________________';
+    const liner = dadosNegociacao?.liner || '________________';
+    const closer = dadosNegociacao?.closer || '_______________';
+    const liderSala = dadosNegociacao?.liderSala || '________________________________________________';
+
     const camposSala = [
-      'SALA DE VENDAS: ____________________________',
-      'LINER: ________________    EMPRESA (Liner): ________________',
-      'CLOSER: _______________    EMPRESA (Closer): _______________',
+      `SALA DE VENDAS: ${salaVendas}`,
+      `LINER: ${liner}    EMPRESA (Liner): ________________`,
+      `CLOSER: ${closer}    EMPRESA (Closer): _______________`,
       'PEP: __________________    EMPRESA (PEP): __________________',
-      'LÍDER DE SALA: ________________________________________________',
+      `LÍDER DE SALA: ${liderSala}`,
       'SUB LÍDER DE SALA: ___________________________________________'
     ];
 
