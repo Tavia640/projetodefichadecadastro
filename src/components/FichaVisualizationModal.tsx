@@ -88,6 +88,20 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
                     <span className="font-medium">RG:</span>
                     <span>{ficha.dadosCliente.rg}</span>
                   </div>
+                  {ficha.dadosCliente.profissao && (
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-orange-500" />
+                      <span className="font-medium">Profissão:</span>
+                      <span>{ficha.dadosCliente.profissao}</span>
+                    </div>
+                  )}
+                  {ficha.dadosCliente.estadoCivil && (
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-pink-500" />
+                      <span className="font-medium">Estado Civil:</span>
+                      <span>{ficha.dadosCliente.estadoCivil}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -114,6 +128,13 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
                       ].filter(Boolean).join(', ')}
                     </span>
                   </div>
+                  {ficha.dadosCliente.orgaoEmissor && (
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-gray-500" />
+                      <span className="font-medium">Órgão Emissor:</span>
+                      <span>{ficha.dadosCliente.orgaoEmissor} - {ficha.dadosCliente.estadoEmissor}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
