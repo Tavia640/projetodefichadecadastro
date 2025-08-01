@@ -53,6 +53,108 @@ export type Database = {
         }
         Relationships: []
       }
+      clientes: {
+        Row: {
+          cpf: string
+          cpf_conjuge: string | null
+          created_at: string | null
+          data_nascimento: string
+          data_nascimento_conjuge: string | null
+          email: string
+          email_conjuge: string | null
+          estado_civil: string
+          estado_emissor: string
+          estado_emissor_conjuge: string | null
+          id: string
+          nome: string
+          nome_conjuge: string | null
+          orgao_emissor: string
+          orgao_emissor_conjuge: string | null
+          profissao: string
+          profissao_conjuge: string | null
+          rg: string
+          rg_conjuge: string | null
+          telefone: string
+          telefone_conjuge: string | null
+        }
+        Insert: {
+          cpf: string
+          cpf_conjuge?: string | null
+          created_at?: string | null
+          data_nascimento: string
+          data_nascimento_conjuge?: string | null
+          email: string
+          email_conjuge?: string | null
+          estado_civil: string
+          estado_emissor: string
+          estado_emissor_conjuge?: string | null
+          id?: string
+          nome: string
+          nome_conjuge?: string | null
+          orgao_emissor: string
+          orgao_emissor_conjuge?: string | null
+          profissao: string
+          profissao_conjuge?: string | null
+          rg: string
+          rg_conjuge?: string | null
+          telefone: string
+          telefone_conjuge?: string | null
+        }
+        Update: {
+          cpf?: string
+          cpf_conjuge?: string | null
+          created_at?: string | null
+          data_nascimento?: string
+          data_nascimento_conjuge?: string | null
+          email?: string
+          email_conjuge?: string | null
+          estado_civil?: string
+          estado_emissor?: string
+          estado_emissor_conjuge?: string | null
+          id?: string
+          nome?: string
+          nome_conjuge?: string | null
+          orgao_emissor?: string
+          orgao_emissor_conjuge?: string | null
+          profissao?: string
+          profissao_conjuge?: string | null
+          rg?: string
+          rg_conjuge?: string | null
+          telefone?: string
+          telefone_conjuge?: string | null
+        }
+        Relationships: []
+      }
+      configuracoes: {
+        Row: {
+          ativo: boolean
+          chave: string
+          created_at: string
+          descricao: string | null
+          id: string
+          updated_at: string
+          valor: string
+        }
+        Insert: {
+          ativo?: boolean
+          chave: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          updated_at?: string
+          valor: string
+        }
+        Update: {
+          ativo?: boolean
+          chave?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          updated_at?: string
+          valor?: string
+        }
+        Relationships: []
+      }
       contratos: {
         Row: {
           apartamento: string | null
@@ -151,6 +253,39 @@ export type Database = {
         }
         Relationships: []
       }
+      fichas: {
+        Row: {
+          created_at: string
+          dados_cliente: Json
+          dados_negociacao: Json
+          id: string
+          nome_admin: string | null
+          nome_consultor: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dados_cliente: Json
+          dados_negociacao: Json
+          id?: string
+          nome_admin?: string | null
+          nome_consultor: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dados_cliente?: Json
+          dados_negociacao?: Json
+          id?: string
+          nome_admin?: string | null
+          nome_consultor?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fichas_negociacao: {
         Row: {
           closer: string
@@ -215,6 +350,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notes: {
+        Row: {
+          color: string
+          content: string
+          created_at: string
+          expires_at: string
+          id: string
+          position_x: number
+          position_y: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          content?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          position_x?: number
+          position_y?: number
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          content?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          position_x?: number
+          position_y?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       pagamentos: {
         Row: {
@@ -486,7 +660,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_expired_notes: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

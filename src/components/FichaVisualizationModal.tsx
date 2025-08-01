@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { FichaCompleta } from '@/lib/fichaStorageService';
+import { FichaCompleta } from '@/lib/fichaSupabaseService';
 import { User, Phone, Mail, MapPin, CreditCard, FileText, Calendar } from 'lucide-react';
 
 interface FichaVisualizationModalProps {
@@ -19,7 +19,7 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
 }) => {
   if (!ficha) return null;
 
-  const formatarData = (timestamp: number) => {
+  const formatarData = (timestamp: string) => {
     return new Date(timestamp).toLocaleString('pt-BR');
   };
 
@@ -38,7 +38,7 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Ficha de Negociação - {ficha.dadosCliente.nome}
+            Ficha de Negociação - {ficha.dados_cliente.nome}
           </DialogTitle>
         </DialogHeader>
 
@@ -52,16 +52,23 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 text-blue-500" />
                 <span className="font-medium">Consultor:</span>
-                <span>{ficha.nomeConsultor}</span>
+                <span>{ficha.nome_consultor}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-blue-500" />
                 <span className="font-medium">Data:</span>
-                <span>{formatarData(ficha.timestamp)}</span>
+                <span>{formatarData(ficha.created_at)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline">Status: {ficha.status}</Badge>
               </div>
+              {ficha.nome_admin && (
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-orange-500" />
+                  <span className="font-medium">Admin Responsável:</span>
+                  <span>{ficha.nome_admin}</span>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -76,30 +83,30 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-blue-500" />
                     <span className="font-medium">Nome:</span>
-                    <span>{ficha.dadosCliente.nome}</span>
+                    <span>{ficha.dados_cliente.nome}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CreditCard className="h-4 w-4 text-blue-500" />
                     <span className="font-medium">CPF:</span>
-                    <span>{formatarCPF(ficha.dadosCliente.cpf)}</span>
+                    <span>{formatarCPF(ficha.dados_cliente.cpf)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4 text-blue-500" />
                     <span className="font-medium">RG:</span>
-                    <span>{ficha.dadosCliente.rg}</span>
+                    <span>{ficha.dados_cliente.rg}</span>
                   </div>
-                  {ficha.dadosCliente.profissao && (
+                  {ficha.dados_cliente.profissao && (
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-orange-500" />
                       <span className="font-medium">Profissão:</span>
-                      <span>{ficha.dadosCliente.profissao}</span>
+                      <span>{ficha.dados_cliente.profissao}</span>
                     </div>
                   )}
-                  {ficha.dadosCliente.estadoCivil && (
+                  {ficha.dados_cliente.estadoCivil && (
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-pink-500" />
                       <span className="font-medium">Estado Civil:</span>
-                      <span>{ficha.dadosCliente.estadoCivil}</span>
+                      <span>{ficha.dados_cliente.estadoCivil}</span>
                     </div>
                   )}
                 </div>
@@ -107,32 +114,32 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-green-500" />
                     <span className="font-medium">Telefone:</span>
-                    <span>{ficha.dadosCliente.telefone}</span>
+                    <span>{ficha.dados_cliente.telefone}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-red-500" />
                     <span className="font-medium">Email:</span>
-                    <span>{ficha.dadosCliente.email}</span>
+                    <span>{ficha.dados_cliente.email}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-purple-500" />
                     <span className="font-medium">Endereço:</span>
                     <span>
                       {[
-                        ficha.dadosCliente.logradouro,
-                        ficha.dadosCliente.numero,
-                        ficha.dadosCliente.bairro,
-                        ficha.dadosCliente.cidade,
-                        ficha.dadosCliente.estado,
-                        ficha.dadosCliente.cep
+                        ficha.dados_cliente.logradouro,
+                        ficha.dados_cliente.numero,
+                        ficha.dados_cliente.bairro,
+                        ficha.dados_cliente.cidade,
+                        ficha.dados_cliente.estado,
+                        ficha.dados_cliente.cep
                       ].filter(Boolean).join(', ')}
                     </span>
                   </div>
-                  {ficha.dadosCliente.orgaoEmissor && (
+                  {ficha.dados_cliente.orgaoEmissor && (
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-gray-500" />
                       <span className="font-medium">Órgão Emissor:</span>
-                      <span>{ficha.dadosCliente.orgaoEmissor} - {ficha.dadosCliente.estadoEmissor}</span>
+                      <span>{ficha.dados_cliente.orgaoEmissor} - {ficha.dados_cliente.estadoEmissor}</span>
                     </div>
                   )}
                 </div>
@@ -141,7 +148,7 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
           </Card>
 
           {/* Dados do Cônjuge */}
-          {(ficha.dadosCliente.nomeConjuge || ficha.dadosCliente.cpfConjuge) && (
+          {(ficha.dados_cliente.nomeConjuge || ficha.dados_cliente.cpfConjuge) && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Dados do Cônjuge</CardTitle>
@@ -149,48 +156,48 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    {ficha.dadosCliente.nomeConjuge && (
+                    {ficha.dados_cliente.nomeConjuge && (
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-blue-500" />
                         <span className="font-medium">Nome:</span>
-                        <span>{ficha.dadosCliente.nomeConjuge}</span>
+                        <span>{ficha.dados_cliente.nomeConjuge}</span>
                       </div>
                     )}
-                    {ficha.dadosCliente.cpfConjuge && (
+                    {ficha.dados_cliente.cpfConjuge && (
                       <div className="flex items-center gap-2">
                         <CreditCard className="h-4 w-4 text-blue-500" />
                         <span className="font-medium">CPF:</span>
-                        <span>{formatarCPF(ficha.dadosCliente.cpfConjuge)}</span>
+                        <span>{formatarCPF(ficha.dados_cliente.cpfConjuge)}</span>
                       </div>
                     )}
-                    {ficha.dadosCliente.rgConjuge && (
+                    {ficha.dados_cliente.rgConjuge && (
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-blue-500" />
                         <span className="font-medium">RG:</span>
-                        <span>{ficha.dadosCliente.rgConjuge}</span>
+                        <span>{ficha.dados_cliente.rgConjuge}</span>
                       </div>
                     )}
                   </div>
                   <div className="space-y-2">
-                    {ficha.dadosCliente.telefoneConjuge && (
+                    {ficha.dados_cliente.telefoneConjuge && (
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-green-500" />
                         <span className="font-medium">Telefone:</span>
-                        <span>{ficha.dadosCliente.telefoneConjuge}</span>
+                        <span>{ficha.dados_cliente.telefoneConjuge}</span>
                       </div>
                     )}
-                    {ficha.dadosCliente.emailConjuge && (
+                    {ficha.dados_cliente.emailConjuge && (
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-red-500" />
                         <span className="font-medium">Email:</span>
-                        <span>{ficha.dadosCliente.emailConjuge}</span>
+                        <span>{ficha.dados_cliente.emailConjuge}</span>
                       </div>
                     )}
-                    {ficha.dadosCliente.profissaoConjuge && (
+                    {ficha.dados_cliente.profissaoConjuge && (
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-orange-500" />
                         <span className="font-medium">Profissão:</span>
-                        <span>{ficha.dadosCliente.profissaoConjuge}</span>
+                        <span>{ficha.dados_cliente.profissaoConjuge}</span>
                       </div>
                     )}
                   </div>
@@ -209,33 +216,33 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
                 <div className="space-y-2">
                   <div>
                     <span className="font-medium">Logradouro:</span>
-                    <p className="text-sm text-gray-600">{ficha.dadosCliente.logradouro || 'Não informado'}</p>
+                    <p className="text-sm text-gray-600">{ficha.dados_cliente.logradouro || 'Não informado'}</p>
                   </div>
                   <div>
                     <span className="font-medium">Número:</span>
-                    <p className="text-sm text-gray-600">{ficha.dadosCliente.numero || 'Não informado'}</p>
+                    <p className="text-sm text-gray-600">{ficha.dados_cliente.numero || 'Não informado'}</p>
                   </div>
                   <div>
                     <span className="font-medium">Bairro:</span>
-                    <p className="text-sm text-gray-600">{ficha.dadosCliente.bairro || 'Não informado'}</p>
+                    <p className="text-sm text-gray-600">{ficha.dados_cliente.bairro || 'Não informado'}</p>
                   </div>
                   <div>
                     <span className="font-medium">Complemento:</span>
-                    <p className="text-sm text-gray-600">{ficha.dadosCliente.complemento || 'Não informado'}</p>
+                    <p className="text-sm text-gray-600">{ficha.dados_cliente.complemento || 'Não informado'}</p>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div>
                     <span className="font-medium">CEP:</span>
-                    <p className="text-sm text-gray-600">{ficha.dadosCliente.cep || 'Não informado'}</p>
+                    <p className="text-sm text-gray-600">{ficha.dados_cliente.cep || 'Não informado'}</p>
                   </div>
                   <div>
                     <span className="font-medium">Cidade:</span>
-                    <p className="text-sm text-gray-600">{ficha.dadosCliente.cidade || 'Não informado'}</p>
+                    <p className="text-sm text-gray-600">{ficha.dados_cliente.cidade || 'Não informado'}</p>
                   </div>
                   <div>
                     <span className="font-medium">Estado (UF):</span>
-                    <p className="text-sm text-gray-600">{ficha.dadosCliente.estado || 'Não informado'}</p>
+                    <p className="text-sm text-gray-600">{ficha.dados_cliente.estado || 'Não informado'}</p>
                   </div>
                 </div>
               </div>
@@ -251,20 +258,20 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <span className="font-medium">Liner:</span>
-                  <p className="text-sm text-gray-600">{ficha.dadosNegociacao.liner || 'Não informado'}</p>
+                  <p className="text-sm text-gray-600">{ficha.dados_negociacao.liner || 'Não informado'}</p>
                 </div>
                 <div>
                   <span className="font-medium">Closer:</span>
-                  <p className="text-sm text-gray-600">{ficha.dadosNegociacao.closer || 'Não informado'}</p>
+                  <p className="text-sm text-gray-600">{ficha.dados_negociacao.closer || 'Não informado'}</p>
                 </div>
                 <div>
                   <span className="font-medium">Tipo de Venda:</span>
-                  <Badge variant="secondary">{ficha.dadosNegociacao.tipoVenda || 'Não informado'}</Badge>
+                  <Badge variant="secondary">{ficha.dados_negociacao.tipoVenda || 'Não informado'}</Badge>
                 </div>
               </div>
 
               {/* Parcelas Pagas em Sala */}
-              {ficha.dadosNegociacao.parcelasPagasSala.length > 0 && (
+              {ficha.dados_negociacao.parcelasPagasSala && ficha.dados_negociacao.parcelasPagasSala.length > 0 && (
                 <div>
                   <h4 className="font-medium mb-2">Parcelas Pagas em Sala:</h4>
                   <div className="overflow-x-auto">
@@ -278,7 +285,7 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
                         </tr>
                       </thead>
                       <tbody>
-                        {ficha.dadosNegociacao.parcelasPagasSala.map((parcela, index) => (
+                        {ficha.dados_negociacao.parcelasPagasSala.map((parcela: any, index: number) => (
                           <tr key={index}>
                             <td className="border border-gray-200 p-2">{parcela.tipo}</td>
                             <td className="border border-gray-200 p-2">{formatarMoeda(parcela.valorTotal)}</td>
@@ -295,14 +302,14 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
           </Card>
 
           {/* Contratos */}
-          {ficha.dadosNegociacao.contratos.length > 0 && (
+          {ficha.dados_negociacao.contratos && ficha.dados_negociacao.contratos.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Contratos</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {ficha.dadosNegociacao.contratos.map((contrato, index) => (
+                  {ficha.dados_negociacao.contratos.map((contrato: any, index: number) => (
                     <div key={index} className="p-4 border rounded-lg bg-gray-50">
                       <h4 className="font-medium mb-2">Contrato {index + 1}</h4>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
@@ -339,7 +346,7 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
           )}
 
           {/* Informações de Pagamento */}
-          {ficha.dadosNegociacao.informacoesPagamento.length > 0 && (
+          {ficha.dados_negociacao.informacoesPagamento && ficha.dados_negociacao.informacoesPagamento.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Informações de Pagamento</CardTitle>
@@ -358,9 +365,9 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
                       </tr>
                     </thead>
                     <tbody>
-                      {ficha.dadosNegociacao.informacoesPagamento
-                        .filter(info => info.total && parseFloat(info.total) > 0)
-                        .map((info, index) => (
+                      {ficha.dados_negociacao.informacoesPagamento
+                        .filter((info: any) => info.total && parseFloat(info.total) > 0)
+                        .map((info: any, index: number) => (
                         <tr key={index}>
                           <td className="border border-gray-200 p-2 font-medium">{info.tipo}</td>
                           <td className="border border-gray-200 p-2">{formatarMoeda(info.total)}</td>

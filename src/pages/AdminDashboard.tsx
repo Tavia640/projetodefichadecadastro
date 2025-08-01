@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { FichaStorageService, FichaCompleta } from '@/lib/fichaStorageService';
+import { FichaSupabaseService, FichaCompleta } from '@/lib/fichaSupabaseService';
 import { SessionService } from '@/lib/sessionService';
 import { PDFGenerator } from '@/lib/pdfGenerator';
 import { PDFGeneratorOfficial } from '@/lib/pdfGeneratorOfficial';
@@ -33,11 +33,11 @@ const AdminDashboard = () => {
     carregarFichas();
   }, [navigate]);
 
-  const carregarFichas = () => {
+  const carregarFichas = async () => {
     setLoading(true);
     try {
-      const fichasData = FichaStorageService.getFichas();
-      const stats = FichaStorageService.getEstatisticas();
+      const fichasData = await FichaSupabaseService.getFichas();
+      const stats = await FichaSupabaseService.getEstatisticas();
       
       setFichas(fichasData);
       setEstatisticas(stats);
@@ -51,8 +51,6 @@ const AdminDashboard = () => {
   const handleVisualizarFicha = (ficha: FichaCompleta) => {
     setFichaVisualizacao(ficha);
     setModalOpen(true);
-    // Não alterar automaticamente o status para 'visualizada'
-    // O status só deve mudar quando o admin pegar para fazer
   };
 
   const handleCloseModal = () => {
@@ -60,50 +58,43 @@ const AdminDashboard = () => {
     setFichaVisualizacao(null);
   };
 
-  const handlePegarParaFazer = (ficha: FichaCompleta) => {
+  const handlePegarParaFazer = async (ficha: FichaCompleta) => {
     if (!session) return;
 
-    const sucesso = FichaStorageService.pegarFichaParaFazer(ficha.id, session.nome);
+    const sucesso = await FichaSupabaseService.pegarFichaParaFazer(ficha.id, session.nome);
     if (sucesso) {
       carregarFichas();
-      alert(`✅ Ficha atribuída com sucesso! Você agora é responsável pelo atendimento de ${ficha.dadosCliente.nome}.`);
+      alert(`✅ Ficha atribuída com sucesso! Você agora é responsável pelo atendimento de ${ficha.dados_cliente.nome}.`);
     } else {
       alert('❌ Não foi possível pegar esta ficha. Ela pode já estar sendo atendida por outro administrador.');
     }
   };
 
-  const handleEncerrarAtendimento = (ficha: FichaCompleta) => {
+  const handleEncerrarAtendimento = async (ficha: FichaCompleta) => {
     if (!session) {
       alert('❌ Erro: Sessão não encontrada');
       return;
     }
 
-    console.log('🔍 Debug Encerrar Atendimento:');
-    console.log('- Ficha ID:', ficha.id);
-    console.log('- Status da ficha:', ficha.status);
-    console.log('- Admin responsável na ficha:', ficha.adminResponsavel);
-    console.log('- Admin da sessão atual:', session.nome);
-    console.log('- Comparação:', ficha.adminResponsavel === session.nome);
-
-    const confirmar = window.confirm(`Tem certeza que deseja encerrar o atendimento da ficha de ${ficha.dadosCliente.nome}?\n\nAdmin responsável: ${ficha.adminResponsavel}\nSua sessão: ${session.nome}`);
+    const confirmar = window.confirm(`Tem certeza que deseja encerrar o atendimento da ficha de ${ficha.dados_cliente.nome}?`);
     if (!confirmar) return;
 
-    const sucesso = FichaStorageService.encerrarAtendimento(ficha.id, session.nome);
+    const sucesso = await FichaSupabaseService.encerrarAtendimento(ficha.id, session.nome);
     if (sucesso) {
       carregarFichas();
       alert(`✅ Atendimento encerrado com sucesso!`);
     } else {
-      alert(`❌ Não foi possível encerrar o atendimento.\n\nDetalhes:\n- Status da ficha: ${ficha.status}\n- Admin responsável: ${ficha.adminResponsavel}\n- Sua sessão: ${session.nome}\n\nVerifique o console para mais informações.`);
+      alert(`❌ Não foi possível encerrar o atendimento.`);
     }
   };
 
-  const handleLiberarFicha = (ficha: FichaCompleta) => {
+  const handleLiberarFicha = async (ficha: FichaCompleta) => {
     if (!session) return;
 
-    const confirmar = window.confirm(`Tem certeza que deseja liberar a ficha de ${ficha.dadosCliente.nome}? Ela voltará para a lista de fichas pendentes.`);
+    const confirmar = window.confirm(`Tem certeza que deseja liberar a ficha de ${ficha.dados_cliente.nome}? Ela voltará para a lista de fichas pendentes.`);
     if (!confirmar) return;
 
-    const sucesso = FichaStorageService.liberarFicha(ficha.id, session.nome);
+    const sucesso = await FichaSupabaseService.liberarFicha(ficha.id, session.nome);
     if (sucesso) {
       carregarFichas();
       alert(`✅ Ficha liberada com sucesso!`);
@@ -112,13 +103,13 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleArquivarFicha = (ficha: FichaCompleta) => {
+  const handleArquivarFicha = async (ficha: FichaCompleta) => {
     if (!session) return;
 
-    const confirmar = window.confirm(`Tem certeza que deseja arquivar a ficha de ${ficha.dadosCliente.nome}?`);
+    const confirmar = window.confirm(`Tem certeza que deseja arquivar a ficha de ${ficha.dados_cliente.nome}?`);
     if (!confirmar) return;
 
-    const sucesso = FichaStorageService.arquivarFicha(ficha.id, session.nome);
+    const sucesso = await FichaSupabaseService.arquivarFicha(ficha.id, session.nome);
     if (sucesso) {
       carregarFichas();
       alert(`📁 Ficha arquivada com sucesso!`);
@@ -127,13 +118,13 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDesarquivarFicha = (ficha: FichaCompleta) => {
+  const handleDesarquivarFicha = async (ficha: FichaCompleta) => {
     if (!session) return;
 
-    const confirmar = window.confirm(`Tem certeza que deseja desarquivar a ficha de ${ficha.dadosCliente.nome}?`);
+    const confirmar = window.confirm(`Tem certeza que deseja desarquivar a ficha de ${ficha.dados_cliente.nome}?`);
     if (!confirmar) return;
 
-    const sucesso = FichaStorageService.desarquivarFicha(ficha.id, session.nome);
+    const sucesso = await FichaSupabaseService.desarquivarFicha(ficha.id, session.nome);
     if (sucesso) {
       carregarFichas();
       alert(`📂 Ficha desarquivada com sucesso!`);
@@ -144,7 +135,7 @@ const AdminDashboard = () => {
 
   const getFichasFiltradas = () => {
     if (filtroStatus === 'todas') return fichas;
-    if (filtroStatus === 'minhas') return fichas.filter(f => f.adminResponsavel === session?.nome);
+    if (filtroStatus === 'minhas') return fichas.filter(f => f.nome_admin === session?.nome);
     return fichas.filter(f => f.status === filtroStatus);
   };
 
@@ -155,12 +146,12 @@ const AdminDashboard = () => {
 
       // Gerar PDF de Cadastro
       console.log('📄 Gerando PDF de Cadastro...');
-      const pdfCadastroBlob = PDFGeneratorOfficial.gerarPDFCadastroOficial(ficha.dadosCliente, ficha.dadosNegociacao);
+      const pdfCadastroBlob = PDFGeneratorOfficial.gerarPDFCadastroOficial(ficha.dados_cliente, ficha.dados_negociacao);
       console.log('✅ PDF de Cadastro gerado com sucesso', pdfCadastroBlob.size, 'bytes');
 
       // Gerar PDF de Negociação
       console.log('📄 Gerando PDF de Negociação...');
-      const pdfNegociacaoBlob = PDFGeneratorOfficial.gerarPDFNegociacaoOficial(ficha.dadosCliente, ficha.dadosNegociacao);
+      const pdfNegociacaoBlob = PDFGeneratorOfficial.gerarPDFNegociacaoOficial(ficha.dados_cliente, ficha.dados_negociacao);
       console.log('✅ PDF de Negociação gerado com sucesso', pdfNegociacaoBlob.size, 'bytes');
 
       // Verificar se os blobs foram criados corretamente
@@ -188,7 +179,7 @@ const AdminDashboard = () => {
       };
 
       // Gerar nomes dos arquivos baseado no cliente
-      const nomeCliente = ficha.dadosCliente.nome?.replace(/[^a-zA-Z0-9]/g, '_') || 'cliente';
+      const nomeCliente = ficha.dados_cliente.nome?.replace(/[^a-zA-Z0-9]/g, '_') || 'cliente';
       const timestamp = new Date().toISOString().slice(0, 10);
 
       // Baixar ambos os PDFs
@@ -220,10 +211,6 @@ const AdminDashboard = () => {
         }, 10000);
       }, 500);
 
-      // Atualizar status para impressa
-      FichaStorageService.atualizarStatus(ficha.id, 'impressa');
-      carregarFichas();
-
       console.log('✅ Processo de impressão completo - 2 PDFs gerados!');
       alert('✅ 2 PDFs foram gerados e baixados: Cadastro e Negociação');
 
@@ -248,40 +235,13 @@ const AdminDashboard = () => {
     navigate('/login');
   };
 
-  const handleDebugFichas = () => {
-    const fichasData = FichaStorageService.exportarFichas();
-    console.log('🔍 Debug - Dados das fichas:', fichasData);
-    const fichas = FichaStorageService.getFichas();
-    console.log('🔍 Debug - Status das fichas:');
-    fichas.forEach((ficha, index) => {
-      console.log(`Ficha ${index + 1}: ID=${ficha.id}, Status=${ficha.status}, Nome=${ficha.dadosCliente.nome}, Admin=${ficha.adminResponsavel}`);
-    });
-    alert(`Debug: ${fichas.length} fichas encontradas. Verifique o console para detalhes.`);
-  };
-
-  const handleResetarStatusFichas = () => {
-    if (window.confirm('Deseja resetar o status de todas as fichas para "pendente"?')) {
-      const fichas = FichaStorageService.getFichas();
-      fichas.forEach(ficha => {
-        ficha.status = 'pendente';
-        ficha.adminResponsavel = undefined;
-        ficha.timestampInicio = undefined;
-      });
-      localStorage.setItem('gav_fichas_admin', JSON.stringify(fichas));
-      carregarFichas();
-      alert('✅ Status de todas as fichas resetado para "pendente"');
-    }
-  };
-
-  const formatarData = (timestamp: number) => {
+  const formatarData = (timestamp: string) => {
     return new Date(timestamp).toLocaleString('pt-BR');
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pendente': return 'bg-yellow-100 text-yellow-800';
-      case 'visualizada': return 'bg-blue-100 text-blue-800';
-      case 'impressa': return 'bg-green-100 text-green-800';
       case 'em_andamento': return 'bg-orange-100 text-orange-800';
       case 'concluida': return 'bg-green-100 text-green-800';
       case 'arquivada': return 'bg-gray-100 text-gray-600';
@@ -292,8 +252,6 @@ const AdminDashboard = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'pendente': return 'Pendente';
-      case 'visualizada': return 'Visualizada';
-      case 'impressa': return 'Impressa';
       case 'em_andamento': return 'Em Andamento';
       case 'concluida': return 'Concluída';
       case 'arquivada': return 'Arquivada';
@@ -344,26 +302,6 @@ const AdminDashboard = () => {
                 <RefreshCw className="h-4 w-4" />
                 <span>Atualizar</span>
               </Button>
-              {process.env.NODE_ENV === 'development' && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleDebugFichas}
-                    className="flex items-center space-x-2 text-yellow-600"
-                  >
-                    <span>🔍 Debug</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleResetarStatusFichas}
-                    className="flex items-center space-x-2 text-red-600"
-                  >
-                    <span>🔄 Reset</span>
-                  </Button>
-                </>
-              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -380,7 +318,7 @@ const AdminDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Estatísticas */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center">
@@ -410,7 +348,7 @@ const AdminDashboard = () => {
               <div className="flex items-center">
                 <PlayCircle className="h-6 w-6 text-orange-600" />
                 <div className="ml-3">
-                  <p className="text-xl font-bold text-gray-900">{estatisticas.emAndamento || 0}</p>
+                  <p className="text-xl font-bold text-gray-900">{estatisticas.em_andamento || 0}</p>
                   <p className="text-xs text-gray-600">Em Andamento</p>
                 </div>
               </div>
@@ -424,30 +362,6 @@ const AdminDashboard = () => {
                 <div className="ml-3">
                   <p className="text-xl font-bold text-gray-900">{estatisticas.concluidas || 0}</p>
                   <p className="text-xs text-gray-600">Concluídas</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <Eye className="h-6 w-6 text-blue-600" />
-                <div className="ml-3">
-                  <p className="text-xl font-bold text-gray-900">{estatisticas.visualizadas || 0}</p>
-                  <p className="text-xs text-gray-600">Visualizadas</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <Printer className="h-6 w-6 text-purple-600" />
-                <div className="ml-3">
-                  <p className="text-xl font-bold text-gray-900">{estatisticas.impressas || 0}</p>
-                  <p className="text-xs text-gray-600">Impressas</p>
                 </div>
               </div>
             </CardContent>
@@ -515,7 +429,7 @@ const AdminDashboard = () => {
                       <div className="flex-1">
                         <div className="flex items-center space-x-4 mb-2">
                           <h3 className="text-lg font-medium text-gray-900">
-                            {ficha.dadosCliente.nome}
+                            {ficha.dados_cliente.nome}
                           </h3>
                           <Badge className={getStatusColor(ficha.status)}>
                             {getStatusText(ficha.status)}
@@ -525,40 +439,35 @@ const AdminDashboard = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
                           <div className="flex items-center space-x-2">
                             <User className="h-4 w-4" />
-                            <span>Consultor: {ficha.nomeConsultor}</span>
+                            <span>Consultor: {ficha.nome_consultor}</span>
                           </div>
                           <div className="flex items-center space-x-2">
                             <Clock className="h-4 w-4" />
-                            <span>Data: {formatarData(ficha.timestamp)}</span>
+                            <span>Data: {formatarData(ficha.created_at)}</span>
                           </div>
                           <div>
-                            <span>CPF: {ficha.dadosCliente.cpf}</span>
+                            <span>CPF: {ficha.dados_cliente.cpf}</span>
                           </div>
                         </div>
 
                         {/* Informações do Admin Responsável */}
-                        {ficha.adminResponsavel && (
+                        {ficha.nome_admin && (
                           <div className="mt-2 p-2 bg-blue-50 rounded text-sm">
                             <span className="font-medium text-blue-800">
-                              📋 Admin Responsável: {ficha.adminResponsavel}
+                              📋 Admin Responsável: {ficha.nome_admin}
                             </span>
-                            {ficha.timestampInicio && (
-                              <span className="ml-4 text-blue-600">
-                                Iniciado: {formatarData(ficha.timestampInicio)}
-                              </span>
-                            )}
                           </div>
                         )}
 
-                        {ficha.dadosNegociacao.contratos.length > 0 && (
+                        {ficha.dados_negociacao.contratos && ficha.dados_negociacao.contratos.length > 0 && (
                           <div className="mt-2 text-sm text-gray-600">
-                            <span>Empreendimento: {ficha.dadosNegociacao.contratos[0].empreendimento}</span>
+                            <span>Empreendimento: {ficha.dados_negociacao.contratos[0].empreendimento}</span>
                           </div>
                         )}
                       </div>
 
                       <div className="flex items-center space-x-2 flex-wrap gap-2">
-                        {/* Bot��o Visualizar - sempre disponível */}
+                        {/* Botão Visualizar - sempre disponível */}
                         <Button
                           variant="outline"
                           size="sm"
@@ -582,15 +491,8 @@ const AdminDashboard = () => {
                           </Button>
                         )}
 
-                        {/* Debug info */}
-                        {process.env.NODE_ENV === 'development' && (
-                          <div className="text-xs text-gray-400 mt-1">
-                            Status: {ficha.status} | Admin: {ficha.adminResponsavel} | Session: {session?.nome}
-                          </div>
-                        )}
-
-                        {ficha.status === 'em_andamento' && ficha.adminResponsavel && session?.nome &&
-                         ficha.adminResponsavel === session.nome && (
+                        {ficha.status === 'em_andamento' && ficha.nome_admin && session?.nome &&
+                         ficha.nome_admin === session.nome && (
                           <>
                             <Button
                               variant="default"
@@ -613,17 +515,10 @@ const AdminDashboard = () => {
                           </>
                         )}
 
-                        {ficha.status === 'em_andamento' && ficha.adminResponsavel && session?.nome &&
-                         ficha.adminResponsavel !== session.nome && (
+                        {ficha.status === 'em_andamento' && ficha.nome_admin && session?.nome &&
+                         ficha.nome_admin !== session.nome && (
                           <div className="text-xs text-gray-500 italic">
-                            Em atendimento por {ficha.adminResponsavel}
-                          </div>
-                        )}
-
-                        {/* Mostrar status mais detalhado para debug */}
-                        {ficha.status === 'em_andamento' && (!ficha.adminResponsavel || !session?.nome) && (
-                          <div className="text-xs text-red-500">
-                            Erro: Dados de admin incompletos
+                            Em atendimento por {ficha.nome_admin}
                           </div>
                         )}
 

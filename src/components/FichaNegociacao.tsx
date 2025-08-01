@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
 import { EmailJsService } from '@/lib/emailJsService';
-import { FichaStorageService } from '@/lib/fichaStorageService';
+import { FichaSupabaseService } from '@/lib/fichaSupabaseService';
 import { SessionService } from '@/lib/sessionService';
 import SessionHeader from '@/components/SessionHeader';
 
@@ -647,7 +647,7 @@ const FichaNegociacao = () => {
       console.log('💾 Salvando ficha para administração...');
 
       // Salvar ficha para os administradores
-      const fichaId = FichaStorageService.salvarFicha(dadosCliente, dadosNegociacao, nomeConsultor);
+      const fichaId = await FichaSupabaseService.salvarFicha(dadosCliente, dadosNegociacao, nomeConsultor);
 
       console.log('✅ Processo concluído com sucesso!');
       alert(`✅ Ficha salva com sucesso!\n\nID da Ficha: ${fichaId}\n\nA ficha foi enviada para a administração e estará disponível para impressão.`);
