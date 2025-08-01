@@ -3,7 +3,7 @@ import { DadosCliente, DadosNegociacao } from './pdfGenerator';
 
 export class PDFGeneratorOfficial {
   
-  static gerarPDFCadastroOficial(dadosCliente: DadosCliente): Blob {
+  static gerarPDFCadastroOficial(dadosCliente: DadosCliente, dadosNegociacao?: DadosNegociacao): Blob {
     try {
       console.log('🔍 Iniciando geração PDF Cadastro...');
       console.log('📊 Dados do cliente:', dadosCliente);
