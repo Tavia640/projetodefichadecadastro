@@ -140,6 +140,65 @@ const FichaVisualizationModal: React.FC<FichaVisualizationModalProps> = ({
             </CardContent>
           </Card>
 
+          {/* Dados do Cônjuge */}
+          {(ficha.dadosCliente.nomeConjuge || ficha.dadosCliente.cpfConjuge) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Dados do Cônjuge</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    {ficha.dadosCliente.nomeConjuge && (
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium">Nome:</span>
+                        <span>{ficha.dadosCliente.nomeConjuge}</span>
+                      </div>
+                    )}
+                    {ficha.dadosCliente.cpfConjuge && (
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium">CPF:</span>
+                        <span>{formatarCPF(ficha.dadosCliente.cpfConjuge)}</span>
+                      </div>
+                    )}
+                    {ficha.dadosCliente.rgConjuge && (
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium">RG:</span>
+                        <span>{ficha.dadosCliente.rgConjuge}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {ficha.dadosCliente.telefoneConjuge && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-green-500" />
+                        <span className="font-medium">Telefone:</span>
+                        <span>{ficha.dadosCliente.telefoneConjuge}</span>
+                      </div>
+                    )}
+                    {ficha.dadosCliente.emailConjuge && (
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-red-500" />
+                        <span className="font-medium">Email:</span>
+                        <span>{ficha.dadosCliente.emailConjuge}</span>
+                      </div>
+                    )}
+                    {ficha.dadosCliente.profissaoConjuge && (
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-orange-500" />
+                        <span className="font-medium">Profissão:</span>
+                        <span>{ficha.dadosCliente.profissaoConjuge}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Endereço */}
           <Card>
             <CardHeader>
