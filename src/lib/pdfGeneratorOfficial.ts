@@ -12,7 +12,7 @@ export class PDFGeneratorOfficial {
         throw new Error('Dados do cliente não fornecidos para PDF de cadastro');
       }
 
-      // Funç��o auxiliar para converter valores para string de forma segura
+      // Funç����o auxiliar para converter valores para string de forma segura
       const safeString = (value: any): string => {
         if (value === null || value === undefined) return '';
         return String(value);
@@ -178,15 +178,15 @@ export class PDFGeneratorOfficial {
     drawBox(margin + rgWidth + orgaoWidth, currentY, ufWidth, rowHeight);
     
     pdf.setFont('helvetica', 'bold');
-    pdf.text('RG:', margin + 2, currentY + 6);
-    pdf.text('��RGÃO:', margin + rgWidth + 2, currentY + 6);
-    pdf.text('UF:', margin + rgWidth + orgaoWidth + 2, currentY + 6);
+    pdf.text('RG:', margin + 2, currentY + 5);
+    pdf.text('ÓRGÃO:', margin + rgWidth + 2, currentY + 5);
+    pdf.text('UF:', margin + rgWidth + orgaoWidth + 2, currentY + 5);
 
     pdf.setFont('helvetica', 'normal');
-    pdf.text(dadosCliente.rgConjuge || '', margin + 15, currentY + 6);
-    pdf.text(dadosCliente.orgaoEmissorConjuge || '', margin + rgWidth + 25, currentY + 6);
-    pdf.text(dadosCliente.estadoEmissorConjuge || '', margin + rgWidth + orgaoWidth + 15, currentY + 6);
-    nextLine(1.7);
+    pdf.text(safeString(dadosCliente.rgConjuge), margin + 18, currentY + 5);
+    pdf.text(safeString(dadosCliente.orgaoEmissorConjuge), margin + rgWidth + 30, currentY + 5);
+    pdf.text(safeString(dadosCliente.estadoEmissorConjuge), margin + rgWidth + orgaoWidth + 18, currentY + 5);
+    nextLine(1.4);
 
     // Demais campos do cônjuge...
     const camposConjuge = [
@@ -591,7 +591,7 @@ export class PDFGeneratorOfficial {
       // Busca específica por tipo
       if (tipoFixo === 'Entrada') {
         infoPagamento = informacoesPagamento.find(info =>
-          info && info.tipo && (info.tipo === '1ª Entrada' || info.tipo === 'Entrada')
+          info && info.tipo && (info.tipo === '1�� Entrada' || info.tipo === 'Entrada')
         );
       } else if (tipoFixo === 'Entrada Restante') {
         infoPagamento = informacoesPagamento.find(info =>
