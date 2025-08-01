@@ -10,7 +10,10 @@ import { Plus, Trash2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { PDFGenerator, DadosCliente, DadosNegociacao } from '@/lib/pdfGenerator';
-import { EmailService } from '@/lib/emailService';
+import { EmailJsService } from '@/lib/emailJsService';
+import { FichaStorageService } from '@/lib/fichaStorageService';
+import { SessionService } from '@/lib/sessionService';
+import SessionHeader from '@/components/SessionHeader';
 
 interface ParcelaPagaSala {
   id: string;
@@ -25,6 +28,7 @@ interface Contrato {
   id: string;
   tipoContrato: string;
   empreendimento: string;
+  empreendimentoId?: string;
   torre: string;
   apartamento: string;
   cota: string;
@@ -80,6 +84,8 @@ const FichaNegociacao = () => {
   const navigate = useNavigate();
   const [liner, setLiner] = useState('');
   const [closer, setCloser] = useState('');
+  const [liderSala, setLiderSala] = useState('');
+  const [nomeSala, setNomeSala] = useState('');
   const [tipoVenda, setTipoVenda] = useState('');
   const [parcelasPagasSala, setParcelasPagasSala] = useState<ParcelaPagaSala[]>([{
     id: '1',
@@ -93,6 +99,7 @@ const FichaNegociacao = () => {
     id: '1',
     tipoContrato: '',
     empreendimento: '',
+    empreendimentoId: '',
     torre: '',
     apartamento: '',
     cota: '',
@@ -102,7 +109,6 @@ const FichaNegociacao = () => {
   const [informacoesPagamento, setInformacoesPagamento] = useState<InformacaoPagamento[]>([
     { id: '1', tipo: '1ª Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
     { id: '2', tipo: 'Restante da Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
-    { id: '3', tipo: '2ª Entrada', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
     { id: '4', tipo: 'Sinal', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' },
     { id: '5', tipo: 'Saldo', total: '', qtdParcelas: '', valorParcela: '', formaPagamento: '', primeiroVencimento: '' }
   ]);
@@ -111,6 +117,24 @@ const FichaNegociacao = () => {
   const [empreendimentos, setEmpreendimentos] = useState<Empreendimento[]>([]);
   const [categoriasPreco, setCategoriasPreco] = useState<CategoriaPreco[]>([]);
   const [torres, setTorres] = useState<Torre[]>([]);
+
+  // Função para sincronizar formas de pagamento da primeira entrada
+  const sincronizarFormasPagamento = (formasPagamento: string[]) => {
+    setInformacoesPagamento(prev => {
+      const novasInformacoes = [...prev];
+      const primeiraEntradaIndex = novasInformacoes.findIndex(info => info.tipo === '1ª Entrada');
+
+      if (primeiraEntradaIndex !== -1 && formasPagamento.length > 0) {
+        // Pegar a primeira forma de pagamento válida
+        const primeiraForma = formasPagamento.find(forma => forma && forma.trim() !== '');
+        if (primeiraForma) {
+          novasInformacoes[primeiraEntradaIndex].formaPagamento = primeiraForma;
+        }
+      }
+
+      return novasInformacoes;
+    });
+  };
   const [loading, setLoading] = useState(true);
 
   // Estados para alertas de autorização
@@ -157,7 +181,7 @@ const FichaNegociacao = () => {
 
   // Função para auditoria de valores
   const realizarAuditoriaValores = (): { valida: boolean; detalhes: string } => {
-    const contratoAtivo = contratos.find(c => c.empreendimento && c.valor);
+    const contratoAtivo = contratos.find(c => c.empreendimentoId && c.valor);
     if (!contratoAtivo) {
       return { valida: false, detalhes: 'Nenhum contrato válido encontrado' };
     }
@@ -180,7 +204,7 @@ const FichaNegociacao = () => {
     
     return {
       valida: diferenca < 0.01, // Tolerância para erros de arredondamento
-      detalhes: `Valor Total: R$ ${valorTotal.toFixed(2)} | Entradas: R$ ${totalEntradas.toFixed(2)} | Sinal: R$ ${valorSinal.toFixed(2)} | Saldo: R$ ${valorSaldo.toFixed(2)} | Diferença: R$ ${diferenca.toFixed(2)}`
+      detalhes: `Valor Total: R$ ${valorTotal.toFixed(2)} | Entradas: R$ ${totalEntradas.toFixed(2)} | Sinal: R$ ${valorSinal.toFixed(2)} | Saldo: R$ ${valorSaldo.toFixed(2)} | Diferen��a: R$ ${diferenca.toFixed(2)}`
     };
   };
 
@@ -209,7 +233,7 @@ const FichaNegociacao = () => {
       }
     }
     
-    // Validar data do sinal (nível 2 - regional, nível 3 - diretoria)
+    // Validar data do sinal (nível 2 - regional, n��vel 3 - diretoria)
     const sinalInfo = informacoesPagamento.find(info => info.tipo === 'Sinal');
     if (sinalInfo?.primeiroVencimento) {
       const alerta = validarDataVencimentoSinal(sinalInfo.primeiroVencimento);
@@ -301,10 +325,10 @@ const FichaNegociacao = () => {
 
   // Função para recalcular restante da entrada
   const recalcularRestanteEntrada = (informacoes: InformacaoPagamento[]) => {
-    const contratoAtivo = contratos.find(c => c.empreendimento);
+    const contratoAtivo = contratos.find(c => c.empreendimentoId);
     if (!contratoAtivo) return informacoes;
 
-    const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimento);
+    const empreendimento = empreendimentos.find(emp => emp.id === contratoAtivo.empreendimentoId);
     const valorEntrada = empreendimento ? calcularValorEntrada(empreendimento.nome) : 0;
     
     // Calcular total das entradas (1ª, 2ª, etc.)
@@ -332,7 +356,7 @@ const FichaNegociacao = () => {
     return novasInformacoes;
   };
 
-  // Executar validações sempre que informações mudarem
+  // Executar valida��ões sempre que informações mudarem
   useEffect(() => {
     atualizarAlertas();
   }, [informacoesPagamento, contratos]);
@@ -505,6 +529,7 @@ const FichaNegociacao = () => {
       id: Date.now().toString(),
       tipoContrato: '',
       empreendimento: '',
+      empreendimentoId: '',
       torre: '',
       apartamento: '',
       cota: '',
@@ -554,6 +579,7 @@ const FichaNegociacao = () => {
       id: '1',
       tipoContrato: '',
       empreendimento: '',
+      empreendimentoId: '',
       torre: '',
       apartamento: '',
       cota: '',
@@ -571,13 +597,19 @@ const FichaNegociacao = () => {
 
   const salvarFicha = async () => {
     try {
-      console.log('🚀 Iniciando processo de salvamento e envio...');
-      
+      console.log('🚀 Iniciando processo de salvamento...');
+
+      // Validar campos obrigatórios
+      if (!liner.trim()) {
+        alert('❌ Campo LINER é obrigatório!');
+        return;
+      }
+
       // Verificar se há alertas críticos (apenas erros, não avisos)
-      const alertasCriticos = Object.values(alertas).filter(alerta => 
+      const alertasCriticos = Object.values(alertas).filter(alerta =>
         alerta.includes('ERRO') && !alerta.includes('AVISO')
       );
-      
+
       if (alertasCriticos.length > 0) {
         console.warn('⚠️ Alertas encontrados:', alertasCriticos);
         // Mostrar alerta mas permitir continuar se for apenas aviso
@@ -586,101 +618,149 @@ const FichaNegociacao = () => {
           return;
         }
       }
-      
+
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
         alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
         return;
       }
-      
+
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
-      
+
       // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
         closer,
+        liderSala,
+        nomeSala,
         tipoVenda,
         parcelasPagasSala,
         contratos,
         informacoesPagamento
       };
-      
-      console.log('📄 Gerando PDFs...');
-      
-      // Gerar PDFs usando a nova biblioteca
-      const pdfCadastro = PDFGenerator.gerarPDFCadastroCliente(dadosCliente);
-      const pdfNegociacao = PDFGenerator.gerarPDFNegociacao(dadosCliente, dadosNegociacao);
-      
-      // Extrair base64 dos PDFs
-      const pdfData1 = pdfCadastro.startsWith('data:') ? pdfCadastro.split(',')[1] : pdfCadastro;
-      const pdfData2 = pdfNegociacao.startsWith('data:') ? pdfNegociacao.split(',')[1] : pdfNegociacao;
-      
-      console.log('📧 Enviando PDFs por email...');
-      
-      // Enviar PDFs usando o novo serviço
-      const resultado = await EmailService.enviarPDFs({
-        clientData: dadosCliente,
-        fichaData: dadosNegociacao,
-        pdfData1,
-        pdfData2
-      });
-      
-      if (resultado.success) {
-        console.log('✅ Processo concluído com sucesso!');
-        alert(`✅ Ficha salva e PDFs enviados com sucesso!\n\n${resultado.message}`);
-      } else {
-        console.error('❌ Falha no envio:', resultado.message);
-        alert(`❌ Erro no envio: ${resultado.message}\n\nOs PDFs foram gerados mas não puderam ser enviados.`);
-      }
-      
+
+      // Obter nome do consultor da sessão
+      const session = SessionService.getSession();
+      const nomeConsultor = session?.nome || 'Consultor não identificado';
+
+      console.log('💾 Salvando ficha para administração...');
+
+      // Salvar ficha para os administradores
+      const fichaId = FichaStorageService.salvarFicha(dadosCliente, dadosNegociacao, nomeConsultor);
+
+      console.log('✅ Processo concluído com sucesso!');
+      alert(`✅ Ficha salva com sucesso!\n\nID da Ficha: ${fichaId}\n\nA ficha foi enviada para a administração e estará disponível para impressão.`);
+
     } catch (error: any) {
       console.error('❌ Erro no processo de salvamento:', error);
       alert(`❌ Erro ao processar a ficha: ${error.message || 'Erro desconhecido'}`);
     }
   };
 
-  const imprimirFichas = () => {
+  const enviarPorEmailJS = async () => {
     try {
-      console.log('🖨️ Iniciando processo de impressão...');
-      
+      console.log('📧 Iniciando processo de envio via EmailJS...');
+
+      // Verificar se há alertas críticos (apenas erros, não avisos)
+      const alertasCriticos = Object.values(alertas).filter(alerta =>
+        alerta.includes('ERRO') && !alerta.includes('AVISO')
+      );
+
+      if (alertasCriticos.length > 0) {
+        console.warn('⚠️ Alertas encontrados:', alertasCriticos);
+        if (alertasCriticos.some(alerta => alerta.includes('CRÍTICO'))) {
+          alert('Não é possível enviar devido a erros críticos. Verifique os campos obrigatórios.');
+          return;
+        }
+      }
+
       // Recuperar dados do cliente
       const dadosClienteString = localStorage.getItem('dadosCliente');
       if (!dadosClienteString) {
         alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
         return;
       }
-      
+
       const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
-      console.log('📋 Dados do cliente recuperados:', dadosCliente);
-      
+
       // Preparar dados da negociação
       const dadosNegociacao: DadosNegociacao = {
         liner,
         closer,
+        liderSala,
+        nomeSala,
         tipoVenda,
         parcelasPagasSala,
         contratos,
         informacoesPagamento
       };
-      
+
+      console.log('📧 Enviando ficha via EmailJS...');
+
+      // Enviar ficha via EmailJS
+      const resultado = await EmailJsService.enviarFichaPorEmail({
+        clientData: dadosCliente,
+        fichaData: dadosNegociacao
+      });
+
+      if (resultado.success) {
+        console.log('✅ Processo concluído com sucesso!');
+        alert(`��� Ficha enviada com sucesso por email!\n\n${resultado.message}`);
+      } else {
+        console.error('❌ Falha no envio:', resultado.message);
+        alert(`❌ Erro no envio: ${resultado.message}`);
+      }
+
+    } catch (error: any) {
+      console.error('�� Erro no processo de envio:', error);
+      alert(`❌ Erro ao enviar a ficha: ${error.message || 'Erro desconhecido'}`);
+    }
+  };
+
+  const imprimirFichas = () => {
+    try {
+      console.log('🖨️ Iniciando processo de impressão...');
+
+      // Recuperar dados do cliente
+      const dadosClienteString = localStorage.getItem('dadosCliente');
+      if (!dadosClienteString) {
+        alert('Dados do cliente não encontrados. Volte ao cadastro do cliente.');
+        return;
+      }
+
+      const dadosCliente: DadosCliente = JSON.parse(dadosClienteString);
+      console.log('📋 Dados do cliente recuperados:', dadosCliente);
+
+      // Preparar dados da negociação
+      const dadosNegociacao: DadosNegociacao = {
+        liner,
+        closer,
+        liderSala,
+        nomeSala,
+        tipoVenda,
+        parcelasPagasSala,
+        contratos,
+        informacoesPagamento
+      };
+
       console.log('💼 Dados da negociação preparados:', dadosNegociacao);
       console.log('📄 Gerando PDFs para impressão...');
-      
+
       // Gerar PDFs como blob URLs para impressão
       const pdfCadastroBlob = PDFGenerator.gerarPDFCadastroClienteBlob(dadosCliente);
       const pdfNegociacaoBlob = PDFGenerator.gerarPDFNegociacaoBlob(dadosCliente, dadosNegociacao);
-      
+
       console.log('🖨️ Abrindo PDFs para impressão...');
-      
+
       // Criar URLs para os blobs
       const urlCadastro = URL.createObjectURL(pdfCadastroBlob);
       const urlNegociacao = URL.createObjectURL(pdfNegociacaoBlob);
-      
+
       // Abrir PDFs em novas janelas para impressão
       const janelaCadastro = window.open(urlCadastro, '_blank');
       const janelaNegociacao = window.open(urlNegociacao, '_blank');
-      
+
       // Aguardar carregamento e imprimir
       setTimeout(() => {
         if (janelaCadastro) {
@@ -689,16 +769,16 @@ const FichaNegociacao = () => {
         if (janelaNegociacao) {
           janelaNegociacao.print();
         }
-        
+
         // Limpar URLs após uso
         setTimeout(() => {
           URL.revokeObjectURL(urlCadastro);
           URL.revokeObjectURL(urlNegociacao);
         }, 5000);
       }, 1500);
-      
+
       console.log('✅ PDFs abertos para impressão!');
-      
+
     } catch (error: any) {
       console.error('❌ Erro na impressão:', error);
       alert(`❌ Erro ao gerar PDFs para impressão: ${error.message || 'Erro desconhecido'}`);
@@ -706,7 +786,9 @@ const FichaNegociacao = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-background">
+      <SessionHeader />
+      <div className="max-w-6xl mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -728,12 +810,14 @@ const FichaNegociacao = () => {
           {/* Seção Inicial */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="liner">LINER:</Label>
+              <Label htmlFor="liner">LINER: *</Label>
               <Input
                 id="liner"
                 value={liner}
                 onChange={(e) => setLiner(e.target.value)}
                 className="mt-1"
+                required
+                placeholder="Nome do liner (obrigatório)"
               />
             </div>
             <div>
@@ -743,6 +827,26 @@ const FichaNegociacao = () => {
                 value={closer}
                 onChange={(e) => setCloser(e.target.value)}
                 className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="liderSala">LÍDER DE SALA:</Label>
+              <Input
+                id="liderSala"
+                value={liderSala}
+                onChange={(e) => setLiderSala(e.target.value)}
+                className="mt-1"
+                placeholder="Nome do líder de sala"
+              />
+            </div>
+            <div>
+              <Label htmlFor="nomeSala">NOME DA SALA:</Label>
+              <Input
+                id="nomeSala"
+                value={nomeSala}
+                onChange={(e) => setNomeSala(e.target.value)}
+                className="mt-1"
+                placeholder="Nome da sala de vendas"
               />
             </div>
           </div>
@@ -875,6 +979,11 @@ const FichaNegociacao = () => {
                                   const newParcelas = [...parcelasPagasSala];
                                   newParcelas[index].formasPagamento[formaIndex] = value;
                                   setParcelasPagasSala(newParcelas);
+
+                                  // Se for a primeira entrada (tipo "Entrada"), sincronizar com informações de pagamento
+                                  if (parcela.tipo === 'Entrada') {
+                                    sincronizarFormasPagamento(newParcelas[index].formasPagamento);
+                                  }
                                 }}
                               >
                                 <SelectTrigger>
@@ -966,10 +1075,14 @@ const FichaNegociacao = () => {
                       </td>
                       <td className="border border-border p-3">
                         <Select
-                          value={contrato.empreendimento}
+                          value={contrato.empreendimentoId || ''}
                           onValueChange={(value) => {
                             const newContratos = [...contratos];
-                            newContratos[index].empreendimento = value;
+                            // Buscar o nome do empreendimento pelo ID selecionado
+                            const empreendimentoSelecionado = empreendimentos.find(emp => emp.id === value);
+                            newContratos[index].empreendimento = empreendimentoSelecionado?.nome || value;
+                            // Salvar também o ID para usar nas validações
+                            newContratos[index].empreendimentoId = value;
                             // Limpar categoria e torre quando mudar empreendimento
                             newContratos[index].categoriaPreco = '';
                             newContratos[index].torre = '';
@@ -1029,31 +1142,31 @@ const FichaNegociacao = () => {
                             const newContratos = [...contratos];
                             newContratos[index].categoriaPreco = value;
                             // Auto-preencher valor baseado na categoria selecionada
-                            const categoria = categoriasPreco.find(cat => 
-                              cat.categoria_preco === value && cat.empreendimento_id === contrato.empreendimento
+                            const categoria = categoriasPreco.find(cat =>
+                              cat.categoria_preco === value && cat.empreendimento_id === contrato.empreendimentoId
                             );
                             if (categoria) {
                               newContratos[index].valor = categoria.vir_cota.toString();
                               
                                // Preencher automaticamente as informações de pagamento
-                               const dados = calcularDadosCategoria(contrato.empreendimento, value);
+                               const dados = calcularDadosCategoria(contrato.empreendimentoId, value);
                                if (dados) {
-                                 preencherInformacoesPagamento(dados, contrato.empreendimento);
+                                 preencherInformacoesPagamento(dados, contrato.empreendimentoId);
                                }
                             }
                             setContratos(newContratos);
                           }}
-                          disabled={!contrato.empreendimento || loading}
+                          disabled={!contrato.empreendimentoId || loading}
                         >
                           <SelectTrigger className="bg-background">
                             <SelectValue placeholder={
-                              !contrato.empreendimento 
-                                ? "Selecione empreendimento primeiro" 
+                              !contrato.empreendimentoId
+                                ? "Selecione empreendimento primeiro"
                                 : "Selecione categoria de preço"
                             } />
                           </SelectTrigger>
                           <SelectContent className="bg-background z-50">
-                            {getCategoriasPorEmpreendimento(contrato.empreendimento).map((categoria) => (
+                            {getCategoriasPorEmpreendimento(contrato.empreendimentoId).map((categoria) => (
                               <SelectItem key={categoria.categoria_preco} value={categoria.categoria_preco}>
                                 {categoria.categoria_preco} - R$ {categoria.vir_cota.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                               </SelectItem>
@@ -1095,7 +1208,7 @@ const FichaNegociacao = () => {
           {/* Local para Assinatura */}
           <div className="text-center space-y-4">
             <p className="text-sm text-muted-foreground">
-              O financeiro descrito acima é referente a cada unidade separadamente.
+              O financeiro descrito acima �� referente a cada unidade separadamente.
             </p>
             <div className="border-t border-border pt-4">
               <Label className="text-base font-semibold">Assinatura do Cliente</Label>
@@ -1217,11 +1330,11 @@ const FichaNegociacao = () => {
                        <td className="border border-border p-3">
                          {(() => {
                            // Encontrar o primeiro contrato com empreendimento e categoria preenchidos para validação
-                           const contratoAtivo = contratos.find(c => c.empreendimento && c.categoriaPreco);
-                           const dados = contratoAtivo ? calcularDadosCategoria(contratoAtivo.empreendimento, contratoAtivo.categoriaPreco) : null;
+                           const contratoAtivo = contratos.find(c => c.empreendimentoId && c.categoriaPreco);
+                           const dados = contratoAtivo ? calcularDadosCategoria(contratoAtivo.empreendimentoId, contratoAtivo.categoriaPreco) : null;
                            let maxParcelas = dados ? (info.tipo === 'Sinal' ? dados.maxParcelasSinal : dados.maxParcelasSaldo) : null;
                            
-                           // Limitação específica para Restante da Entrada: máximo 5 parcelas
+                           // Limitaç��o específica para Restante da Entrada: máximo 5 parcelas
                            if (info.tipo === 'Restante da Entrada') {
                              maxParcelas = 5;
                            }
@@ -1391,23 +1504,12 @@ const FichaNegociacao = () => {
           </div>
 
           {/* Botões de Ação */}
-          <div className="flex justify-center space-x-4 pt-6">
+          <div className="flex justify-center space-x-3 pt-6 flex-wrap gap-2">
             <Button variant="outline" onClick={limparFicha}>
               Limpar
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={imprimirFichas}
-              className="flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6,9 6,2 18,2 18,9"/>
-                <path d="M6,18L4,16v-5a2,2 0 0,1 2-2h12a2,2 0 0,1 2,2v5l-2,2"/>
-                <rect x="6" y="14" width="12" height="8"/>
-              </svg>
-              Imprimir PDFs
-            </Button>
-            <Button 
+
+            <Button
               onClick={salvarFicha}
               className="flex items-center gap-2"
             >
@@ -1418,11 +1520,12 @@ const FichaNegociacao = () => {
                 <line x1="16" y1="17" x2="8" y2="17"/>
                 <polyline points="10,9 9,9 8,9"/>
               </svg>
-              Salvar e Enviar PDFs
+              Salvar Ficha
             </Button>
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };
