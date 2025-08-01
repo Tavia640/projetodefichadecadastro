@@ -70,10 +70,10 @@ export class PDFGeneratorOfficial {
       nextLine(1.5);
 
       // DADOS DO CLIENTE
-      pdf.setFontSize(10);
+      pdf.setFontSize(9);
       pdf.setFont('helvetica', 'bold');
       pdf.text('DADOS DO CLIENTE:', margin, currentY);
-      nextLine(1.5);
+      nextLine(1.8);
 
       // Configurações da tabela
       const tableWidth = pageWidth - 2 * margin;
@@ -149,10 +149,10 @@ export class PDFGeneratorOfficial {
       nextLine(1.5);
 
       // DADOS DO CÔNJUGE
-      pdf.setFontSize(10);
+      pdf.setFontSize(9);
       pdf.setFont('helvetica', 'bold');
       pdf.text('DADOS DO CONJUGE:', margin, currentY);
-      nextLine(1.5);
+      nextLine(1.8);
 
       // Nome do cônjuge
       drawBox(margin, currentY, tableWidth, rowHeight);
@@ -207,10 +207,10 @@ export class PDFGeneratorOfficial {
       nextLine(0.5);
 
       // ENDEREÇO
-      pdf.setFontSize(10);
+      pdf.setFontSize(9);
       pdf.setFont('helvetica', 'bold');
       pdf.text('ENDERECO:', margin, currentY);
-      nextLine(1.5);
+      nextLine(1.8);
 
       // Logradouro e Número
       const logradouroWidth = tableWidth * 0.7;
@@ -270,13 +270,16 @@ export class PDFGeneratorOfficial {
       nextLine(1.5);
 
       // SALA DE VENDAS
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
       pdf.text('SALA DE VENDAS:', margin, currentY);
+      nextLine(1.2);
 
       // Checkbox BEEBACK (não marcado por padrão)
-      pdf.rect(margin + 80, currentY - 2.5, 2.5, 2.5);
-      pdf.text('BEEBACK', margin + 85, currentY);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.rect(margin, currentY - 2.5, 2.5, 2.5);
+      pdf.text('BEEBACK', margin + 4, currentY);
       nextLine(1.5);
 
       // Campos da sala de vendas com dados preenchidos quando disponível
@@ -594,11 +597,11 @@ export class PDFGeneratorOfficial {
         // Busca específica por tipo
         if (tipoFixo === 'Entrada') {
           infoPagamento = informacoesPagamento.find(info =>
-            info && info.tipo && (info.tipo === '1a Entrada' || info.tipo === 'Entrada')
+            info && info.tipo && (info.tipo === '1ª Entrada' || info.tipo === '1a Entrada' || info.tipo === 'Entrada' || info.tipo.toLowerCase().includes('entrada'))
           );
         } else if (tipoFixo === 'Entrada Restante') {
           infoPagamento = informacoesPagamento.find(info =>
-            info && info.tipo && info.tipo === 'Restante da Entrada'
+            info && info.tipo && (info.tipo === 'Restante da Entrada' || info.tipo.toLowerCase().includes('restante'))
           );
         } else {
           infoPagamento = informacoesPagamento.find(info =>
